@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# AI answer-engine crawlers explicitly allowed — GutCheck wants to be
+# cited by AI search/answer engines, not just indexed by traditional search.
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://gutcheckchicago.com/sitemap.xml

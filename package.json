@@ -1,0 +1,24 @@
+{
+  "name": "gutcheck-chicago",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "prebuild": "node scripts/fetch-data.mjs",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.2",
+    "lucide-react": "^0.383.0",
+    "next": "14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "browserslist": [
+    "defaults",
+    "iOS >= 12",
+    "Safari >= 12",
+    "not dead"
+  ]
+}
