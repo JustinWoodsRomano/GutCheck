@@ -90,11 +90,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
         <meta property="og:description" content={description} />
         <meta property="og:type" content="restaurant" />
         <meta property="og:url" content={url} />
-        <meta property="og:image" content={`https://gutcheckchicago.com/og/${r.slug}.webp`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="1200" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={`https://gutcheckchicago.com/og/${r.slug}.webp`} />
+        <meta name="twitter:card" content="summary" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
