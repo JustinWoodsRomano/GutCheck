@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft, MapPin, CheckCircle2, AlertTriangle, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Nav, Footer } from "../../../components/Layout";
 import Stamp from "../../../components/Stamp";
 import HistoryAccordion from "../../../components/HistoryAccordion";
@@ -139,9 +139,20 @@ export default function RestaurantPage({ restaurant: r, total }) {
 
         <h2 className="eyebrow">Violations at most recent inspection</h2>
         <div style={{ marginBottom: 20 }}>
-          {r.v.length === 0 && (
+          {r.v.length === 0 && r.g === "PASS" && (
             <div style={{ fontFamily: "var(--font-serif)", color: "var(--seal-green)", fontSize: "0.92rem", display: "flex", alignItems: "center", gap: 8 }}>
               <CheckCircle2 size={16} /> No violations recorded at last inspection.
+            </div>
+          )}
+          {r.v.length === 0 && r.g !== "PASS" && (
+            <div style={{ fontFamily: "var(--font-serif)", color: "var(--ink-muted)", fontSize: "0.92rem", display: "flex", alignItems: "flex-start", gap: 8 }}>
+              <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 2 }} />
+              <span>
+                The City of Chicago&rsquo;s public record for this inspection lists a result of{" "}
+                <strong>{r.g === "FAIL" ? "Fail" : "Pass w/ Conditions"}</strong> but doesn&rsquo;t include itemized
+                violation text. GutCheck displays exactly what the city publishes and doesn&rsquo;t infer or add
+                violation details that aren&rsquo;t in the official record.
+              </span>
             </div>
           )}
           {r.v.map((v, i) => (
@@ -151,14 +162,6 @@ export default function RestaurantPage({ restaurant: r, total }) {
                 <div className="violation-text">{v.t}</div>
                 <div className="violation-sev">{v.s === "c" ? "priority violation" : "core violation"}</div>
               </div>
-              <Link
-                href={`/r/${r.slug}/v/${i + 1}`}
-                className="violation-share-link"
-                aria-label="Share this violation"
-                title="Share this violation"
-              >
-                <Share2 size={14} />
-              </Link>
             </div>
           ))}
         </div>

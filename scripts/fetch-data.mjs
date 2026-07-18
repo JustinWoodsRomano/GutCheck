@@ -10,7 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { generateAllOgImages, generateAllViolationOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
+import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const CUTOFF = "2022-01-01T00:00:00.000";
@@ -125,10 +125,72 @@ function stableIdFor(licenseNum, name, address) {
   return hash.toString(36);
 }
 
+// Chicago's inspection dataset assigns a separate license_ number per
+// business license, but a single physical restaurant frequently gets
+// inspected under MULTIPLE license numbers for the exact same visit
+// (e.g. distinct license types, or administrative re-issuance) --
+// confirmed directly against the live feed: hundreds of (name, address,
+// date) triples have 2-4 different license_ values. Critically, the
+// city's dataset sometimes records the actual violation text under only
+// ONE of those license rows, leaving sibling rows with a real Fail/Pass
+// result but a BLANK violations field. Grouping by license_ alone (as
+// this used to do) creates duplicate listings for the same restaurant,
+// some of which showed a failing grade with a misleading "no violations"
+// state -- a real accuracy bug for a site whose entire premise is
+// accurate public safety data. Grouping by (name, address) instead
+// reliably identifies "the same physical restaurant" for this dataset,
+// and merging every row that shares an exact inspection_date within that
+// group (rather than picking one arbitrary row) ensures violation text
+// recorded under a sibling license number is never dropped.
+function severityRank(grade) {
+  if (grade === "FAIL") return 2;
+  if (grade === "CONDITIONAL") return 1;
+  if (grade === "PASS") return 0;
+  return -1;
+}
+
+// Collapses every row sharing one exact inspection_date into a single
+// "visit": violations are the union of every row's violations (a
+// sibling license record may hold text a Fail record itself lacks), and
+// the grade is the most severe one recorded for that date -- if any
+// license record for that visit says Fail, the visit is a Fail. Rows
+// are pre-sorted newest-first by the caller.
+function mergeVisits(entries) {
+  const byDate = new Map();
+  const order = [];
+  for (const e of entries) {
+    const d = (e.inspection_date || "").slice(0, 10);
+    if (!d) continue;
+    if (!byDate.has(d)) {
+      byDate.set(d, []);
+      order.push(d);
+    }
+    byDate.get(d).push(e);
+  }
+
+  return order.map((d) => {
+    const rows = byDate.get(d);
+    let grade = null;
+    let gradeRow = rows[0];
+    const violations = [];
+    let sawOutOfBusiness = false;
+    for (const row of rows) {
+      if (row.results === "Out of Business") sawOutOfBusiness = true;
+      const g = mapGrade(row.results);
+      if (g && severityRank(g) > severityRank(grade)) {
+        grade = g;
+        gradeRow = row;
+      }
+      violations.push(...parseViolations(row.violations));
+    }
+    return { date: d, grade, sourceRow: gradeRow, violations, sawOutOfBusiness, allRows: rows };
+  });
+}
+
 function processRows(rows) {
   const groups = new Map();
   for (const r of rows) {
-    const key = r.license_ || `${r.dba_name || ""}|${r.address || ""}`;
+    const key = `${(r.dba_name || "").trim().toUpperCase()}|${(r.address || "").trim().toUpperCase()}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(r);
   }
@@ -139,34 +201,34 @@ function processRows(rows) {
   for (const entries of groups.values()) {
     entries.sort((a, b) => (a.inspection_date < b.inspection_date ? 1 : -1));
 
-    const latestAny = entries[0];
-    if (latestAny.results === "Out of Business") continue;
+    const visits = mergeVisits(entries);
+    if (visits.length === 0) continue;
+    if (visits[0].sawOutOfBusiness) continue;
 
-    const current = entries.find((e) => mapGrade(e.results) !== null);
+    const current = visits.find((v) => v.grade !== null);
     if (!current) continue;
 
-    const name = toTitleCase(current.dba_name);
+    const name = toTitleCase(current.sourceRow.dba_name);
     if (!name) continue;
 
-    const history = [];
-    const seenDates = new Set();
-    for (const e of entries) {
-      const g = mapGrade(e.results);
-      const d = (e.inspection_date || "").slice(0, 10);
-      if (g && d && !seenDates.has(d)) {
-        history.push({ d, g, v: parseViolations(e.violations) });
-        seenDates.add(d);
-      }
-      if (history.length >= 5) break;
-    }
+    const history = visits
+      .filter((v) => v.grade !== null)
+      .slice(0, 5)
+      .map((v) => ({ d: v.date, g: v.grade, v: v.violations }));
 
-    const nb = neighborhoodFor(current.zip);
+    const nb = neighborhoodFor(current.sourceRow.zip);
     const baseSlug = slugify(name) || "restaurant";
-    const stableId = stableIdFor(current.license_, name, current.address);
+    // Deterministic across rebuilds: the lowest license number seen
+    // anywhere in this group, not whichever row happened to carry the
+    // grade -- keeps the slug stable even if which sibling row holds the
+    // violation text shifts between city data refreshes.
+    const licenseCandidates = entries.map((e) => e.license_).filter((l) => l && String(l).trim());
+    const chosenLicense = licenseCandidates.sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }))[0];
+    const stableId = stableIdFor(chosenLicense, name, current.sourceRow.address);
     const slug = `${baseSlug}-${stableId}`;
 
-    const lat = parseFloat(current.latitude);
-    const lon = parseFloat(current.longitude);
+    const lat = parseFloat(current.sourceRow.latitude);
+    const lon = parseFloat(current.sourceRow.longitude);
 
     restaurants.push({
       id: id++,
@@ -174,11 +236,11 @@ function processRows(rows) {
       n: name,
       nb,
       nbSlug: slugify(nb),
-      z: (current.zip || "").slice(0, 5),
-      a: toTitleCase(current.address),
-      g: mapGrade(current.results),
-      d: (current.inspection_date || "").slice(0, 10),
-      v: parseViolations(current.violations),
+      z: (current.sourceRow.zip || "").slice(0, 5),
+      a: toTitleCase(current.sourceRow.address),
+      g: current.grade,
+      d: current.date,
+      v: current.violations,
       hi: history,
       lat: Number.isFinite(lat) ? lat : null,
       lon: Number.isFinite(lon) ? lon : null,
@@ -328,9 +390,7 @@ try {
   console.log("Generating Open Graph images...");
   const ogStart = Date.now();
   const ogDir = path.resolve("public/og");
-  const violationOgDir = path.join(ogDir, "v");
   fs.mkdirSync(ogDir, { recursive: true });
-  fs.mkdirSync(violationOgDir, { recursive: true });
 
   // The build cache persists public/og/*.webp between deploys, and image
   // generation skips any file that already exists (regenerating all
@@ -338,28 +398,24 @@ try {
   // design change in generate-og-images.mjs would otherwise silently
   // never apply to a restaurant that already had an image -- forever.
   // Comparing against a version marker catches that: any mismatch wipes
-  // every cached image (both restaurant and violation cards) so the whole
-  // set regenerates under the new design exactly once, then future builds
-  // go back to the fast skip-existing path.
-  const versionFile = path.join(ogDir, ".design-version");
+  // every cached image so the whole set regenerates under the new design
+  // exactly once, then future builds go back to the fast skip-existing
+  // path. Named without a leading dot -- a dotfile here previously failed
+  // to survive Vercel's build-cache restoration between deploys, which
+  // silently forced a full unnecessary regeneration on the next build.
+  const versionFile = path.join(ogDir, "design-version.txt");
   const cachedVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf-8").trim() : null;
   if (cachedVersion !== String(OG_DESIGN_VERSION)) {
     console.log(`OG design version changed (${cachedVersion ?? "none"} -> ${OG_DESIGN_VERSION}); clearing cached images for full regeneration.`);
     for (const f of fs.readdirSync(ogDir)) {
       if (f.endsWith(".webp")) fs.unlinkSync(path.join(ogDir, f));
     }
-    for (const f of fs.readdirSync(violationOgDir)) {
-      if (f.endsWith(".webp")) fs.unlinkSync(path.join(violationOgDir, f));
-    }
     fs.writeFileSync(versionFile, String(OG_DESIGN_VERSION));
   }
 
   fs.writeFileSync(path.join(ogDir, "default.webp"), generateGenericOgImage());
   const ogCount = await generateAllOgImages(restaurants, ogDir, { skipExisting: true });
-  const violationOgCount = await generateAllViolationOgImages(restaurants, violationOgDir, { skipExisting: true });
-  console.log(
-    `Generated ${ogCount + 1} restaurant OG images and ${violationOgCount} violation OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`
-  );
+  console.log(`Generated ${ogCount + 1} restaurant OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`);
 
   console.log(`Wrote ${restaurants.length} restaurants across ${neighborhoods.length} neighborhoods.`);
 } catch (err) {

@@ -33,13 +33,18 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = path.resolve(__dirname, "../assets/fonts");
 const THIS_FILE = fileURLToPath(import.meta.url);
 
-// Bump this whenever the visual design of the OG image changes. The build
-// cache persists public/og/*.webp between deploys, and generateAllOgImages
-// skips any file that already exists -- without a version check, a design
-// change here would silently never apply to restaurants that already had
-// an image generated under the old design, forever. fetch-data.mjs reads
-// this to decide whether to wipe the cache before regenerating.
-export const OG_DESIGN_VERSION = 2;
+// Bump this whenever the visual design changes OR the underlying data
+// pipeline changes in a way that could make a cached image show
+// incorrect information (e.g. the restaurant-grouping fix that changed
+// some restaurants' grade/violation data -- those slugs' cached images
+// needed to regenerate against the corrected data, not just future
+// design tweaks). The build cache persists public/og/*.webp between
+// deploys, and generateAllOgImages skips any file that already exists --
+// without a version check, either kind of change would otherwise
+// silently never apply to a restaurant that already had an image,
+// forever. fetch-data.mjs reads this to decide whether to wipe the cache
+// before regenerating.
+export const OG_DESIGN_VERSION = 3;
 
 const GRADE_META = {
   PASS: { fg: "#2E6B4F", tint: "#E2ECE5", emoji: "\u{1F642}", label: "PASS" },

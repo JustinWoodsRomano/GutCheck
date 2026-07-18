@@ -24,9 +24,15 @@ export default function HistoryAccordion({ history }) {
             </button>
             {open && (
               <div className="accordion-panel">
-                {(!h.v || h.v.length === 0) && (
+                {(!h.v || h.v.length === 0) && h.g === "PASS" && (
                   <div className="accordion-clean">
                     <CheckCircle2 size={15} /> No violations recorded at this inspection.
+                  </div>
+                )}
+                {(!h.v || h.v.length === 0) && h.g !== "PASS" && (
+                  <div className="accordion-clean" style={{ color: "var(--ink-muted)" }}>
+                    <AlertTriangle size={15} style={{ flexShrink: 0 }} /> The city&rsquo;s public record for this
+                    inspection doesn&rsquo;t include itemized violation text.
                   </div>
                 )}
                 {h.v?.map((v, vi) => (
