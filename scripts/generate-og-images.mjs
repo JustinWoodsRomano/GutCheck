@@ -57,6 +57,85 @@ function registerFonts() {
   fontsRegistered = true;
 }
 
+// Icon drawing is done entirely with canvas primitives (arcs/paths), not
+// emoji glyphs or custom fonts -- @napi-rs/canvas on Vercel's build
+// machines has no color-emoji font available, so any emoji character
+// (fork/knife, grade smileys) silently renders as a missing-glyph box no
+// matter what font is registered. Vector-drawn icons render identically
+// everywhere with zero font/glyph dependency.
+
+function drawUtensilsMark(ctx, x, y, size, color) {
+  // Small fork+knife glyph matching the site's nav icon silhouette.
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = size * 0.11;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  // Fork: three tines merging into a handle.
+  const forkX = size * 0.18;
+  ctx.beginPath();
+  for (const dx of [-1, 0, 1]) {
+    ctx.moveTo(forkX + dx * size * 0.11, 0);
+    ctx.lineTo(forkX + dx * size * 0.11, size * 0.32);
+  }
+  ctx.moveTo(forkX - size * 0.11, size * 0.32);
+  ctx.lineTo(forkX + size * 0.11, size * 0.32);
+  ctx.lineTo(forkX, size * 0.46);
+  ctx.lineTo(forkX, size);
+  ctx.stroke();
+
+  // Knife: blade tapering to a straight handle.
+  const knifeX = size * 0.82;
+  ctx.beginPath();
+  ctx.moveTo(knifeX, 0);
+  ctx.quadraticCurveTo(knifeX + size * 0.16, size * 0.22, knifeX, size * 0.5);
+  ctx.lineTo(knifeX, size);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawGradeIcon(ctx, cx, cy, r, grade, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = r * 0.18;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.stroke();
+
+  if (grade === "PASS") {
+    ctx.beginPath();
+    ctx.moveTo(cx - r * 0.5, cy);
+    ctx.lineTo(cx - r * 0.12, cy + r * 0.38);
+    ctx.lineTo(cx + r * 0.55, cy - r * 0.42);
+    ctx.stroke();
+  } else if (grade === "FAIL") {
+    const d = r * 0.42;
+    ctx.beginPath();
+    ctx.moveTo(cx - d, cy - d);
+    ctx.lineTo(cx + d, cy + d);
+    ctx.moveTo(cx + d, cy - d);
+    ctx.lineTo(cx - d, cy + d);
+    ctx.stroke();
+  } else {
+    // CONDITIONAL: exclamation mark.
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - r * 0.5);
+    ctx.lineTo(cx, cy + r * 0.12);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(cx, cy + r * 0.42, r * 0.08, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
 function wrapText(ctx, text, maxWidth) {
   const words = text.split(" ");
   const lines = [];
@@ -79,35 +158,45 @@ function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
   const canvas = createCanvas(SIZE, SIZE);
   const ctx = canvas.getContext("2d");
   const colors = GRADE_META[grade] || GRADE_META.PASS;
+  const FOOTER_H = SIZE * 0.42;
 
   if (photoBuffer) {
-    // Reserved for future Google Places photo compositing.
-  } else {
-    ctx.fillStyle = "#EDEDE6";
+    // Reserved for future Google Places photo compositing. Only in this
+    // branch does the photo need a legibility fade under the text.
+    const fade = ctx.createLinearGradient(0, SIZE - FOOTER_H, 0, SIZE);
+    fade.addColorStop(0, "rgba(28,35,51,0)");
+    fade.addColorStop(1, "rgba(28,35,51,0.92)");
+    ctx.fillStyle = fade;
     ctx.fillRect(0, 0, SIZE, SIZE);
-    const radial = ctx.createRadialGradient(SIZE * 0.5, SIZE * 0.32, 80, SIZE * 0.5, SIZE * 0.32, SIZE * 0.9);
+  } else {
+    // No photo yet: a clearly-designed two-part card instead of a faded
+    // wash over nothing -- a tinted paper top and a solid ink footer band,
+    // so the brand tint is actually visible and the name/stamp sit on a
+    // deliberate dark panel rather than a barely-there gradient.
+    ctx.fillStyle = "#EDEDE6";
+    ctx.fillRect(0, 0, SIZE, SIZE - FOOTER_H);
+    const radial = ctx.createRadialGradient(SIZE * 0.5, (SIZE - FOOTER_H) * 0.55, 60, SIZE * 0.5, (SIZE - FOOTER_H) * 0.55, SIZE * 0.75);
     radial.addColorStop(0, colors.tint);
     radial.addColorStop(1, "#EDEDE6");
     ctx.fillStyle = radial;
-    ctx.fillRect(0, 0, SIZE, SIZE);
+    ctx.fillRect(0, 0, SIZE, SIZE - FOOTER_H);
+
+    ctx.fillStyle = "#1C2333";
+    ctx.fillRect(0, SIZE - FOOTER_H, SIZE, FOOTER_H);
   }
 
-  const fade = ctx.createLinearGradient(0, SIZE * 0.45, 0, SIZE);
-  fade.addColorStop(0, "rgba(28,35,51,0)");
-  fade.addColorStop(1, "rgba(28,35,51,0.92)");
-  ctx.fillStyle = fade;
-  ctx.fillRect(0, 0, SIZE, SIZE);
-
-  ctx.fillStyle = photoBuffer ? "#FFFFFF" : "#1C2333";
-  ctx.font = "44px 'IBM Plex Mono Bold'";
+  const headerInk = photoBuffer ? "#FFFFFF" : "#1C2333";
+  drawUtensilsMark(ctx, 56, 60, 30, headerInk);
+  ctx.fillStyle = headerInk;
+  ctx.font = "bold 44px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
-  ctx.fillText("\u{1F374} GUTCHECK", 56, 56);
+  ctx.fillText("GUTCHECK", 100, 56);
 
   const stampText = colors.label;
-  ctx.font = "38px 'IBM Plex Mono Bold'";
+  ctx.font = "bold 38px 'IBM Plex Mono Bold', 'Courier New', monospace";
   const stampTextWidth = ctx.measureText(stampText).width;
-  const stampPadX = 28, stampPadY = 20, emojiW = 52;
-  const stampW = emojiW + stampTextWidth + stampPadX * 2 + 12;
+  const iconW = 52, stampPadX = 28, stampPadY = 20;
+  const stampW = iconW + stampTextWidth + stampPadX * 2 + 12;
   const stampH = 38 + stampPadY * 2;
   const stampX = SIZE - 56 - stampW;
   const stampY = 56;
@@ -118,14 +207,12 @@ function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
   ctx.roundRect(stampX, stampY, stampW, stampH, 16);
   ctx.fill();
   ctx.stroke();
-  ctx.font = "38px sans-serif";
+  drawGradeIcon(ctx, stampX + stampPadX + iconW / 2 - 8, stampY + stampH / 2, 17, grade, colors.fg);
   ctx.fillStyle = colors.fg;
-  ctx.fillText(colors.emoji, stampX + stampPadX, stampY + stampPadY - 2);
-  ctx.font = "38px 'IBM Plex Mono Bold'";
-  ctx.fillText(stampText, stampX + stampPadX + emojiW, stampY + stampPadY + 2);
+  ctx.fillText(stampText, stampX + stampPadX + iconW, stampY + stampPadY + 2);
 
   ctx.fillStyle = "#FFFFFF";
-  ctx.font = "84px 'Archivo Black'";
+  ctx.font = "900 84px 'Archivo Black', Impact, 'Arial Narrow Bold', sans-serif";
   ctx.textBaseline = "alphabetic";
   const nameLines = wrapText(ctx, name.toUpperCase(), SIZE - 112);
   let ny = SIZE - 96 - (nameLines.length - 1) * 92;
@@ -134,7 +221,7 @@ function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
     ny += 92;
   }
 
-  ctx.font = "32px 'IBM Plex Mono Medium'";
+  ctx.font = "32px 'IBM Plex Mono Medium', 'Courier New', monospace";
   ctx.fillStyle = "rgba(255,255,255,0.82)";
   return canvas.toBuffer("image/webp", 88);
 }
@@ -153,16 +240,17 @@ export function generateGenericOgImage() {
   ctx.fillStyle = radial;
   ctx.fillRect(0, 0, W, H);
 
+  drawUtensilsMark(ctx, 64, 68, 28, "#1C2333");
   ctx.fillStyle = "#1C2333";
-  ctx.font = "40px 'IBM Plex Mono Bold'";
+  ctx.font = "bold 40px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
-  ctx.fillText("\u{1F374} GUTCHECK", 64, 64);
+  ctx.fillText("GUTCHECK", 106, 64);
 
-  ctx.font = "96px 'Archivo Black'";
+  ctx.font = "900 96px 'Archivo Black', Impact, 'Arial Narrow Bold', sans-serif";
   ctx.fillText("KNOW BEFORE", 64, 220);
   ctx.fillText("YOU EAT.", 64, 322);
 
-  ctx.font = "30px 'IBM Plex Mono Medium'";
+  ctx.font = "30px 'IBM Plex Mono Medium', 'Courier New', monospace";
   ctx.fillStyle = "#4B5566";
   ctx.fillText("CHICAGO HEALTH INSPECTION RECORDS \u00B7 OFFICIAL PUBLIC DATA", 64, 460);
 
