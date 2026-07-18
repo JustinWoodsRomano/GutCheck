@@ -173,6 +173,7 @@ function mergeVisits(entries) {
     let grade = null;
     let gradeRow = rows[0];
     const violations = [];
+    const seenViolationText = new Set();
     let sawOutOfBusiness = false;
     for (const row of rows) {
       if (row.results === "Out of Business") sawOutOfBusiness = true;
@@ -181,7 +182,19 @@ function mergeVisits(entries) {
         grade = g;
         gradeRow = row;
       }
-      violations.push(...parseViolations(row.violations));
+      // Verified against the live feed: when Chicago inspects one physical
+      // location under multiple license numbers on the same visit, the
+      // same violation text is sometimes recorded verbatim on more than
+      // one sibling license row. Deduping by exact text keeps each real
+      // violation listed once -- otherwise the merge above would make a
+      // restaurant look like it had more issues than inspectors actually
+      // found.
+      for (const v of parseViolations(row.violations)) {
+        if (!seenViolationText.has(v.t)) {
+          seenViolationText.add(v.t);
+          violations.push(v);
+        }
+      }
     }
     return { date: d, grade, sourceRow: gradeRow, violations, sawOutOfBusiness, allRows: rows };
   });
