@@ -10,8 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-// OG image generation (generateAllOgImages/generateGenericOgImage from
-// ./generate-og-images.mjs) is intentionally not imported -- see note below.
+import { generateAllOgImages, generateGenericOgImage } from "./generate-og-images.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const CUTOFF = "2022-01-01T00:00:00.000";
@@ -317,13 +316,12 @@ try {
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(restaurants, neighborhoods));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(restaurants.length, neighborhoods));
 
-  // Per-restaurant and generic-fallback OG image generation is intentionally
-  // skipped: no page currently references default.webp or /og/{slug}.webp
-  // (only the homepage sets an og:image, using the hand-provided
-  // public/og/home.webp). Re-enable generateAllOgImages/generateGenericOgImage
-  // here once per-page OG images are ready to ship -- this step alone was
-  // the slowest part of the build (thousands of rendered images) for
-  // metadata nothing currently links to.
+  console.log("Generating Open Graph images...");
+  const ogStart = Date.now();
+  fs.mkdirSync(path.resolve("public/og"), { recursive: true });
+  fs.writeFileSync(path.resolve("public/og/default.webp"), generateGenericOgImage());
+  const ogCount = await generateAllOgImages(restaurants, path.resolve("public/og"), { skipExisting: true });
+  console.log(`Generated ${ogCount + 1} OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`);
 
   console.log(`Wrote ${restaurants.length} restaurants across ${neighborhoods.length} neighborhoods.`);
 } catch (err) {
