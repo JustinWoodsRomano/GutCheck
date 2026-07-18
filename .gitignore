@@ -13,7 +13,7 @@ scripts/.data/
 # several hundred MB for no benefit (they're not source, they're output).
 # home.webp is a hand-provided design asset, not build output -- keep it.
 public/og/*.webp
-!public/og/home.webp
+!public/og/home.jpg
 
 public/sitemap.xml
 public/llms.txt
