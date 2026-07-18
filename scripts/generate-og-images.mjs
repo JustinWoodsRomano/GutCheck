@@ -33,6 +33,14 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = path.resolve(__dirname, "../assets/fonts");
 const THIS_FILE = fileURLToPath(import.meta.url);
 
+// Bump this whenever the visual design of the OG image changes. The build
+// cache persists public/og/*.webp between deploys, and generateAllOgImages
+// skips any file that already exists -- without a version check, a design
+// change here would silently never apply to restaurants that already had
+// an image generated under the old design, forever. fetch-data.mjs reads
+// this to decide whether to wipe the cache before regenerating.
+export const OG_DESIGN_VERSION = 2;
+
 const GRADE_META = {
   PASS: { fg: "#2E6B4F", tint: "#E2ECE5", emoji: "\u{1F642}", label: "PASS" },
   CONDITIONAL: { fg: "#B4841D", tint: "#F2E8D3", emoji: "\u{1F62C}", label: "PASS W/ CONDITIONS" },
@@ -186,30 +194,36 @@ function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
   }
 
   const headerInk = photoBuffer ? "#FFFFFF" : "#1C2333";
-  drawUtensilsMark(ctx, 56, 60, 30, headerInk);
+  drawUtensilsMark(ctx, 64, 76, 52, headerInk);
   ctx.fillStyle = headerInk;
-  ctx.font = "bold 44px 'IBM Plex Mono Bold', 'Courier New', monospace";
+  ctx.font = "bold 60px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
-  ctx.fillText("GUTCHECK", 100, 56);
+  ctx.fillText("GUTCHECK", 138, 64);
 
-  const stampText = colors.label;
-  ctx.font = "bold 38px 'IBM Plex Mono Bold', 'Courier New', monospace";
+  // Short, single-word label at large scale -- this badge is the entire
+  // point of the card (a stranger should be able to read PASS/FAIL from a
+  // thumbnail-sized preview), so it gets real visual weight instead of
+  // being a small corner detail. Full "Pass w/ Conditions" phrasing lives
+  // on the page itself.
+  const stampText = grade === "CONDITIONAL" ? "CONDITIONAL" : grade;
+  ctx.font = "900 64px 'IBM Plex Mono Bold', 'Courier New', monospace";
   const stampTextWidth = ctx.measureText(stampText).width;
-  const iconW = 52, stampPadX = 28, stampPadY = 20;
-  const stampW = iconW + stampTextWidth + stampPadX * 2 + 12;
-  const stampH = 38 + stampPadY * 2;
-  const stampX = SIZE - 56 - stampW;
-  const stampY = 56;
+  const iconD = 84, stampPadX = 40, stampPadY = 30, gap = 20;
+  const stampW = iconD + gap + stampTextWidth + stampPadX * 2;
+  const stampH = iconD + stampPadY * 2;
+  const stampX = SIZE - 64 - stampW;
+  const stampY = 190;
   ctx.fillStyle = "#F5F5EF";
   ctx.strokeStyle = colors.fg;
-  ctx.lineWidth = 4;
+  ctx.lineWidth = 6;
   ctx.beginPath();
-  ctx.roundRect(stampX, stampY, stampW, stampH, 16);
+  ctx.roundRect(stampX, stampY, stampW, stampH, 24);
   ctx.fill();
   ctx.stroke();
-  drawGradeIcon(ctx, stampX + stampPadX + iconW / 2 - 8, stampY + stampH / 2, 17, grade, colors.fg);
+  drawGradeIcon(ctx, stampX + stampPadX + iconD / 2, stampY + stampH / 2, iconD / 2, grade, colors.fg);
   ctx.fillStyle = colors.fg;
-  ctx.fillText(stampText, stampX + stampPadX + iconW, stampY + stampPadY + 2);
+  ctx.textBaseline = "middle";
+  ctx.fillText(stampText, stampX + stampPadX + iconD + gap, stampY + stampH / 2 + 4);
 
   ctx.fillStyle = "#FFFFFF";
   ctx.font = "900 84px 'Archivo Black', Impact, 'Arial Narrow Bold', sans-serif";
@@ -240,11 +254,11 @@ export function generateGenericOgImage() {
   ctx.fillStyle = radial;
   ctx.fillRect(0, 0, W, H);
 
-  drawUtensilsMark(ctx, 64, 68, 28, "#1C2333");
+  drawUtensilsMark(ctx, 64, 78, 44, "#1C2333");
   ctx.fillStyle = "#1C2333";
-  ctx.font = "bold 40px 'IBM Plex Mono Bold', 'Courier New', monospace";
+  ctx.font = "bold 52px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
-  ctx.fillText("GUTCHECK", 106, 64);
+  ctx.fillText("GUTCHECK", 126, 64);
 
   ctx.font = "900 96px 'Archivo Black', Impact, 'Arial Narrow Bold', sans-serif";
   ctx.fillText("KNOW BEFORE", 64, 220);

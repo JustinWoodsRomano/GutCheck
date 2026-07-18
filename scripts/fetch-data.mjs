@@ -10,7 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { generateAllOgImages, generateGenericOgImage } from "./generate-og-images.mjs";
+import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const CUTOFF = "2022-01-01T00:00:00.000";
@@ -327,9 +327,29 @@ try {
 
   console.log("Generating Open Graph images...");
   const ogStart = Date.now();
-  fs.mkdirSync(path.resolve("public/og"), { recursive: true });
-  fs.writeFileSync(path.resolve("public/og/default.webp"), generateGenericOgImage());
-  const ogCount = await generateAllOgImages(restaurants, path.resolve("public/og"), { skipExisting: true });
+  const ogDir = path.resolve("public/og");
+  fs.mkdirSync(ogDir, { recursive: true });
+
+  // The build cache persists public/og/*.webp between deploys, and image
+  // generation skips any file that already exists (regenerating all
+  // 9,700+ images on every build would be far too slow). That means a
+  // design change in generate-og-images.mjs would otherwise silently
+  // never apply to a restaurant that already had an image -- forever.
+  // Comparing against a version marker catches that: any mismatch wipes
+  // every cached image so the whole set regenerates under the new design
+  // exactly once, then future builds go back to the fast skip-existing path.
+  const versionFile = path.join(ogDir, ".design-version");
+  const cachedVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf-8").trim() : null;
+  if (cachedVersion !== String(OG_DESIGN_VERSION)) {
+    console.log(`OG design version changed (${cachedVersion ?? "none"} -> ${OG_DESIGN_VERSION}); clearing cached images for full regeneration.`);
+    for (const f of fs.readdirSync(ogDir)) {
+      if (f.endsWith(".webp")) fs.unlinkSync(path.join(ogDir, f));
+    }
+    fs.writeFileSync(versionFile, String(OG_DESIGN_VERSION));
+  }
+
+  fs.writeFileSync(path.join(ogDir, "default.webp"), generateGenericOgImage());
+  const ogCount = await generateAllOgImages(restaurants, ogDir, { skipExisting: true });
   console.log(`Generated ${ogCount + 1} OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`);
 
   console.log(`Wrote ${restaurants.length} restaurants across ${neighborhoods.length} neighborhoods.`);
