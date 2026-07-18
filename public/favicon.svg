@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Favicon</title>
+    <defs>
+        <path d="M0,0 L32,0 L32,32 L0,32 L0,0 Z" id="path-1"></path>
+    </defs>
+    <g id="Favicon" stroke="none" fill="none" xlink:href="#path-1" fill-rule="evenodd">
+        <use fill="#FFFFFF" xlink:href="#path-1"></use>
+        <rect id="Rectangle" fill="#EDEDE6" x="0" y="0" width="32" height="32" rx="6.05405426"></rect>
+        <g id="gutcheck-utensils-icon" transform="translate(5.1892, 6.0541)" stroke="#1C2333" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+            <g id="Group" transform="translate(2.5946, 1.7297)">
+                <path d="M0,0 L0,6.05405405 C0,7.00540541 0.778378378,7.78378378 1.72972973,7.78378378 L5.18918919,7.78378378 C6.14449254,7.78378378 6.91891892,7.00935741 6.91891892,6.05405405 L6.91891892,0" id="Path" stroke-width="2.16216216"></path>
+                <line x1="3.45945946" y1="0" x2="3.45945946" y2="17.2972973" id="Path" stroke-width="2.16216216"></line>
+                <path d="M15.5675676,11.2432432 L15.5675676,0 L15.5675676,0 C13.1793092,0 11.2432432,1.93606595 11.2432432,4.32432432 L11.2432432,9.51351351 C11.2432432,10.4648649 12.0216216,11.2432432 12.972973,11.2432432 L15.5675676,11.2432432 Z M15.5675676,11.2432432 L15.5675676,17.2972973" id="Shape" stroke-width="2.16216216"></path>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -8,6 +8,7 @@ import { MapEmbed, ContactRow, RestaurantLogo } from "../../components/Contact";
 import AdSlot from "../../components/AdSlot";
 import { loadRestaurants } from "../../lib/data";
 import { GRADE_LABEL } from "../../lib/constants";
+import { buildRestaurantFaq } from "../../lib/restaurantCopy";
 
 export async function getStaticPaths() {
   const restaurants = loadRestaurants();
@@ -68,6 +69,17 @@ export default function RestaurantPage({ restaurant: r, total }) {
     ],
   };
 
+  const faqItems = buildRestaurantFaq(r);
+  const faqLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
   return (
     <div>
       <Head>
@@ -85,6 +97,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
         <meta name="twitter:image" content={`https://gutcheckchicago.com/og/${r.slug}.webp`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
       </Head>
 
       <Nav total={total} />
@@ -99,7 +112,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
         </p>
 
         <div className="detail-head">
-          <RestaurantLogo logoUrl={r.logoUrl} name={r.n} />
+          <RestaurantLogo logoUrl={r.logoUrl} name={r.n} neighborhood={r.nb} grade={r.g} />
           <div className="detail-titles">
             <h1>{r.n}</h1>
           </div>
@@ -124,7 +137,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
 
         <MapEmbed address={`${r.a}, Chicago, IL ${r.z}`} lat={r.lat} lon={r.lon} />
 
-        <div className="eyebrow">Violations at most recent inspection</div>
+        <h2 className="eyebrow">Violations at most recent inspection</h2>
         <div style={{ marginBottom: 20 }}>
           {r.v.length === 0 && (
             <div style={{ fontFamily: "var(--font-serif)", color: "var(--seal-green)", fontSize: "0.92rem", display: "flex", alignItems: "center", gap: 8 }}>
@@ -146,10 +159,20 @@ export default function RestaurantPage({ restaurant: r, total }) {
 
         {r.hi?.length > 0 && (
           <div style={{ margin: "26px 0 8px" }}>
-            <div className="eyebrow">Inspection history — tap to expand</div>
+            <h2 className="eyebrow">Inspection history — tap to expand</h2>
             <HistoryAccordion history={r.hi} />
           </div>
         )}
+
+        <div style={{ margin: "26px 0 8px" }}>
+          <h2 className="eyebrow">{r.n} health inspection FAQ</h2>
+          {faqItems.map((f) => (
+            <div className="faq-item" key={f.q}>
+              <p className="faq-q">{f.q}</p>
+              <p className="faq-a">{f.a}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Footer />

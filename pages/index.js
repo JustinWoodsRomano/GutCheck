@@ -113,9 +113,9 @@ export default function Home({ neighborhoods }) {
       <div className="wrap section">
         <AdSlot variant="banner" />
 
-        <div className="eyebrow" style={{ marginTop: 22 }}>
+        <h2 className="eyebrow" style={{ marginTop: 22 }}>
           {query.trim() ? `Results for "${query}"` : "All Chicago restaurants"}
-        </div>
+        </h2>
 
         <div className="chip-row">
           <button className={`chip ${!neighborhood ? "active" : ""}`} onClick={() => { setNeighborhood(null); setVisibleCount(PAGE_SIZE); }}>

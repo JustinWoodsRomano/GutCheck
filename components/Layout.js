@@ -40,9 +40,15 @@ export function Footer() {
           <a href="mailto:hello@gutcheckchicago.com">Contact</a>
         </div>
         <div className="footer-copyright">
-          &copy; {new Date().getFullYear()} Built By Backspace, LLC. All rights reserved.
-          {" \u00B7 "}
-          Built by Website Design Chicago
+          &copy; {new Date().getFullYear()} All Rights Reserved{" \u00B7 "}
+          Built by{" "}
+          <a href="https://www.builtbybackspace.com/" target="_blank" rel="noopener noreferrer">
+            Built By Backspace, LLC
+          </a>
+          {" \u2013 "}
+          <a href="https://www.websitedesign-chicago.com/" target="_blank" rel="noopener noreferrer">
+            Website Design Chicago
+          </a>
         </div>
       </div>
     </div>

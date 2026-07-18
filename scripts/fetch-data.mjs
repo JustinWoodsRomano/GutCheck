@@ -221,6 +221,83 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 `;
 }
 
+// Categorizes free-text violation comments into recognizable food-safety
+// categories using real City of Chicago health-code violation language
+// (these categories mirror the city's own inspection code sections, not
+// invented labels), so neighborhood-page copy can cite genuine, specific
+// patterns instead of generic filler.
+const VIOLATION_CATEGORIES = [
+  { key: "pest control", re: /\b(rodent|mice|mouse|roach|cockroach|vermin|insect|pest|infestation)\b/i },
+  { key: "handwashing & hygiene", re: /\b(hand ?wash|handwashing|hand sink|employee hygiene|bare hand)\b/i },
+  { key: "food temperature control", re: /\b(cold hold|hot hold|temperature|thermometer|cooling|reheat)\b/i },
+  { key: "cross-contamination", re: /\b(cross[- ]?contaminat|raw (meat|chicken|poultry) (stored|above))\b/i },
+  { key: "facility maintenance", re: /\b(floor|ceiling|wall|plumbing|leak|drain|ventilation|repair)\b/i },
+  { key: "food storage", re: /\b(food storage|improperly stored|labeling|expired|date mark)\b/i },
+  { key: "sanitation & cleaning", re: /\b(sanitiz|clean(ing|ed)?|dish ?wash|wash.{0,15}rinse.{0,15}sanit)\b/i },
+  { key: "certified food manager", re: /\b(certified food manager|food service sanitation|CFM)\b/i },
+];
+
+function categorizeViolations(violationText) {
+  const hits = [];
+  for (const cat of VIOLATION_CATEGORIES) {
+    if (cat.re.test(violationText)) hits.push(cat.key);
+  }
+  return hits;
+}
+
+function buildNeighborhoodStats(restaurants) {
+  const byNb = new Map();
+  for (const r of restaurants) {
+    if (!byNb.has(r.nbSlug)) byNb.set(r.nbSlug, []);
+    byNb.get(r.nbSlug).push(r);
+  }
+
+  const citywideTotal = restaurants.length;
+  const citywidePass = restaurants.filter((r) => r.g === "PASS").length;
+  const citywidePassRate = Math.round((citywidePass / citywideTotal) * 100);
+
+  const stats = {};
+  for (const [slug, list] of byNb) {
+    const total = list.length;
+    const pass = list.filter((r) => r.g === "PASS").length;
+    const conditional = list.filter((r) => r.g === "CONDITIONAL").length;
+    const fail = list.filter((r) => r.g === "FAIL").length;
+    const passRate = Math.round((pass / total) * 100);
+
+    const catCounts = {};
+    for (const r of list) {
+      const text = (r.v || []).map((v) => v.t).join(" ");
+      for (const cat of categorizeViolations(text)) {
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
+      }
+    }
+    const topCategories = Object.entries(catCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([key]) => key);
+
+    // Recent activity window: inspections in the last 30 days of data.
+    const dates = list.map((r) => r.d).filter(Boolean).sort();
+    const mostRecentDate = dates[dates.length - 1] || null;
+    const thirtyDaysAgo = mostRecentDate
+      ? new Date(new Date(mostRecentDate).getTime() - 30 * 86400000).toISOString().slice(0, 10)
+      : null;
+    const recentInspectionCount = thirtyDaysAgo ? list.filter((r) => r.d >= thirtyDaysAgo).length : 0;
+
+    stats[slug] = {
+      total,
+      pass,
+      conditional,
+      fail,
+      passRate,
+      vsCitywide: passRate - citywidePassRate,
+      topCategories,
+      recentInspectionCount,
+    };
+  }
+  return { citywidePassRate, byNeighborhood: stats };
+}
+
 const outDataDir = path.resolve("public/data");
 const outBuildDir = path.resolve("scripts/.data");
 fs.mkdirSync(outDataDir, { recursive: true });
@@ -231,9 +308,11 @@ try {
   const rows = await fetchAllRows();
   const restaurants = processRows(rows);
   const neighborhoods = [...new Set(restaurants.map((r) => r.nbSlug))].sort();
+  const neighborhoodStats = buildNeighborhoodStats(restaurants);
 
   fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(restaurants));
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(restaurants));
+  fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(restaurants, neighborhoods));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(restaurants.length, neighborhoods));
 

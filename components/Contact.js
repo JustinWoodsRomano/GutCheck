@@ -33,7 +33,14 @@ export function ContactRow({ address, phone, website, restaurant, shareUrl }) {
   );
 }
 
-export function RestaurantLogo({ logoUrl, name }) {
+export function RestaurantLogo({ logoUrl, name, neighborhood, grade }) {
   if (!logoUrl) return null;
-  return <img className="detail-logo" src={logoUrl} alt={`${name} logo`} loading="lazy" />;
+  // Descriptive, natural-language alt text using real page context (name +
+  // neighborhood + city), not keyword-stuffed. Grade is intentionally
+  // omitted from alt text -- alt text describes the IMAGE content, and a
+  // pass/fail rating isn't part of what the photo depicts; it's already
+  // conveyed adjacently via the Stamp component with its own accessible
+  // label.
+  const alt = `${name}, a restaurant in ${neighborhood}, Chicago`;
+  return <img className="detail-logo" src={logoUrl} alt={alt} loading="lazy" width="56" height="56" />;
 }
