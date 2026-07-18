@@ -11,7 +11,9 @@ scripts/.data/
 # Generated at build time by scripts/generate-og-images.mjs -- ~9,700 WebP
 # images regenerated fresh each build; committing them would make this repo
 # several hundred MB for no benefit (they're not source, they're output).
+# home.webp is a hand-provided design asset, not build output -- keep it.
 public/og/*.webp
+!public/og/home.webp
 
 public/sitemap.xml
 public/llms.txt

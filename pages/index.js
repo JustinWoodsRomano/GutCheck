@@ -51,9 +51,9 @@ export default function Home({ neighborhoods }) {
   const total = data ? data.length : 0;
   const visible = filtered.slice(0, visibleCount);
 
-  const title = "GutCheck Chicago — Restaurant Health Inspection Records";
+  const title = "Chicago Restaurant Health Inspections — GutCheck";
   const description =
-    "Search official Chicago health department inspection records for restaurants — pass/fail results, violations, and full inspection history. Free, updated daily.";
+    "Look up any Chicago restaurant's official health inspection status — pass, fail, or violations — sourced live from the City of Chicago. Free, updated daily.";
 
   return (
     <div>
@@ -64,11 +64,11 @@ export default function Home({ neighborhoods }) {
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://gutcheckchicago.com/og/home.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta name="twitter:image" content="https://gutcheckchicago.com/og/home.webp" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
