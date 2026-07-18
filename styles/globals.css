@@ -551,7 +551,24 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 .violation.critical { background: var(--stamp-red-tint); }
 .violation.noncritical { background: var(--paper-light); }
-.violation-body { min-width: 0; max-width: 100%; }
+.violation-body { min-width: 0; max-width: 100%; flex: 1; }
+.violation-share-link {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--ink-muted);
+  margin-left: auto;
+  align-self: center;
+}
+.violation-share-link:hover,
+.violation-share-link:focus-visible {
+  background: rgba(28, 35, 51, 0.08);
+  color: var(--ink);
+}
 .violation-text {
   font-family: var(--font-serif);
   color: var(--ink);

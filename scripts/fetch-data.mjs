@@ -10,7 +10,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
+import { generateAllOgImages, generateAllViolationOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const CUTOFF = "2022-01-01T00:00:00.000";
@@ -328,7 +328,9 @@ try {
   console.log("Generating Open Graph images...");
   const ogStart = Date.now();
   const ogDir = path.resolve("public/og");
+  const violationOgDir = path.join(ogDir, "v");
   fs.mkdirSync(ogDir, { recursive: true });
+  fs.mkdirSync(violationOgDir, { recursive: true });
 
   // The build cache persists public/og/*.webp between deploys, and image
   // generation skips any file that already exists (regenerating all
@@ -336,8 +338,9 @@ try {
   // design change in generate-og-images.mjs would otherwise silently
   // never apply to a restaurant that already had an image -- forever.
   // Comparing against a version marker catches that: any mismatch wipes
-  // every cached image so the whole set regenerates under the new design
-  // exactly once, then future builds go back to the fast skip-existing path.
+  // every cached image (both restaurant and violation cards) so the whole
+  // set regenerates under the new design exactly once, then future builds
+  // go back to the fast skip-existing path.
   const versionFile = path.join(ogDir, ".design-version");
   const cachedVersion = fs.existsSync(versionFile) ? fs.readFileSync(versionFile, "utf-8").trim() : null;
   if (cachedVersion !== String(OG_DESIGN_VERSION)) {
@@ -345,12 +348,18 @@ try {
     for (const f of fs.readdirSync(ogDir)) {
       if (f.endsWith(".webp")) fs.unlinkSync(path.join(ogDir, f));
     }
+    for (const f of fs.readdirSync(violationOgDir)) {
+      if (f.endsWith(".webp")) fs.unlinkSync(path.join(violationOgDir, f));
+    }
     fs.writeFileSync(versionFile, String(OG_DESIGN_VERSION));
   }
 
   fs.writeFileSync(path.join(ogDir, "default.webp"), generateGenericOgImage());
   const ogCount = await generateAllOgImages(restaurants, ogDir, { skipExisting: true });
-  console.log(`Generated ${ogCount + 1} OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`);
+  const violationOgCount = await generateAllViolationOgImages(restaurants, violationOgDir, { skipExisting: true });
+  console.log(
+    `Generated ${ogCount + 1} restaurant OG images and ${violationOgCount} violation OG images in ${((Date.now() - ogStart) / 1000).toFixed(1)}s`
+  );
 
   console.log(`Wrote ${restaurants.length} restaurants across ${neighborhoods.length} neighborhoods.`);
 } catch (err) {

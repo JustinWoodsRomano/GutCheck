@@ -144,7 +144,7 @@ function drawGradeIcon(ctx, cx, cy, r, grade, color) {
   ctx.restore();
 }
 
-function wrapText(ctx, text, maxWidth) {
+function wrapText(ctx, text, maxWidth, maxLines = 2) {
   const words = text.split(" ");
   const lines = [];
   let line = "";
@@ -158,7 +158,39 @@ function wrapText(ctx, text, maxWidth) {
     }
   }
   if (line) lines.push(line);
-  return lines.slice(0, 2);
+  return lines.slice(0, maxLines);
+}
+
+function drawWarningTriangle(ctx, cx, cy, size, color) {
+  // Matches the lucide AlertTriangle silhouette used next to each
+  // violation on the live site: a rounded triangle outline with a
+  // vertical bar and a dot for the exclamation mark.
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = size * 0.09;
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  const h = size * 0.92;
+  const top = { x: cx, y: cy - h * 0.55 };
+  const left = { x: cx - size * 0.55, y: cy + h * 0.45 };
+  const right = { x: cx + size * 0.55, y: cy + h * 0.45 };
+  ctx.beginPath();
+  ctx.moveTo(top.x, top.y);
+  ctx.lineTo(right.x, right.y);
+  ctx.lineTo(left.x, left.y);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - size * 0.14);
+  ctx.lineTo(cx, cy + size * 0.12);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx, cy + size * 0.32, size * 0.055, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
 
 function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
@@ -271,7 +303,99 @@ export function generateGenericOgImage() {
   return canvas.toBuffer("image/webp", 88);
 }
 
-// --- Child-process batch worker mode ---
+// A "screenshot" of a single violation, styled to match the on-site
+// .violation.critical / .violation.noncritical treatment exactly (same
+// tint colors, same left accent bar concept, same severity label), plus a
+// GUTCHECK watermark. This is the share target for individual violations
+// -- landscape so it reads well both as a link preview and, later, as a
+// Story background.
+export function generateViolationOgImage({ name, neighborhood, violationText, severity }) {
+  registerFonts();
+  const W = 1200, H = 900;
+  const canvas = createCanvas(W, H);
+  const ctx = canvas.getContext("2d");
+  const isCritical = severity === "c";
+  const accent = isCritical ? "#B7362F" : "#B4841D";
+  // Matches --stamp-red-tint for critical; noncritical violations on-site
+  // sit on --paper-light rather than a colored tint, so the accent bar and
+  // badge carry all the color signal in that case.
+  const bg = isCritical ? "#F3E1DF" : "#F5F5EF";
+  const padX = 72;
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, 18, H);
+
+  drawUtensilsMark(ctx, padX, 58, 34, "#1C2333");
+  ctx.fillStyle = "#1C2333";
+  ctx.font = "bold 40px 'IBM Plex Mono Bold', 'Courier New', monospace";
+  ctx.textBaseline = "top";
+  ctx.fillText("GUTCHECK", padX + 62, 46);
+
+  const sevLabel = isCritical ? "PRIORITY VIOLATION" : "CORE VIOLATION";
+  ctx.font = "bold 26px 'IBM Plex Mono Bold', 'Courier New', monospace";
+  const sevW = ctx.measureText(sevLabel).width;
+  const badgePadX = 22;
+  const badgeH = 50;
+  const badgeW = sevW + badgePadX * 2;
+  const badgeX = W - padX - badgeW;
+  const badgeY = 42;
+  ctx.fillStyle = "#FFFFFF";
+  ctx.strokeStyle = accent;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 12);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = accent;
+  ctx.textBaseline = "middle";
+  ctx.fillText(sevLabel, badgeX + badgePadX, badgeY + badgeH / 2 + 2);
+
+  ctx.fillStyle = "#1C2333";
+  ctx.font = "900 52px 'Archivo Black', Impact, 'Arial Narrow Bold', sans-serif";
+  ctx.textBaseline = "alphabetic";
+  const nameLines = wrapText(ctx, name.toUpperCase(), W - padX * 2, 2);
+  let ny = 188;
+  for (const line of nameLines) {
+    ctx.fillText(line, padX, ny);
+    ny += 58;
+  }
+
+  ctx.font = "26px 'IBM Plex Mono Medium', 'Courier New', monospace";
+  ctx.fillStyle = "#4B5566";
+  ctx.fillText(`${neighborhood.toUpperCase()} \u00B7 CHICAGO`, padX, ny + 6);
+  ny += 56;
+
+  ctx.strokeStyle = "rgba(28,35,51,0.18)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padX, ny);
+  ctx.lineTo(W - padX, ny);
+  ctx.stroke();
+  ny += 54;
+
+  drawWarningTriangle(ctx, padX + 20, ny + 18, 40, accent);
+  const textX = padX + 68;
+  const textMaxWidth = W - padX - textX;
+
+  ctx.fillStyle = "#1C2333";
+  ctx.font = "42px Georgia, 'Source Serif 4', serif";
+  ctx.textBaseline = "alphabetic";
+  const quoteLines = wrapText(ctx, `\u201C${violationText}\u201D`, textMaxWidth, 8);
+  let qy = ny + 24;
+  for (const line of quoteLines) {
+    ctx.fillText(line, textX, qy);
+    qy += 54;
+  }
+
+  ctx.font = "24px 'IBM Plex Mono Medium', 'Courier New', monospace";
+  ctx.fillStyle = "#8A93A3";
+  ctx.textBaseline = "bottom";
+  ctx.fillText("gutcheckchicago.com", padX, H - 44);
+
+  return canvas.toBuffer("image/webp", 88);
+}
 // When forked with IPC, this same file acts as the batch worker: it
 // receives one small batch of restaurants, renders them, writes the PNGs,
 // reports done, and exits -- releasing all leaked native memory with it.
@@ -280,18 +404,32 @@ if (process.send) {
   process.on("message", (msg) => {
     if (msg?.type !== "batch") return;
     registerFonts();
-    for (const r of msg.items) {
-      const outPath = path.join(msg.outDir, `${r.slug}.webp`);
-      if (msg.skipExisting && fs.existsSync(outPath)) continue;
-      const buf = generateOgImage({ name: r.n, neighborhood: r.nb, grade: r.g });
-      fs.writeFileSync(outPath, buf);
+    if (msg.kind === "violation") {
+      for (const item of msg.items) {
+        const outPath = path.join(msg.outDir, `${item.slug}-${item.index + 1}.webp`);
+        if (msg.skipExisting && fs.existsSync(outPath)) continue;
+        const buf = generateViolationOgImage({
+          name: item.n,
+          neighborhood: item.nb,
+          violationText: item.text,
+          severity: item.severity,
+        });
+        fs.writeFileSync(outPath, buf);
+      }
+    } else {
+      for (const r of msg.items) {
+        const outPath = path.join(msg.outDir, `${r.slug}.webp`);
+        if (msg.skipExisting && fs.existsSync(outPath)) continue;
+        const buf = generateOgImage({ name: r.n, neighborhood: r.nb, grade: r.g });
+        fs.writeFileSync(outPath, buf);
+      }
     }
     process.send({ type: "done", count: msg.items.length });
     process.exit(0);
   });
 }
 
-function runBatch(items, outDir, skipExisting) {
+function runBatch(items, outDir, skipExisting, kind = "restaurant") {
   return new Promise((resolve, reject) => {
     const child = fork(THIS_FILE, [], { stdio: "ignore" });
     let settled = false;
@@ -308,17 +446,11 @@ function runBatch(items, outDir, skipExisting) {
         else reject(new Error(`OG batch worker exited with code ${code}`));
       }
     });
-    child.send({ type: "batch", items, outDir, skipExisting });
+    child.send({ type: "batch", items, outDir, skipExisting, kind });
   });
 }
 
-export async function generateAllOgImages(restaurants, outDir, { skipExisting = false } = {}) {
-  fs.mkdirSync(outDir, { recursive: true });
-
-  const pending = skipExisting
-    ? restaurants.filter((r) => !fs.existsSync(path.join(outDir, `${r.slug}.webp`)))
-    : restaurants;
-
+async function runAllBatches(pending, outDir, skipExisting, kind) {
   if (pending.length === 0) return 0;
 
   // Small batch size keeps each child process's peak RSS well within safe
@@ -337,11 +469,39 @@ export async function generateAllOgImages(restaurants, outDir, { skipExisting = 
   async function worker() {
     while (cursor < batches.length) {
       const idx = cursor++;
-      const count = await runBatch(batches[idx], outDir);
+      const count = await runBatch(batches[idx], outDir, skipExisting, kind);
       total += count;
     }
   }
   await Promise.all(Array.from({ length: Math.min(CONCURRENCY, batches.length) }, worker));
 
   return total;
+}
+
+export async function generateAllOgImages(restaurants, outDir, { skipExisting = false } = {}) {
+  fs.mkdirSync(outDir, { recursive: true });
+  const pending = skipExisting
+    ? restaurants.filter((r) => !fs.existsSync(path.join(outDir, `${r.slug}.webp`)))
+    : restaurants;
+  return runAllBatches(pending, outDir, skipExisting, "restaurant");
+}
+
+// Flattens every restaurant's violations into individual share-card jobs.
+// Only restaurants with current violations produce anything -- PASS
+// restaurants with a clean current inspection contribute zero images.
+export async function generateAllViolationOgImages(restaurants, outDir, { skipExisting = false } = {}) {
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const allItems = [];
+  for (const r of restaurants) {
+    (r.v || []).forEach((v, index) => {
+      allItems.push({ slug: r.slug, n: r.n, nb: r.nb, index, text: v.t, severity: v.s });
+    });
+  }
+
+  const pending = skipExisting
+    ? allItems.filter((item) => !fs.existsSync(path.join(outDir, `${item.slug}-${item.index + 1}.webp`)))
+    : allItems;
+
+  return runAllBatches(pending, outDir, skipExisting, "violation");
 }

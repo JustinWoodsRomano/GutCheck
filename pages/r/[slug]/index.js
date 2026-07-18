@@ -1,14 +1,14 @@
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft, MapPin, CheckCircle2, AlertTriangle } from "lucide-react";
-import { Nav, Footer } from "../../components/Layout";
-import Stamp from "../../components/Stamp";
-import HistoryAccordion from "../../components/HistoryAccordion";
-import { MapEmbed, ContactRow, RestaurantLogo } from "../../components/Contact";
-import AdSlot from "../../components/AdSlot";
-import { loadRestaurants } from "../../lib/data";
-import { GRADE_LABEL } from "../../lib/constants";
-import { buildRestaurantFaq } from "../../lib/restaurantCopy";
+import { ArrowLeft, MapPin, CheckCircle2, AlertTriangle, Share2 } from "lucide-react";
+import { Nav, Footer } from "../../../components/Layout";
+import Stamp from "../../../components/Stamp";
+import HistoryAccordion from "../../../components/HistoryAccordion";
+import { MapEmbed, ContactRow, RestaurantLogo } from "../../../components/Contact";
+import AdSlot from "../../../components/AdSlot";
+import { loadRestaurants } from "../../../lib/data";
+import { GRADE_LABEL } from "../../../lib/constants";
+import { buildRestaurantFaq } from "../../../lib/restaurantCopy";
 
 export async function getStaticPaths() {
   const restaurants = loadRestaurants();
@@ -151,6 +151,14 @@ export default function RestaurantPage({ restaurant: r, total }) {
                 <div className="violation-text">{v.t}</div>
                 <div className="violation-sev">{v.s === "c" ? "priority violation" : "core violation"}</div>
               </div>
+              <Link
+                href={`/r/${r.slug}/v/${i + 1}`}
+                className="violation-share-link"
+                aria-label="Share this violation"
+                title="Share this violation"
+              >
+                <Share2 size={14} />
+              </Link>
             </div>
           ))}
         </div>

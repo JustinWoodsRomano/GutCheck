@@ -1,15 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { Share2, X, Link2, Mail, MessageSquareText, Check } from "lucide-react";
-import { FacebookIcon, XIcon, LinkedInIcon, WhatsAppIcon, InstagramIcon, TikTokIcon } from "./BrandIcons";
-import { getShareMessage } from "../lib/share";
+import { FacebookIcon, XIcon, LinkedInIcon, WhatsAppIcon, InstagramIcon, TikTokIcon, SnapchatIcon } from "./BrandIcons";
+import { getShareMessage, getViolationShareMessage } from "../lib/share";
 
-// Platforms with no public web share-intent URL (Instagram, TikTok) fall
-// back to copy-message-to-clipboard + a "paste it in" toast, which is the
-// same workaround most apps use since neither platform accepts an
-// external site pushing pre-filled content into a post or DM.
-const NO_INTENT_PLATFORMS = new Set(["Instagram", "TikTok"]);
-
-export default function ShareButton({ restaurant, url }) {
+// Platforms with no public web share-intent URL (Instagram, Snapchat,
+// TikTok) fall back to copy-message-to-clipboard + a "paste it in" toast,
+// which is the same workaround most apps use since none of the three
+// accept an external site pushing pre-filled content into a post, Story,
+// or DM without going through their native SDKs (Meta App ID / Snap Kit
+// registration).
+//
+// `violation` is optional: { t: string, s: 'c'|'n' }. When present, the
+// share message and Email subject describe the specific violation instead
+// of the restaurant's overall grade, matching whatever `url` was passed in
+// (expected to be the /r/[slug]/v/[n] page in that case).
+export default function ShareButton({ restaurant, url, violation }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const panelRef = useRef(null);
@@ -23,7 +28,7 @@ export default function ShareButton({ restaurant, url }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const message = getShareMessage(restaurant);
+  const message = violation ? getViolationShareMessage(restaurant, violation) : getShareMessage(restaurant);
   const shareUrl = url;
 
   function showToast(text) {
@@ -97,11 +102,18 @@ export default function ShareButton({ restaurant, url }) {
       label: "Email",
       icon: Mail,
       onClick: () => {
-        const subject = `Chicago health inspection: ${restaurant.n}`;
+        const subject = violation
+          ? `Chicago health violation: ${restaurant.n}`
+          : `Chicago health inspection: ${restaurant.n}`;
         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
           `${message}\n\n${shareUrl}`
         )}`;
       },
+    },
+    {
+      label: "Snapchat",
+      icon: SnapchatIcon,
+      onClick: () => copyToClipboard(`${message} ${shareUrl}`, "Copied \u2014 paste it into Snapchat"),
     },
     {
       label: "Instagram",
