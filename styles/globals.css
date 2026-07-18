@@ -222,6 +222,23 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   gap: 6px;
   margin-bottom: 18px;
 }
+/* Mobile: the neighborhood chip list used to wrap into ~15 rows, pushing
+   results far below the fold with no indication anything was still to
+   come. One horizontally-scrollable row keeps the filter visible and
+   the results in view immediately below it. Desktop keeps the wrapped
+   layout since there's enough width for it to read as a filter panel
+   rather than a wall of chips. */
+@media (max-width: 639px) {
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin: 0 -20px 18px;
+    padding: 0 20px;
+  }
+  .chip-row::-webkit-scrollbar { display: none; }
+}
 .chip {
   font-family: var(--font-mono);
   font-size: 0.72rem;
@@ -231,6 +248,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   background: transparent;
   color: var(--ink-muted);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .chip.active {
   background: var(--ink);
@@ -619,6 +637,12 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   overflow: hidden;
 }
 .ad-banner { margin: 4px 0 0; }
+@media (max-width: 639px) {
+  /* Hidden for now on mobile -- the empty placeholder box was adding
+     scroll distance between the search bar and results with nothing
+     to show for it yet. Revert this once real ad units are live. */
+  .ad-banner { display: none; }
+}
 .ad-infeed { height: 100%; }
 .ad-label {
   position: absolute;

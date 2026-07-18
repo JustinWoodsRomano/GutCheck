@@ -10,6 +10,13 @@ import { COMING_SOON_AREAS } from "../lib/constants";
 const PAGE_SIZE = 60;
 const AD_EVERY = 12;
 
+// Strips apostrophes (straight ' and curly ') before matching, so
+// "McDonald's" and "Mcdonalds" return the same results regardless of
+// which one the person typed or how the source name is punctuated.
+function normalizeForSearch(s) {
+  return (s || "").toLowerCase().replace(/['\u2019]/g, "");
+}
+
 export async function getStaticProps() {
   const neighborhoods = loadNeighborhoods();
   return { props: { neighborhoods } };
@@ -40,9 +47,12 @@ export default function Home({ neighborhoods }) {
     let list = data;
     if (neighborhood) list = list.filter((r) => r.nbSlug === neighborhood);
     if (query.trim()) {
-      const q = query.toLowerCase().trim();
+      const q = normalizeForSearch(query.trim());
       list = list.filter(
-        (r) => r.n.toLowerCase().includes(q) || r.nb.toLowerCase().includes(q) || r.z.includes(q)
+        (r) =>
+          normalizeForSearch(r.n).includes(q) ||
+          normalizeForSearch(r.nb).includes(q) ||
+          r.z.includes(query.trim())
       );
     }
     return list;

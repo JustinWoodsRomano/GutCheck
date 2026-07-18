@@ -57,7 +57,16 @@ function slugify(s) {
 }
 
 function toTitleCase(s) {
-  return (s || "").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+  // \b\w capitalizes every letter that follows a non-word character,
+  // and an apostrophe counts as one -- so "mcdonald's" incorrectly
+  // becomes "Mcdonald'S". Undo that specific case: an apostrophe is
+  // virtually always a possessive/contraction in these names, so the
+  // letter right after it should stay lowercase (McDonald's, Andy's,
+  // Wendy's, etc.).
+  return (s || "")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .replace(/'(\w)/g, (_, c) => `'${c.toLowerCase()}`);
 }
 
 function mapGrade(result) {
