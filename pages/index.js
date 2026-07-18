@@ -75,8 +75,8 @@ export default function Home({ neighborhoods }) {
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="https://gutcheckchicago.com/og/home.jpg" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        <meta property="og:image:width" content="600" />
+        <meta property="og:image:height" content="315" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://gutcheckchicago.com/og/home.jpg" />
         <script
