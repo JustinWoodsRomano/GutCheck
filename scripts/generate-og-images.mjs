@@ -42,9 +42,18 @@ const GRADE_META = {
 let fontsRegistered = false;
 function registerFonts() {
   if (fontsRegistered) return;
-  GlobalFonts.registerFromPath(path.join(FONTS_DIR, "ArchivoBlack.ttf"), "Archivo Black");
-  GlobalFonts.registerFromPath(path.join(FONTS_DIR, "IBMPlexMono-Bold.ttf"), "IBM Plex Mono Bold");
-  GlobalFonts.registerFromPath(path.join(FONTS_DIR, "IBMPlexMono-Medium.ttf"), "IBM Plex Mono Medium");
+  // Registering local fonts is a nice-to-have for on-brand OG images, not a
+  // build-correctness requirement -- if the font files aren't present (e.g.
+  // a lean deploy payload that intentionally omits large binary assets),
+  // canvas falls back to its default sans-serif rather than crashing the
+  // entire site build over a social-preview-image detail.
+  try {
+    GlobalFonts.registerFromPath(path.join(FONTS_DIR, "ArchivoBlack.ttf"), "Archivo Black");
+    GlobalFonts.registerFromPath(path.join(FONTS_DIR, "IBMPlexMono-Bold.ttf"), "IBM Plex Mono Bold");
+    GlobalFonts.registerFromPath(path.join(FONTS_DIR, "IBMPlexMono-Medium.ttf"), "IBM Plex Mono Medium");
+  } catch (err) {
+    console.warn(`[generate-og-images] Local fonts unavailable (${err.message}); OG images will use the system default font this build.`);
+  }
   fontsRegistered = true;
 }
 
