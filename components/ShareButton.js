@@ -14,7 +14,14 @@ import { getShareMessage, getViolationShareMessage } from "../lib/share";
 // share message and Email subject describe the specific violation instead
 // of the restaurant's overall grade, matching whatever `url` was passed in
 // (expected to be the /r/[slug]/v/[n] page in that case).
-export default function ShareButton({ restaurant, url, violation }) {
+//
+// `message` and `emailSubject` are optional explicit overrides -- when
+// provided, they're used verbatim instead of deriving text from
+// `restaurant`/`violation`. Used by the Hall of Shame page, where
+// `restaurant` is deliberately not passed in at all (the whole point is
+// not sharing the restaurant's identity), so there's nothing to derive a
+// message from in the first place.
+export default function ShareButton({ restaurant, url, violation, message: messageOverride, emailSubject: emailSubjectOverride }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const panelRef = useRef(null);
@@ -28,7 +35,7 @@ export default function ShareButton({ restaurant, url, violation }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const message = violation ? getViolationShareMessage(restaurant, violation) : getShareMessage(restaurant);
+  const message = messageOverride ?? (violation ? getViolationShareMessage(restaurant, violation) : getShareMessage(restaurant));
   const shareUrl = url;
 
   function showToast(text) {
@@ -102,9 +109,9 @@ export default function ShareButton({ restaurant, url, violation }) {
       label: "Email",
       icon: Mail,
       onClick: () => {
-        const subject = violation
-          ? `Chicago health violation: ${restaurant.n}`
-          : `Chicago health inspection: ${restaurant.n}`;
+        const subject =
+          emailSubjectOverride ??
+          (violation ? `Chicago health violation: ${restaurant.n}` : `Chicago health inspection: ${restaurant.n}`);
         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(
           `${message}\n\n${shareUrl}`
         )}`;

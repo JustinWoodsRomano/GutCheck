@@ -102,6 +102,7 @@ function buildSitemap(restaurants, neighborhoods) {
   const urls = [
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/faq`, priority: "0.6" },
+    { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
     { loc: `${SITE_URL}/about`, priority: "0.5" },
     { loc: `${SITE_URL}/privacy`, priority: "0.2" },
     { loc: `${SITE_URL}/terms`, priority: "0.2" },

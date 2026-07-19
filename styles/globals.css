@@ -682,3 +682,11 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .prose { font-family: var(--font-serif); color: var(--ink); font-size: 1rem; line-height: 1.65; }
 .prose h2 { font-family: var(--font-display); font-size: 1.3rem; margin: 30px 0 12px; }
 .prose p { margin: 0 0 16px; color: var(--ink-muted); }
+
+/* ---------- Hall of Shame ---------- */
+.shame-card { border: var(--stamp-border) solid var(--line); border-radius: var(--radius-card); padding: 18px 20px; margin-bottom: 16px; background: var(--paper-light); scroll-margin-top: 90px; }
+.shame-card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+.shame-name { font-family: var(--font-serif); font-weight: 600; font-size: 1.05rem; color: var(--ink); }
+.shame-name-hidden { filter: blur(6px); user-select: none; letter-spacing: 0.02em; }
+.shame-card-meta { font-family: var(--font-mono); color: var(--ink-muted); font-size: 0.75rem; margin-bottom: 4px; }
+.shame-caption { font-family: var(--font-serif); color: var(--ink-muted); font-size: 0.9rem; margin: 6px 0 0; }
