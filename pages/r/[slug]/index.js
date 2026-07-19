@@ -42,7 +42,7 @@ export async function getStaticProps({ params }) {
 
   let restaurant = null;
   try {
-    const rows = await fetchRowsForRestaurant(entry.n, entry.a);
+    const rows = await fetchRowsForRestaurant(entry.n, entry.a, entry.l);
     restaurant = buildRestaurantFromRows(rows, { neighborhoodFor });
   } catch (err) {
     console.error(`ISR revalidate fetch failed for ${params.slug}:`, err);
@@ -57,6 +57,14 @@ export async function getStaticProps({ params }) {
     if (!fallback) return { notFound: true, revalidate: 300 };
     return { props: { restaurant: fallback, total }, revalidate: 300 };
   }
+
+  // Belt-and-suspenders: the freshly-fetched restaurant's own computed slug
+  // should always equal params.slug (both derive from the same name/license
+  // identity), but if a business is ever renamed under the same license,
+  // force it here anyway -- this page's canonical URL, OG image URL, and
+  // breadcrumb links all key off restaurant.slug, and none of them should
+  // ever point somewhere other than the URL actually being viewed.
+  restaurant.slug = params.slug;
 
   // Revalidate hourly: individual restaurant grade/violation changes go
   // live within an hour of appearing in the city's feed, without needing a

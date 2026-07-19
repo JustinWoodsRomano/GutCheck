@@ -21,7 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
-import { buildRestaurantFromRows, CUTOFF } from "../lib/inspections.mjs";
+import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF } from "../lib/inspections.mjs";
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
@@ -84,16 +84,18 @@ function processRows(rows) {
     groups.get(key).push(r);
   }
 
-  const restaurants = [];
-  let id = 1;
-
+  const built = [];
   for (const entries of groups.values()) {
-    const built = buildRestaurantFromRows(entries, { neighborhoodFor });
-    if (!built) continue;
-    restaurants.push({ id: id++, ...built });
+    const restaurant = buildRestaurantFromRows(entries, { neighborhoodFor });
+    if (restaurant) built.push(restaurant);
   }
 
-  return restaurants;
+  // Collapses any restaurants that landed in separate (name, address)
+  // groups but share a license number and therefore computed the same
+  // slug -- see mergeSlugCollisions in lib/inspections.mjs for why this
+  // happens and how the merge is resolved.
+  const deduped = mergeSlugCollisions(built);
+  return deduped.map((r, i) => ({ id: i + 1, ...r }));
 }
 
 function buildSitemap(restaurants, neighborhoods) {
@@ -234,13 +236,13 @@ try {
   // Uses the RAW (not title-cased) values since that's what has to match
   // Socrata's own stored casing for an exact upper() comparison.
   const slugIndex = {};
-  for (const r of restaurants) slugIndex[r.slug] = { n: r.rawName, a: r.rawAddress };
+  for (const r of restaurants) slugIndex[r.slug] = { n: r.rawName, a: r.rawAddress, l: r.license };
   fs.writeFileSync(path.join(outBuildDir, "slug-index.json"), JSON.stringify(slugIndex));
 
   // rawName/rawAddress only exist to seed slugIndex above -- strip them
   // before writing the public-facing dataset so it stays lean and doesn't
   // carry two redundant near-duplicates of every restaurant's name/address.
-  const publicRestaurants = restaurants.map(({ rawName, rawAddress, ...rest }) => rest);
+  const publicRestaurants = restaurants.map(({ rawName, rawAddress, license, ...rest }) => rest);
 
   fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
