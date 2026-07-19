@@ -1,94 +1,35 @@
 // Runs as a "prebuild" step. Fetches live Chicago restaurant inspection
 // data at BUILD time, processes it, and writes:
-//   - public/data/restaurants.json  (full dataset for the client-side browse UI)
-//   - scripts/.data/restaurants-by-slug.json (used by getStaticProps/getStaticPaths)
+//   - public/data/restaurants.json    (full dataset for the client-side browse UI)
+//   - scripts/.data/restaurants.json  (used by neighborhood/homepage getStaticProps)
+//   - scripts/.data/slug-index.json   (lean slug -> {n,a} lookup used by
+//                                       pages/r/[slug]/index.js to resolve a
+//                                       slug into a scoped Socrata query at
+//                                       ISR revalidate time, WITHOUT needing
+//                                       the full dataset)
 //   - public/sitemap.xml
 //   - public/llms.txt
-// Nothing here runs at request time — everything is baked in at build time,
-// which is what makes 9,700+ individual restaurant pages possible without
-// any serverless function or timeout risk.
+//
+// As of the ISR migration, individual restaurant pages (pages/r/[slug])
+// no longer read their grade/violations from the snapshot this script
+// writes -- they revalidate directly against Socrata on their own schedule
+// (see lib/inspections.mjs), so a restaurant's accuracy-critical data no
+// longer waits on a full rebuild to go live. This script still owns the
+// full-dataset snapshot used by the homepage browse list, neighborhood
+// pages, sitemap, llms.txt, and OG image generation.
 
 import fs from "node:fs";
 import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
+import { buildRestaurantFromRows, CUTOFF } from "../lib/inspections.mjs";
+import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
-const CUTOFF = "2022-01-01T00:00:00.000";
 const SITE_URL = "https://gutcheckchicago.com";
-
-const ZIP_NEIGHBORHOOD = {
-  "60601": "Loop", "60602": "Loop", "60603": "Loop", "60604": "Loop",
-  "60605": "South Loop", "60606": "West Loop", "60607": "West Loop",
-  "60608": "Pilsen", "60609": "Back of the Yards", "60610": "Near North Side",
-  "60611": "Streeterville", "60612": "East Garfield Park", "60613": "Lakeview",
-  "60614": "Lincoln Park", "60615": "Hyde Park", "60616": "Chinatown",
-  "60617": "South Chicago", "60618": "North Center", "60619": "Chatham",
-  "60620": "Auburn Gresham", "60621": "Englewood", "60622": "Wicker Park",
-  "60623": "Little Village", "60624": "West Garfield Park", "60625": "Albany Park",
-  "60626": "Rogers Park", "60628": "Roseland", "60629": "Gage Park",
-  "60630": "Portage Park", "60631": "Edison Park", "60632": "Archer Heights",
-  "60633": "Hegewisch", "60634": "Dunning", "60636": "West Englewood",
-  "60637": "Woodlawn", "60638": "Garfield Ridge", "60639": "Belmont Cragin",
-  "60640": "Uptown", "60641": "Irving Park", "60642": "Noble Square",
-  "60643": "Beverly", "60644": "Austin", "60645": "West Ridge",
-  "60646": "Forest Glen", "60647": "Logan Square", "60649": "South Shore",
-  "60651": "Humboldt Park", "60652": "Ashburn", "60653": "Bronzeville",
-  "60654": "River North", "60655": "Mount Greenwood", "60656": "Norwood Park",
-  "60657": "Lakeview", "60659": "West Rogers Park", "60660": "Edgewater",
-  "60661": "West Loop", "60664": "Loop", "60666": "O'Hare",
-  "60827": "Riverdale", "60707": "Dunning",
-};
 
 // Suburbs requested but not yet sourced from a verified open-data feed.
 // Shown in the UI as "coming soon" — never populated with fabricated data.
 export const COMING_SOON_AREAS = ["Oak Park", "Elmwood Park", "Rosemont"];
-
-function neighborhoodFor(zip) {
-  const z = (zip || "").trim().slice(0, 5);
-  return ZIP_NEIGHBORHOOD[z] || "Other Chicago";
-}
-
-function slugify(s) {
-  return (s || "")
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function toTitleCase(s) {
-  // \b\w capitalizes every letter that follows a non-word character,
-  // and an apostrophe counts as one -- so "mcdonald's" incorrectly
-  // becomes "Mcdonald'S". Undo that specific case: an apostrophe is
-  // virtually always a possessive/contraction in these names, so the
-  // letter right after it should stay lowercase (McDonald's, Andy's,
-  // Wendy's, etc.).
-  return (s || "")
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase())
-    .replace(/'(\w)/g, (_, c) => `'${c.toLowerCase()}`);
-}
-
-function mapGrade(result) {
-  if (result === "Pass") return "PASS";
-  if (result === "Pass w/ Conditions") return "CONDITIONAL";
-  if (result === "Fail") return "FAIL";
-  return null;
-}
-
-function parseViolations(raw) {
-  if (!raw) return [];
-  return raw
-    .split(" | ")
-    .map((chunk) => chunk.trim())
-    .filter(Boolean)
-    .map((chunk) => {
-      const parts = chunk.split(/\s*-\s*Comments:\s*/i);
-      const comment = (parts[1] || chunk).replace(/\s+/g, " ").trim().slice(0, 220);
-      const isCritical = /PRIORITY FOUNDATION|PRIORITY VIOLATION/.test(chunk);
-      return { t: comment, s: isCritical ? "c" : "n" };
-    });
-}
 
 async function fetchAllRows() {
   const rows = [];
@@ -113,18 +54,6 @@ async function fetchAllRows() {
   return rows;
 }
 
-function stableIdFor(licenseNum, name, address) {
-  if (licenseNum && String(licenseNum).trim()) return String(licenseNum).trim();
-  // Fallback for the rare record with no license number: short stable hash
-  // of name+address so the slug still doesn't depend on fetch/processing order.
-  let hash = 0;
-  const s = `${name}|${address}`;
-  for (let i = 0; i < s.length; i++) {
-    hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
-  }
-  return hash.toString(36);
-}
-
 // Chicago's inspection dataset assigns a separate license_ number per
 // business license, but a single physical restaurant frequently gets
 // inspected under MULTIPLE license numbers for the exact same visit
@@ -140,66 +69,13 @@ function stableIdFor(licenseNum, name, address) {
 // accurate public safety data. Grouping by (name, address) instead
 // reliably identifies "the same physical restaurant" for this dataset,
 // and merging every row that shares an exact inspection_date within that
-// group (rather than picking one arbitrary row) ensures violation text
-// recorded under a sibling license number is never dropped.
-function severityRank(grade) {
-  if (grade === "FAIL") return 2;
-  if (grade === "CONDITIONAL") return 1;
-  if (grade === "PASS") return 0;
-  return -1;
-}
-
-// Collapses every row sharing one exact inspection_date into a single
-// "visit": violations are the union of every row's violations (a
-// sibling license record may hold text a Fail record itself lacks), and
-// the grade is the most severe one recorded for that date -- if any
-// license record for that visit says Fail, the visit is a Fail. Rows
-// are pre-sorted newest-first by the caller.
-function mergeVisits(entries) {
-  const byDate = new Map();
-  const order = [];
-  for (const e of entries) {
-    const d = (e.inspection_date || "").slice(0, 10);
-    if (!d) continue;
-    if (!byDate.has(d)) {
-      byDate.set(d, []);
-      order.push(d);
-    }
-    byDate.get(d).push(e);
-  }
-
-  return order.map((d) => {
-    const rows = byDate.get(d);
-    let grade = null;
-    let gradeRow = rows[0];
-    const violations = [];
-    const seenViolationText = new Set();
-    let sawOutOfBusiness = false;
-    for (const row of rows) {
-      if (row.results === "Out of Business") sawOutOfBusiness = true;
-      const g = mapGrade(row.results);
-      if (g && severityRank(g) > severityRank(grade)) {
-        grade = g;
-        gradeRow = row;
-      }
-      // Verified against the live feed: when Chicago inspects one physical
-      // location under multiple license numbers on the same visit, the
-      // same violation text is sometimes recorded verbatim on more than
-      // one sibling license row. Deduping by exact text keeps each real
-      // violation listed once -- otherwise the merge above would make a
-      // restaurant look like it had more issues than inspectors actually
-      // found.
-      for (const v of parseViolations(row.violations)) {
-        if (!seenViolationText.has(v.t)) {
-          seenViolationText.add(v.t);
-          violations.push(v);
-        }
-      }
-    }
-    return { date: d, grade, sourceRow: gradeRow, violations, sawOutOfBusiness, allRows: rows };
-  });
-}
-
+// group (rather than picking one arbitrary row, via mergeVisits() in
+// lib/inspections.mjs) ensures violation text recorded under a sibling
+// license number is never dropped. This groups the full dataset and
+// delegates the actual per-restaurant build to buildRestaurantFromRows()
+// -- the SAME function pages/r/[slug]/index.js calls at ISR revalidate
+// time on a scoped per-restaurant fetch, so both code paths are
+// guaranteed to compute a restaurant's grade identically.
 function processRows(rows) {
   const groups = new Map();
   for (const r of rows) {
@@ -212,52 +88,9 @@ function processRows(rows) {
   let id = 1;
 
   for (const entries of groups.values()) {
-    entries.sort((a, b) => (a.inspection_date < b.inspection_date ? 1 : -1));
-
-    const visits = mergeVisits(entries);
-    if (visits.length === 0) continue;
-    if (visits[0].sawOutOfBusiness) continue;
-
-    const current = visits.find((v) => v.grade !== null);
-    if (!current) continue;
-
-    const name = toTitleCase(current.sourceRow.dba_name);
-    if (!name) continue;
-
-    const history = visits
-      .filter((v) => v.grade !== null)
-      .slice(0, 5)
-      .map((v) => ({ d: v.date, g: v.grade, v: v.violations }));
-
-    const nb = neighborhoodFor(current.sourceRow.zip);
-    const baseSlug = slugify(name) || "restaurant";
-    // Deterministic across rebuilds: the lowest license number seen
-    // anywhere in this group, not whichever row happened to carry the
-    // grade -- keeps the slug stable even if which sibling row holds the
-    // violation text shifts between city data refreshes.
-    const licenseCandidates = entries.map((e) => e.license_).filter((l) => l && String(l).trim());
-    const chosenLicense = licenseCandidates.sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }))[0];
-    const stableId = stableIdFor(chosenLicense, name, current.sourceRow.address);
-    const slug = `${baseSlug}-${stableId}`;
-
-    const lat = parseFloat(current.sourceRow.latitude);
-    const lon = parseFloat(current.sourceRow.longitude);
-
-    restaurants.push({
-      id: id++,
-      slug,
-      n: name,
-      nb,
-      nbSlug: slugify(nb),
-      z: (current.sourceRow.zip || "").slice(0, 5),
-      a: toTitleCase(current.sourceRow.address),
-      g: current.grade,
-      d: current.date,
-      v: current.violations,
-      hi: history,
-      lat: Number.isFinite(lat) ? lat : null,
-      lon: Number.isFinite(lon) ? lon : null,
-    });
+    const built = buildRestaurantFromRows(entries, { neighborhoodFor });
+    if (!built) continue;
+    restaurants.push({ id: id++, ...built });
   }
 
   return restaurants;
@@ -394,11 +227,26 @@ try {
   const neighborhoods = [...new Set(restaurants.map((r) => r.nbSlug))].sort();
   const neighborhoodStats = buildNeighborhoodStats(restaurants);
 
-  fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(restaurants));
-  fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(restaurants));
+  // Lean slug -> {n: raw dba_name, a: raw address} index. pages/r/[slug]
+  // uses this at ISR revalidate time to resolve a slug into the exact
+  // upper()-matched Socrata query fetchRowsForRestaurant() needs, without
+  // loading the full (much larger, violation-history-inclusive) dataset.
+  // Uses the RAW (not title-cased) values since that's what has to match
+  // Socrata's own stored casing for an exact upper() comparison.
+  const slugIndex = {};
+  for (const r of restaurants) slugIndex[r.slug] = { n: r.rawName, a: r.rawAddress };
+  fs.writeFileSync(path.join(outBuildDir, "slug-index.json"), JSON.stringify(slugIndex));
+
+  // rawName/rawAddress only exist to seed slugIndex above -- strip them
+  // before writing the public-facing dataset so it stays lean and doesn't
+  // carry two redundant near-duplicates of every restaurant's name/address.
+  const publicRestaurants = restaurants.map(({ rawName, rawAddress, ...rest }) => rest);
+
+  fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(publicRestaurants));
+  fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
-  fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(restaurants, neighborhoods));
-  fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(restaurants.length, neighborhoods));
+  fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(publicRestaurants, neighborhoods));
+  fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(publicRestaurants.length, neighborhoods));
 
   console.log("Generating Open Graph images...");
   const ogStart = Date.now();
@@ -435,6 +283,7 @@ try {
   console.error("Live fetch failed, writing empty fallback so the build still succeeds:", err);
   fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify([]));
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify([]));
+  fs.writeFileSync(path.join(outBuildDir, "slug-index.json"), JSON.stringify({}));
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap([], []));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(0, []));
 }

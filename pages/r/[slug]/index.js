@@ -6,24 +6,62 @@ import Stamp from "../../../components/Stamp";
 import HistoryAccordion from "../../../components/HistoryAccordion";
 import { MapEmbed, ContactRow, RestaurantLogo } from "../../../components/Contact";
 import AdSlot from "../../../components/AdSlot";
-import { loadRestaurants } from "../../../lib/data";
+import { loadRestaurants, loadSlugIndex } from "../../../lib/data";
 import { GRADE_LABEL } from "../../../lib/constants";
 import { buildRestaurantFaq } from "../../../lib/restaurantCopy";
+import { buildRestaurantFromRows, fetchRowsForRestaurant } from "../../../lib/inspections.mjs";
+import { neighborhoodFor } from "../../../lib/zipNeighborhoods.mjs";
 
+// getStaticProps now does a live, scoped Socrata call per restaurant (see
+// below) instead of reading a pre-baked snapshot -- so pre-rendering all
+// 8,000+ known slugs here would turn a single deploy into 8,000+
+// sequential live API calls, the opposite of the efficiency this migration
+// is for. Instead, paths starts empty and every restaurant page renders on
+// its first visit via fallback: 'blocking', then serves from cache and
+// revalidates hourly from then on. This is the standard ISR pattern for
+// large catalogs: deploys stay fast no matter how many restaurants exist,
+// and a page's data freshness is decoupled from needing a redeploy at all.
 export async function getStaticPaths() {
-  const restaurants = loadRestaurants();
-  return {
-    paths: restaurants.map((r) => ({ params: { slug: r.slug } })),
-    fallback: false,
-  };
+  return { paths: [], fallback: "blocking" };
 }
 
 export async function getStaticProps({ params }) {
-  const restaurants = loadRestaurants();
-  const restaurant = restaurants.find((r) => r.slug === params.slug);
-  if (!restaurant) return { notFound: true };
-  const total = restaurants.length;
-  return { props: { restaurant, total } };
+  const slugIndex = loadSlugIndex();
+  // Comes from the already-loaded lean index rather than loadRestaurants()
+  // -- avoids reading the full (~26MB) dataset on every single restaurant
+  // page request just to display a count.
+  const total = Object.keys(slugIndex).length;
+  const entry = slugIndex[params.slug];
+
+  // Slug not in the last-built index -- brand-new restaurant, or requested
+  // between builds. There's no known {name, address} yet to query Socrata
+  // with, so this genuinely can't be resolved until the next full rebuild
+  // picks it up. Retry sooner than the normal window in case the index
+  // updates shortly.
+  if (!entry) return { notFound: true, revalidate: 900 };
+
+  let restaurant = null;
+  try {
+    const rows = await fetchRowsForRestaurant(entry.n, entry.a);
+    restaurant = buildRestaurantFromRows(rows, { neighborhoodFor });
+  } catch (err) {
+    console.error(`ISR revalidate fetch failed for ${params.slug}:`, err);
+  }
+
+  if (!restaurant) {
+    // Scoped fetch failed (transient Socrata issue) or returned nothing
+    // usable (e.g. the restaurant is now marked Out of Business) -- fall
+    // back to the last full-build snapshot rather than taking the page
+    // down, and retry the live fetch again soon.
+    const fallback = loadRestaurants().find((r) => r.slug === params.slug);
+    if (!fallback) return { notFound: true, revalidate: 300 };
+    return { props: { restaurant: fallback, total }, revalidate: 300 };
+  }
+
+  // Revalidate hourly: individual restaurant grade/violation changes go
+  // live within an hour of appearing in the city's feed, without needing a
+  // full site rebuild/redeploy.
+  return { props: { restaurant, total }, revalidate: 3600 };
 }
 
 export default function RestaurantPage({ restaurant: r, total }) {
