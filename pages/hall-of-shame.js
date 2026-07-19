@@ -107,7 +107,7 @@ export default function HallOfShame({ entries, total }) {
               <div style={{ marginTop: 12 }}>
                 <ShareButton
                   url={`${url}#entry-${i + 1}`}
-                  message={getAnonymizedViolationShareMessage(entry.violation)}
+                  message={getAnonymizedViolationShareMessage(entry.violation, entry.g)}
                   emailSubject="Chicago health inspection finding"
                 />
               </div>
