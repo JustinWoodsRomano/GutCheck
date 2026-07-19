@@ -245,7 +245,38 @@ try {
   // carry two redundant near-duplicates of every restaurant's name/address.
   const publicRestaurants = restaurants.map(({ rawName, rawAddress, license, ...rest }) => rest);
 
-  fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(publicRestaurants));
+  // The homepage's client-side browse/search UI (pages/index.js) only ever
+  // reads id, slug, n, nb, nbSlug, z, g, d from each restaurant -- it never
+  // touches violations (v), inspection history (hi), street address (a), or
+  // coordinates (lat/lon); those are only used on individual restaurant
+  // detail pages, which get their data through a completely separate path
+  // (ISR + a scoped per-restaurant Socrata fetch in pages/r/[slug], see
+  // lib/inspections.mjs) and never read this file at all. Measured directly
+  // against a production snapshot: hi + v alone accounted for 95.7% of this
+  // file's total bytes (81.5% + 14.2%), for data the browse page was
+  // downloading on every single visit and never using. That produced a
+  // ~26.6MB client-side fetch -- large enough to fail outright on a slow or
+  // spotty mobile connection, which is what actually caused the "Couldn't
+  // reach the inspection data feed right now" error a person hit on 5G with
+  // a couple bars of signal. Trimming to only the fields the browse UI
+  // reads cuts this to roughly 1/30th the size with zero loss of
+  // functionality anywhere. The FULL dataset (with v/hi/a/lat/lon intact)
+  // still gets written to scripts/.data/restaurants.json below, which is
+  // what loadRestaurants() reads server-side for pages that do need those
+  // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
+  // only the client-fetched public copy is trimmed.
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d }) => ({
+    id,
+    slug,
+    n,
+    nb,
+    nbSlug,
+    z,
+    g,
+    d,
+  }));
+
+  fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(browseRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(publicRestaurants, neighborhoods));

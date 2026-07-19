@@ -30,16 +30,35 @@ export default function Home({ neighborhoods }) {
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    fetch("/data/restaurants.json")
-      .then((r) => {
-        if (!r.ok) throw new Error("bad response");
-        return r.json();
-      })
-      .then((json) => setData(json.sort((a, b) => (a.d < b.d ? 1 : -1))))
-      .catch(() => {
-        setLoadError(true);
-        setData([]);
-      });
+    let cancelled = false;
+
+    // A couple of quick automatic retries for genuine transient network
+    // blips (dropped mobile connection mid-request, brief edge hiccup) --
+    // cheap defense in depth now that the payload itself is small (~800KB,
+    // down from a 26.6MB file that used to carry every restaurant's full
+    // violation history and inspection history even though this page never
+    // reads either field).
+    async function loadWithRetry(attempt = 0) {
+      try {
+        const r = await fetch("/data/restaurants.json");
+        if (!r.ok) throw new Error(`bad response: ${r.status}`);
+        const json = await r.json();
+        if (!cancelled) setData(json.sort((a, b) => (a.d < b.d ? 1 : -1)));
+      } catch (err) {
+        if (cancelled) return;
+        if (attempt < 2) {
+          setTimeout(() => loadWithRetry(attempt + 1), 600 * (attempt + 1));
+        } else {
+          setLoadError(true);
+          setData([]);
+        }
+      }
+    }
+
+    loadWithRetry();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(() => {
