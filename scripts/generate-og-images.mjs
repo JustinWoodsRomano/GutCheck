@@ -66,7 +66,7 @@ function drawLogoMark(ctx, x, y, size) {
 // silently never apply to a restaurant that already had an image,
 // forever. fetch-data.mjs reads this to decide whether to wipe the cache
 // before regenerating.
-export const OG_DESIGN_VERSION = 3;
+export const OG_DESIGN_VERSION = 4;
 
 const GRADE_META = {
   PASS: { fg: "#2E6B4F", tint: "#E2ECE5", emoji: "\u{1F642}", label: "PASS" },
