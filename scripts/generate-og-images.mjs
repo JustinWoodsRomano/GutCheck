@@ -23,7 +23,7 @@
 // worker_threads would NOT fix this since threads share one process's
 // memory space; child_process is required.
 
-import { createCanvas, GlobalFonts } from "@napi-rs/canvas";
+import { createCanvas, GlobalFonts, loadImage } from "@napi-rs/canvas";
 import fs from "node:fs";
 import path from "node:path";
 import { fork } from "node:child_process";
@@ -32,6 +32,28 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = path.resolve(__dirname, "../assets/fonts");
 const THIS_FILE = fileURLToPath(import.meta.url);
+
+// The actual brand mark (public/gutcheck-mark.png), loaded once and reused
+// for every image this module draws. Previously this drew a hand-coded
+// approximation of a fork+knife via canvas paths (drawUtensilsMark, now
+// removed) -- close enough at a glance but visibly not the real logo once
+// you compare them side by side, which is exactly what showed up in a
+// live share-preview screenshot. Loading the real asset guarantees pixel
+// fidelity with the actual brand mark instead of a lookalike.
+let logoImage = null;
+try {
+  logoImage = await loadImage(path.resolve(__dirname, "../public/gutcheck-mark.png"));
+} catch (err) {
+  console.warn(`[generate-og-images] Could not load public/gutcheck-mark.png (${err.message}); OG images will omit the mark this build.`);
+}
+
+// Draws the real logo at (x, y) sized to `size` square. The source PNG is
+// square (42x42) with transparency, so a simple square draw preserves its
+// proportions at any target size.
+function drawLogoMark(ctx, x, y, size) {
+  if (!logoImage) return;
+  ctx.drawImage(logoImage, x, y, size, size);
+}
 
 // Bump this whenever the visual design changes OR the underlying data
 // pipeline changes in a way that could make a cached image show
@@ -70,45 +92,14 @@ function registerFonts() {
   fontsRegistered = true;
 }
 
-// Icon drawing is done entirely with canvas primitives (arcs/paths), not
-// emoji glyphs or custom fonts -- @napi-rs/canvas on Vercel's build
-// machines has no color-emoji font available, so any emoji character
-// (fork/knife, grade smileys) silently renders as a missing-glyph box no
+// Icon drawing for the grade badge is done entirely with canvas primitives
+// (arcs/paths), not emoji glyphs or custom fonts -- @napi-rs/canvas on
+// Vercel's build machines has no color-emoji font available, so any emoji
+// character (grade smileys) silently renders as a missing-glyph box no
 // matter what font is registered. Vector-drawn icons render identically
-// everywhere with zero font/glyph dependency.
-
-function drawUtensilsMark(ctx, x, y, size, color) {
-  // Small fork+knife glyph matching the site's nav icon silhouette.
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.strokeStyle = color;
-  ctx.lineWidth = size * 0.11;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-
-  // Fork: three tines merging into a handle.
-  const forkX = size * 0.18;
-  ctx.beginPath();
-  for (const dx of [-1, 0, 1]) {
-    ctx.moveTo(forkX + dx * size * 0.11, 0);
-    ctx.lineTo(forkX + dx * size * 0.11, size * 0.32);
-  }
-  ctx.moveTo(forkX - size * 0.11, size * 0.32);
-  ctx.lineTo(forkX + size * 0.11, size * 0.32);
-  ctx.lineTo(forkX, size * 0.46);
-  ctx.lineTo(forkX, size);
-  ctx.stroke();
-
-  // Knife: blade tapering to a straight handle.
-  const knifeX = size * 0.82;
-  ctx.beginPath();
-  ctx.moveTo(knifeX, 0);
-  ctx.quadraticCurveTo(knifeX + size * 0.16, size * 0.22, knifeX, size * 0.5);
-  ctx.lineTo(knifeX, size);
-  ctx.stroke();
-
-  ctx.restore();
-}
+// everywhere with zero font/glyph dependency. The brand mark itself is now
+// the real logo image (see drawLogoMark above) rather than a hand-drawn
+// approximation.
 
 function drawGradeIcon(ctx, cx, cy, r, grade, color) {
   ctx.save();
@@ -230,8 +221,13 @@ function generateOgImage({ name, neighborhood, grade, photoBuffer = null }) {
     ctx.fillRect(0, SIZE - FOOTER_H, SIZE, FOOTER_H);
   }
 
+  // headerInk still governs the wordmark color for the (currently unused)
+  // photo-background variant, but the logo mark itself is a fixed dark-ink
+  // PNG now rather than a stroke-colored path drawing -- if the photo
+  // layer gets wired in later, this mark would need a white variant asset
+  // to stay legible on a dark photo background.
   const headerInk = photoBuffer ? "#FFFFFF" : "#1C2333";
-  drawUtensilsMark(ctx, 64, 76, 52, headerInk);
+  drawLogoMark(ctx, 64, 60, 52);
   ctx.fillStyle = headerInk;
   ctx.font = "bold 60px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
@@ -291,7 +287,7 @@ export function generateGenericOgImage() {
   ctx.fillStyle = radial;
   ctx.fillRect(0, 0, W, H);
 
-  drawUtensilsMark(ctx, 64, 78, 44, "#1C2333");
+  drawLogoMark(ctx, 64, 61, 44);
   ctx.fillStyle = "#1C2333";
   ctx.font = "bold 52px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
@@ -332,7 +328,7 @@ export function generateViolationOgImage({ name, neighborhood, violationText, se
   ctx.fillStyle = accent;
   ctx.fillRect(0, 0, 18, H);
 
-  drawUtensilsMark(ctx, padX, 58, 34, "#1C2333");
+  drawLogoMark(ctx, padX, 43, 34);
   ctx.fillStyle = "#1C2333";
   ctx.font = "bold 40px 'IBM Plex Mono Bold', 'Courier New', monospace";
   ctx.textBaseline = "top";
