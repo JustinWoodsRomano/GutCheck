@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Utensils } from "lucide-react";
 
 export function Nav({ total }) {
   return (
     <div className="nav">
       <div className="wrap nav-inner">
         <Link href="/" className="brand">
-          <Utensils size={20} strokeWidth={2.5} />
+          <img className="brand-mark" src="/gutcheck-mark.png" alt="" width="20" height="20" />
           <span className="brand-name">GUTCHECK</span>
         </Link>
         <div className="nav-count">

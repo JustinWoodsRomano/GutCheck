@@ -133,6 +133,10 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   font-size: 1.15rem;
   letter-spacing: 0.02em;
 }
+.brand-mark {
+  display: block;
+  flex-shrink: 0;
+}
 .nav-count {
   font-family: var(--font-mono);
   color: var(--ink-muted);
