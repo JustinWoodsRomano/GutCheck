@@ -641,12 +641,6 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   overflow: hidden;
 }
 .ad-banner { margin: 4px 0 0; }
-@media (max-width: 639px) {
-  /* Hidden for now on mobile -- the empty placeholder box was adding
-     scroll distance between the search bar and results with nothing
-     to show for it yet. Revert this once real ad units are live. */
-  .ad-banner { display: none; }
-}
 .ad-infeed { height: 100%; }
 .ad-label {
   position: absolute;
