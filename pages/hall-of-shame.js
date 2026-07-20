@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, AlertTriangle } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import Stamp from "../components/Stamp";
+import AdSlot from "../components/AdSlot";
 import ShareButton from "../components/ShareButton";
 import { loadRestaurants } from "../lib/data";
 import { HALL_OF_SHAME } from "../lib/hallOfShame";
@@ -73,6 +74,7 @@ export default function HallOfShame({ entries, total }) {
       </div>
 
       <div className="wrap section" style={{ maxWidth: 760 }}>
+        <AdSlot variant="banner" />
         {entries.map((entry, i) => (
           <div className="shame-card" key={entry.slug} id={`entry-${i + 1}`}>
             <div className="shame-card-head">
