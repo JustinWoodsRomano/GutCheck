@@ -3,7 +3,7 @@ import Head from "next/head";
 import { Search } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
-import AdSlot from "../components/AdSlot";
+import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
 import { loadNeighborhoods } from "../lib/data";
 import { COMING_SOON_AREAS } from "../lib/constants";
 
@@ -89,15 +89,15 @@ export default function Home({ neighborhoods }) {
       <Head>
         <title>{title}</title>
         <meta name="description" content={description} />
-        <link rel="canonical" href="https://gutcheckchicago.com/" />
+        <link rel="canonical" href="https://www.gutcheckchicago.com/" />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
         <meta property="og:type" content="website" />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -105,10 +105,10 @@ export default function Home({ neighborhoods }) {
               "@context": "https://schema.org",
               "@type": "WebSite",
               name: "GutCheck Chicago",
-              url: "https://gutcheckchicago.com/",
+              url: "https://www.gutcheckchicago.com/",
               potentialAction: {
                 "@type": "SearchAction",
-                target: "https://gutcheckchicago.com/?q={search_term_string}",
+                target: "https://www.gutcheckchicago.com/?q={search_term_string}",
                 "query-input": "required name=search_term_string",
               },
             }),
@@ -184,7 +184,7 @@ export default function Home({ neighborhoods }) {
               {visible.map((r, i) => (
                 <div key={r.id} style={{ display: "contents" }}>
                   <RestaurantCard r={r} />
-                  {(i + 1) % AD_EVERY === 0 && (
+                  {(i + 1) % AD_EVERY === 0 && ADS_ENABLED && (
                     <div className="grid-ad">
                       <AdSlot variant="infeed" />
                     </div>
