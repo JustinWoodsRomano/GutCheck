@@ -1,3 +1,11 @@
 {
-  "framework": "nextjs"
+  "framework": "nextjs",
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "gutcheckchicago.com" }],
+      "destination": "https://www.gutcheckchicago.com/$1",
+      "permanent": true
+    }
+  ]
 }
