@@ -9,7 +9,7 @@ export function Nav({ total }) {
           <span className="brand-name">GUTCHECK</span>
         </Link>
         <div className="nav-count">
-          CHICAGO · {total.toLocaleString()} RESTAURANTS ·{" "}
+          CHICAGO · {total.toLocaleString()} RESTAURANTS & BARS ·{" "}
           <span className="live-badge">
             <span className="live-dot" aria-hidden="true" /> LIVE DATA
           </span>
@@ -37,7 +37,7 @@ export function Footer() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/cookies">Cookies</Link>
-          <a href="mailto:hello@gutcheckchicago.com">Contact</a>
+          <a href="mailto:GutCheckChicago@builtbybackspace.com">Contact</a>
         </div>
         <div className="footer-copyright">
           &copy; {new Date().getFullYear()} All Rights Reserved{" \u00B7 "}
