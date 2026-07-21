@@ -80,9 +80,9 @@ export default function Home({ neighborhoods }) {
   const total = data ? data.length : 0;
   const visible = filtered.slice(0, visibleCount);
 
-  const title = "Chicago Restaurant Health Inspections — GutCheck";
+  const title = "Chicago Restaurant & Bar Health Inspections — GutCheck";
   const description =
-    "Look up any Chicago restaurant's official health inspection status — pass, fail, or violations — sourced live from the City of Chicago. Free, updated daily.";
+    "Look up any Chicago restaurant or bar's official health inspection status — pass, fail, or violations — sourced live from the City of Chicago. Free, updated daily.";
 
   return (
     <div>
@@ -126,15 +126,15 @@ export default function Home({ neighborhoods }) {
           YOU EAT.
         </h1>
         <p>
-          Search official Chicago health inspection records — pass/fail results, violations,
-          and full history, straight from the city&rsquo;s own data.
+          Search official Chicago restaurant and bar health inspection records — pass/fail
+          results, violations, and full history, straight from the city&rsquo;s own data.
         </p>
         <div className="search-bar">
           <Search size={18} color="var(--ink-muted)" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search any Chicago restaurant, neighborhood, or ZIP code…"
+            placeholder="Search any Chicago restaurant or bar, neighborhood, or ZIP code…"
           />
         </div>
       </div>
@@ -143,7 +143,7 @@ export default function Home({ neighborhoods }) {
         <AdSlot variant="banner" />
 
         <h2 className="eyebrow" style={{ marginTop: 22 }}>
-          {query.trim() ? `Results for "${query}"` : "All Chicago restaurants"}
+          {query.trim() ? `Results for "${query}"` : "All Chicago restaurants & bars"}
         </h2>
 
         <div className="chip-row">
