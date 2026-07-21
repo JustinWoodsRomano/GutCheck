@@ -50,12 +50,12 @@ export default function FAQPage({ faqs, total }) {
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
-        <link rel="canonical" href="https://gutcheckchicago.com/faq" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        <link rel="canonical" href="https://www.gutcheckchicago.com/faq" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       </Head>
 
