@@ -13,7 +13,7 @@ const AD_SLOT = "4378563391";
 // (instead of an empty box) lets surrounding grid/list items flow into
 // the space naturally. Flip back to true once AdSense is actually
 // serving creative consistently.
-const ADS_ENABLED = false;
+export const ADS_ENABLED = false;
 
 export default function AdSlot({ variant = "banner" }) {
   const dims = VARIANT_STYLES[variant] || VARIANT_STYLES.banner;
