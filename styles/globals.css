@@ -649,7 +649,8 @@ button:focus-visible, input:focus-visible, a:focus-visible {
    collapse back to a small, clearly-intentional-looking placeholder
    instead of a near-fullscreen empty box on mobile. */
 .ad-banner { margin: 4px 0 0; max-height: 120px; }
-.ad-infeed { height: 100%; max-height: 250px; }
+/* No max-height here -- this is a fluid/native ad unit now, and Google's own placement guidance warns that fixed-height containers can distort a fluid unit. min-height alone (set inline per-variant in AdSlot.js) is enough to avoid layout jump before the ad loads. */
+.ad-infeed { width: 100%; }
 .ad-sidebar { max-height: 280px; }
 .ad-label {
   position: absolute;
