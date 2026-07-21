@@ -25,7 +25,7 @@ import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF, facilityTypeWhere
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
-const SITE_URL = "https://gutcheckchicago.com";
+const SITE_URL = "https://www.gutcheckchicago.com";
 
 // Suburbs requested but not yet sourced from a verified open-data feed.
 // Shown in the UI as "coming soon" — never populated with fabricated data.
