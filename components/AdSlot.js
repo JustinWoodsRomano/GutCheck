@@ -7,7 +7,16 @@ const VARIANT_STYLES = {
 };
 
 const AD_CLIENT = "ca-pub-4996587777992774";
-const AD_SLOT = "4378563391";
+
+// Each variant is a genuinely different AdSense unit -- infeed is a
+// fluid/native unit with its own layout key (created to match the
+// results-grid card style), separate from the generic responsive
+// display unit used for banner/sidebar.
+const AD_UNITS = {
+  banner: { format: "auto", slot: "4378563391", fullWidthResponsive: true },
+  sidebar: { format: "auto", slot: "4378563391", fullWidthResponsive: true },
+  infeed: { format: "fluid", slot: "2024731363", layoutKey: "-en+5m+5y-db+3i" },
+};
 
 // Ads aren't reliably filling yet (2026-07-21) -- rendering nothing
 // (instead of an empty box) lets surrounding grid/list items flow into
@@ -17,6 +26,7 @@ export const ADS_ENABLED = false;
 
 export default function AdSlot({ variant = "banner" }) {
   const dims = VARIANT_STYLES[variant] || VARIANT_STYLES.banner;
+  const unit = AD_UNITS[variant] || AD_UNITS.banner;
   const pushedRef = useRef(false);
 
   useEffect(() => {
@@ -40,11 +50,16 @@ export default function AdSlot({ variant = "banner" }) {
       <span className="ad-label">Advertisement</span>
       <ins
         className="adsbygoogle"
-        style={{ display: "block", width: "100%", height: "100%" }}
+        // Fluid/native units size themselves to their content -- forcing
+        // height:100% here (fine for the fixed-box banner/sidebar units)
+        // would fight that and can distort a fluid unit, so only the
+        // display:block base style applies across all variants.
+        style={{ display: "block", width: "100%" }}
         data-ad-client={AD_CLIENT}
-        data-ad-slot={AD_SLOT}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
+        data-ad-slot={unit.slot}
+        data-ad-format={unit.format}
+        {...(unit.fullWidthResponsive ? { "data-full-width-responsive": "true" } : {})}
+        {...(unit.layoutKey ? { "data-ad-layout-key": unit.layoutKey } : {})}
       />
     </div>
   );
