@@ -42,7 +42,7 @@ export default function HallOfShame({ entries, total }) {
   const title = "Hall of Shame \u2014 Notable Chicago Health Inspection Findings | GutCheck";
   const description =
     "Some of the more notable violations found in recent Chicago restaurant health inspections, sourced directly from the City of Chicago's official public records.";
-  const url = "https://gutcheckchicago.com/hall-of-shame";
+  const url = "https://www.gutcheckchicago.com/hall-of-shame";
 
   return (
     <div>
@@ -52,11 +52,11 @@ export default function HallOfShame({ entries, total }) {
         <link rel="canonical" href={url} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
       </Head>
 
       <Nav total={total} />
