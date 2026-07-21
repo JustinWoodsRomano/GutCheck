@@ -20,7 +20,7 @@ export default function About({ total, lastUpdated }) {
     name: "GutCheck Chicago Restaurant Health Inspection Records",
     description:
       "Currently-active Chicago restaurants with their most recent City of Chicago health inspection result, violations, and inspection history, rebuilt from the city's live open-data feed.",
-    url: "https://gutcheckchicago.com/about",
+    url: "https://www.gutcheckchicago.com/about",
     isBasedOn: "https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5",
     creator: { "@type": "Organization", name: "GutCheck Chicago" },
     license: "https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html",
@@ -36,12 +36,12 @@ export default function About({ total, lastUpdated }) {
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
-        <link rel="canonical" href="https://gutcheckchicago.com/about" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        <link rel="canonical" href="https://www.gutcheckchicago.com/about" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(datasetLd) }} />
       </Head>
 
