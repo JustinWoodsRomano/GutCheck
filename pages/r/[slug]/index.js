@@ -76,7 +76,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
   const gradeLabel = GRADE_LABEL[r.g];
   const title = `${r.n} Health Inspection — ${r.nb}, Chicago | GutCheck`;
   const description = `${r.n} in ${r.nb}, Chicago most recently ${gradeLabel === "Fail" ? "failed" : gradeLabel === "Pass" ? "passed" : "received a Pass w/ Conditions on"} its Chicago health inspection on ${r.d}. See full violation details and inspection history.`;
-  const url = `https://gutcheckchicago.com/r/${r.slug}`;
+  const url = `https://www.gutcheckchicago.com/r/${r.slug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -109,8 +109,8 @@ export default function RestaurantPage({ restaurant: r, total }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://gutcheckchicago.com/" },
-      { "@type": "ListItem", position: 2, name: r.nb, item: `https://gutcheckchicago.com/n/${r.nbSlug}` },
+      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://www.gutcheckchicago.com/" },
+      { "@type": "ListItem", position: 2, name: r.nb, item: `https://www.gutcheckchicago.com/n/${r.nbSlug}` },
       { "@type": "ListItem", position: 3, name: r.n, item: url },
     ],
   };
@@ -136,11 +136,11 @@ export default function RestaurantPage({ restaurant: r, total }) {
         <meta property="og:description" content={description} />
         <meta property="og:type" content="restaurant" />
         <meta property="og:url" content={url} />
-        <meta property="og:image" content={`https://gutcheckchicago.com/og/${r.slug}.webp`} />
+        <meta property="og:image" content={`https://www.gutcheckchicago.com/og/${r.slug}.webp`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="1200" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content={`https://gutcheckchicago.com/og/${r.slug}.webp`} />
+        <meta name="twitter:image" content={`https://www.gutcheckchicago.com/og/${r.slug}.webp`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
