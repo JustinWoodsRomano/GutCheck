@@ -107,8 +107,8 @@ export default function Cookies({ total }) {
 
         <h2>Questions</h2>
         <p>
-          <a href="mailto:hello@gutcheckchicago.com" style={{ textDecoration: "underline" }}>
-            hello@gutcheckchicago.com
+          <a href="mailto:GutCheckChicago@builtbybackspace.com" style={{ textDecoration: "underline" }}>
+            GutCheckChicago@builtbybackspace.com
           </a>
         </p>
       </div>
