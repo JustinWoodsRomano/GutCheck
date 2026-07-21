@@ -9,11 +9,18 @@ const VARIANT_STYLES = {
 const AD_CLIENT = "ca-pub-4996587777992774";
 const AD_SLOT = "4378563391";
 
+// Ads aren't reliably filling yet (2026-07-21) -- rendering nothing
+// (instead of an empty box) lets surrounding grid/list items flow into
+// the space naturally. Flip back to true once AdSense is actually
+// serving creative consistently.
+const ADS_ENABLED = false;
+
 export default function AdSlot({ variant = "banner" }) {
   const dims = VARIANT_STYLES[variant] || VARIANT_STYLES.banner;
   const pushedRef = useRef(false);
 
   useEffect(() => {
+    if (!ADS_ENABLED) return;
     // Guard against double-push in dev (React 18 strict-mode double effect)
     // and on client-side route changes re-mounting the same slot.
     if (pushedRef.current) return;
@@ -25,6 +32,8 @@ export default function AdSlot({ variant = "banner" }) {
       // silently so a missing ad never breaks the page around it.
     }
   }, []);
+
+  if (!ADS_ENABLED) return null;
 
   return (
     <div className={`ad-slot ad-${variant}`} style={dims}>
