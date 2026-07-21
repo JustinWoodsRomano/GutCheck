@@ -32,7 +32,7 @@ export async function getStaticProps({ params }) {
 export default function NeighborhoodPage({ restaurants, name, slug, total, passCount, stats }) {
   const title = `${name} Restaurant Health Inspections — Chicago | GutCheck`;
   const description = `Official Chicago health inspection records for ${restaurants.length} restaurants in ${name}, Chicago. ${passCount} currently passing, updated from the city's live data feed.`;
-  const url = `https://gutcheckchicago.com/n/${slug}`;
+  const url = `https://www.gutcheckchicago.com/n/${slug}`;
   const intro = buildNeighborhoodIntro({ name, stats });
   const faqItems = buildNeighborhoodFaqCopy({ name, stats });
 
@@ -43,7 +43,7 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
     itemListElement: restaurants.map((r, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://gutcheckchicago.com/r/${r.slug}`,
+      url: `https://www.gutcheckchicago.com/r/${r.slug}`,
       name: r.n,
     })),
   };
@@ -52,7 +52,7 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://gutcheckchicago.com/" },
+      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://www.gutcheckchicago.com/" },
       { "@type": "ListItem", position: 2, name, item: url },
     ],
   };
@@ -75,11 +75,11 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
         <link rel="canonical" href={url} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
