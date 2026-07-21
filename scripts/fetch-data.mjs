@@ -21,7 +21,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
-import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF } from "../lib/inspections.mjs";
+import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF, facilityTypeWhereClause } from "../lib/inspections.mjs";
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
@@ -38,7 +38,7 @@ async function fetchAllRows() {
   for (let page = 0; page < 6; page++) {
     const params = new URLSearchParams({
       $select: "license_,dba_name,address,zip,inspection_date,results,violations,latitude,longitude",
-      $where: `facility_type='Restaurant' AND inspection_date >= '${CUTOFF}'`,
+      $where: `${facilityTypeWhereClause()} AND inspection_date >= '${CUTOFF}'`,
       $order: "inspection_date DESC",
       $limit: String(limit),
       $offset: String(offset),
@@ -127,7 +127,7 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 > Chicago's public Food Inspections open-data feed (data.cityofchicago.org,
 > dataset 4ijn-s7e5), rebuilt daily.
 
-- Currently indexes ${restaurantCount.toLocaleString()} active Chicago restaurants across ${neighborhoods.length} neighborhoods.
+- Currently indexes ${restaurantCount.toLocaleString()} active Chicago restaurants and bars across ${neighborhoods.length} neighborhoods.
 - Each restaurant has its own page at /r/{slug} with current grade (Pass / Pass w/ Conditions / Fail), listed violations, and up to 5 most recent inspections.
 - Neighborhood directories are at /n/{neighborhood-slug}.
 - FAQ (methodology, grading system explanation): /faq
