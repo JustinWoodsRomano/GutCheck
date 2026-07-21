@@ -20,12 +20,12 @@ export default function Terms({ total }) {
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://gutcheckchicago.com/og/default.webp" />
+        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://gutcheckchicago.com/og/default.webp" />
-        <link rel="canonical" href="https://gutcheckchicago.com/terms" />
+        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        <link rel="canonical" href="https://www.gutcheckchicago.com/terms" />
       </Head>
 
       <Nav total={total} />
@@ -43,7 +43,7 @@ export default function Terms({ total }) {
 
         <p>
           These Terms of Service (&ldquo;Terms&rdquo;) govern your use of GutCheck Chicago,
-          available at gutcheckchicago.com. GutCheck Chicago is operated by Built By Backspace,
+          available at www.gutcheckchicago.com. GutCheck Chicago is operated by Built By Backspace,
           LLC (&ldquo;Built By Backspace,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;our&rdquo;). By using
           this site, you agree to these Terms. If you don&rsquo;t agree, please don&rsquo;t use the site.
         </p>
