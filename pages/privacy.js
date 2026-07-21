@@ -128,8 +128,8 @@ export default function Privacy({ total }) {
         <h2>8. Contact</h2>
         <p>
           Questions about this policy:{" "}
-          <a href="mailto:hello@gutcheckchicago.com" style={{ textDecoration: "underline" }}>
-            hello@gutcheckchicago.com
+          <a href="mailto:GutCheckChicago@builtbybackspace.com" style={{ textDecoration: "underline" }}>
+            GutCheckChicago@builtbybackspace.com
           </a>
         </p>
       </div>
