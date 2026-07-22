@@ -77,6 +77,20 @@ export default function Home({ neighborhoods }) {
     return list;
   }, [data, neighborhood, query]);
 
+  // GA4 search event, debounced 800ms after typing stops -- fires once
+  // per pause in typing rather than on every keystroke, so this captures
+  // what people actually searched for instead of every partial letter.
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    const timer = setTimeout(() => {
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "search", { search_term: trimmed });
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [query]);
+
   const total = data ? data.length : 0;
   const visible = filtered.slice(0, visibleCount);
 
@@ -183,7 +197,7 @@ export default function Home({ neighborhoods }) {
             <div className="grid">
               {visible.map((r, i) => (
                 <div key={r.id} style={{ display: "contents" }}>
-                  <RestaurantCard r={r} />
+                  <RestaurantCard r={r} source="homepage" />
                   {(i + 1) % AD_EVERY === 0 && ADS_ENABLED && (
                     <div className="grid-ad">
                       <AdSlot variant="infeed" />

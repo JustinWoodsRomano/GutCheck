@@ -101,7 +101,7 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
         <h2 className="eyebrow" style={{ marginTop: 22 }}>All {name} restaurant health inspections</h2>
         <div className="grid">
           {restaurants.map((r) => (
-            <RestaurantCard key={r.id} r={r} />
+            <RestaurantCard key={r.id} r={r} source="neighborhood" />
           ))}
         </div>
       </div>
