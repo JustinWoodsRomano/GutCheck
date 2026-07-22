@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import { ADS_ENABLED } from "../components/AdSlot";
 
 export default function Document() {
   return (
@@ -14,11 +15,18 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4996587777992774"
-          crossOrigin="anonymous"
-        ></script>
+        {/* AdSense's loader is one of the heavier third-party scripts a
+            page can carry -- loading it unconditionally while ads are
+            disabled (ADS_ENABLED=false) was pure dead weight on every
+            single pageview: main-thread time, third-party cookies, and
+            an unnecessary network request, for zero benefit. */}
+        {ADS_ENABLED && (
+          <script
+            async
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4996587777992774"
+            crossOrigin="anonymous"
+          ></script>
+        )}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-0ZMBW9N7PV"></script>
         <script
           dangerouslySetInnerHTML={{
