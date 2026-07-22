@@ -16,9 +16,11 @@
     "react-dom": "^18.3.1"
   },
   "browserslist": [
-    "defaults",
-    "iOS >= 12",
-    "Safari >= 12",
-    "not dead"
+    "> 0.5%",
+    "last 2 versions",
+    "iOS >= 15",
+    "Safari >= 15",
+    "not dead",
+    "not ie 11"
   ]
 }
