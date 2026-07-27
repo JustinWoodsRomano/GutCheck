@@ -768,25 +768,29 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 .map-pin-wrapper { background: transparent; border: none; }
+/* Mirrors .stamp so a pin on the map reads as the same object as the
+   pass/fail label on a card. Colors/background/border-color are set
+   inline per grade by RestaurantMap.js, matching Stamp.js. The only
+   deliberate additions are the drop shadow (pins need separation from
+   the map tiles underneath) and a 12px floor on the label size. */
 .map-pin {
   display: flex;
   align-items: center;
-  gap: 5px;
-  max-width: 160px;
-  padding: 5px 9px 5px 6px;
-  background: var(--paper);
-  border: 2px solid;
-  border-radius: 999px;
+  gap: 6px;
+  max-width: 190px;
+  padding: 4px 10px;
+  border: var(--stamp-border) solid;
+  border-radius: var(--radius-stamp);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.map-pin-emoji { flex-shrink: 0; font-size: 0.9rem; line-height: 1; }
+.map-pin-emoji { flex-shrink: 0; font-size: 1.1em; line-height: 1; }
 .map-pin-label { overflow: hidden; text-overflow: ellipsis; }
 .map-pin-arrow {
   width: 0;
@@ -800,7 +804,9 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 @media (max-width: 640px) {
   .restaurant-map { height: 60vh; min-height: 360px; }
-  .map-pin { max-width: 120px; font-size: 0.65rem; }
+  /* Narrower on small screens, but the label keeps its 12px size --
+     shrinking type further would trip the legibility floor. */
+  .map-pin { max-width: 140px; letter-spacing: 0.05em; }
 }
 
 .search-clear {

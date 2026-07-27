@@ -2,7 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { GRADE_EMOJI } from "../lib/constants";
 
-const GRADE_COLOR = { PASS: "#2E6B4F", CONDITIONAL: "#B4841D", FAIL: "#B7362F" };
+// Mirrors stampStyle() in components/Stamp.js -- same tokens, so the map
+// pins and the pass/fail stamps stay in lockstep if the palette ever moves.
+const GRADE_STYLE = {
+  PASS: { fg: "var(--seal-green)", bg: "var(--seal-green-tint)" },
+  CONDITIONAL: { fg: "var(--amber)", bg: "var(--amber-tint)" },
+  FAIL: { fg: "var(--stamp-red)", bg: "var(--stamp-red-tint)" },
+};
+const DEFAULT_STYLE = { fg: "var(--ink-muted)", bg: "var(--paper-light)" };
 
 function escapeHtml(str) {
   return String(str)
@@ -96,15 +103,15 @@ export default function RestaurantMap({ restaurants, center, zoom = 14, fitToMar
     restaurants.forEach((r) => {
       if (r.lat == null || r.lon == null) return;
       const emoji = GRADE_EMOJI[r.g] || "";
-      const color = GRADE_COLOR[r.g] || "#666";
+      const s = GRADE_STYLE[r.g] || DEFAULT_STYLE;
       const icon = L.divIcon({
         className: "map-pin-wrapper",
         html:
-          `<div class="map-pin" style="border-color:${color}">` +
+          `<div class="map-pin" style="color:${s.fg};background:${s.bg};border-color:${s.fg}">` +
           `<span class="map-pin-emoji">${emoji}</span>` +
           `<span class="map-pin-label">${escapeHtml(r.n)}</span>` +
           `</div>` +
-          `<div class="map-pin-arrow" style="border-top-color:${color}"></div>`,
+          `<div class="map-pin-arrow" style="border-top-color:${s.fg}"></div>`,
         iconSize: null,
         iconAnchor: [22, 48],
       });
