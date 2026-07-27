@@ -203,17 +203,21 @@ export default function Home({ neighborhoods }) {
           />
         </div>
 
-        <button className="near-me-btn" onClick={handleNearMe} disabled={geoStatus === "requesting"}>
-          <LocateFixed size={18} />
-          {geoStatus === "requesting" ? "Finding you…" : "What’s near me right now"}
-        </button>
-        {geoStatus === "denied" && (
-          <p className="geo-error">
-            Location access is off. Enable it in your browser settings to see what&rsquo;s nearby.
-          </p>
-        )}
-        {geoStatus === "error" && (
-          <p className="geo-error">Couldn&rsquo;t get your location. Try again in a moment.</p>
+        {!mapCenter && (
+          <>
+            <button className="near-me-btn" onClick={handleNearMe} disabled={geoStatus === "requesting"}>
+              <LocateFixed size={18} />
+              {geoStatus === "requesting" ? "Finding you…" : "What’s near me right now"}
+            </button>
+            {geoStatus === "denied" && (
+              <p className="geo-error">
+                Location access is off. Enable it in your browser settings to see what&rsquo;s nearby.
+              </p>
+            )}
+            {geoStatus === "error" && (
+              <p className="geo-error">Couldn&rsquo;t get your location. Try again in a moment.</p>
+            )}
+          </>
         )}
       </div>
 
