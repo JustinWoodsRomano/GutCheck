@@ -15,9 +15,6 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
         {/* AdSense's loader is one of the heavier third-party scripts a
             page can carry -- loading it unconditionally while ads are
             disabled (ADS_ENABLED=false) was pure dead weight on every
