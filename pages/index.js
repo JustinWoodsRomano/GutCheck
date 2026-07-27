@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import Head from "next/head";
 import dynamic from "next/dynamic";
-import { Search, LocateFixed, ArrowLeft } from "lucide-react";
+import { Search, LocateFixed, ArrowLeft, X } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
 import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
@@ -20,6 +20,19 @@ const AD_EVERY = 12;
 // which one the person typed or how the source name is punctuated.
 function normalizeForSearch(s) {
   return (s || "").toLowerCase().replace(/['\u2019]/g, "");
+}
+
+// Single source of truth for what counts as a match, so the list view and
+// the map view can't drift apart on what a given query means.
+function matchesQuery(r, rawQuery) {
+  const trimmed = rawQuery.trim();
+  if (!trimmed) return true;
+  const q = normalizeForSearch(trimmed);
+  return (
+    normalizeForSearch(r.n).includes(q) ||
+    normalizeForSearch(r.nb).includes(q) ||
+    r.z.includes(trimmed)
+  );
 }
 
 // Haversine distance in miles -- used to scope the "near me" map to a
@@ -48,6 +61,7 @@ export default function Home({ neighborhoods }) {
   const [loadError, setLoadError] = useState(false);
   const [mapCenter, setMapCenter] = useState(null); // { lat, lng, isUser } or null (list view)
   const [geoStatus, setGeoStatus] = useState("idle"); // idle | requesting | denied | error
+  const [mapQuery, setMapQuery] = useState(""); // debounced copy of `query`; drives the map
 
   useEffect(() => {
     let cancelled = false;
@@ -85,15 +99,7 @@ export default function Home({ neighborhoods }) {
     if (!data) return [];
     let list = data;
     if (neighborhood) list = list.filter((r) => r.nbSlug === neighborhood);
-    if (query.trim()) {
-      const q = normalizeForSearch(query.trim());
-      list = list.filter(
-        (r) =>
-          normalizeForSearch(r.n).includes(q) ||
-          normalizeForSearch(r.nb).includes(q) ||
-          r.z.includes(query.trim())
-      );
-    }
+    if (query.trim()) list = list.filter((r) => matchesQuery(r, query));
     return list;
   }, [data, neighborhood, query]);
 
@@ -108,6 +114,28 @@ export default function Home({ neighborhoods }) {
     const nearby = withDistance.filter((r) => r._dist <= 3);
     return nearby.length >= 5 ? nearby : withDistance;
   }, [data, mapCenter]);
+
+  // The list re-filters instantly on every keystroke, but the map also
+  // redraws pins and re-fits its bounds -- doing that mid-word is jumpy,
+  // so the map waits for a brief pause in typing.
+  useEffect(() => {
+    const t = setTimeout(() => setMapQuery(query), 300);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  const mapSearchActive = mapQuery.trim().length > 0;
+
+  // What the map actually plots. With a search active this deliberately
+  // drops the 3-mile cutoff and searches the whole city -- looking a place
+  // up by name should find it, not report nothing nearby. Nearest first.
+  const mapRestaurants = useMemo(() => {
+    if (!data || !mapCenter) return [];
+    if (!mapSearchActive) return nearbyRestaurants;
+    return data
+      .filter((r) => r.lat != null && r.lon != null && matchesQuery(r, mapQuery))
+      .map((r) => ({ ...r, _dist: distanceMiles(mapCenter.lat, mapCenter.lng, r.lat, r.lon) }))
+      .sort((a, b) => a._dist - b._dist);
+  }, [data, mapCenter, mapQuery, mapSearchActive, nearbyRestaurants]);
 
   function handleNearMe() {
     if (!navigator.geolocation) {
@@ -201,6 +229,11 @@ export default function Home({ neighborhoods }) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search any Chicago restaurant or bar, neighborhood, or ZIP code…"
           />
+          {query && (
+            <button className="search-clear" onClick={() => setQuery("")} aria-label="Clear search">
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         {!mapCenter && (
@@ -230,12 +263,23 @@ export default function Home({ neighborhoods }) {
               <button className="back-to-list" onClick={() => setMapCenter(null)}>
                 <ArrowLeft size={16} /> Back to list
               </button>
-              <span className="map-count">{nearbyRestaurants.length} nearby</span>
+              <span className="map-count">
+                {mapSearchActive
+                  ? `${mapRestaurants.length} result${mapRestaurants.length === 1 ? "" : "s"}`
+                  : `${nearbyRestaurants.length} nearby`}
+              </span>
             </div>
+            {mapSearchActive && mapRestaurants.length === 0 && (
+              <div className="map-empty-notice">
+                Nothing on file matching &ldquo;{mapQuery.trim()}&rdquo;. Clear the search to go back to
+                what&rsquo;s near you.
+              </div>
+            )}
             <RestaurantMap
-              restaurants={nearbyRestaurants}
+              restaurants={mapRestaurants}
               center={mapCenter}
               zoom={nearbyRestaurants.length === data?.length ? 12 : 15}
+              fitToMarkers={mapSearchActive && mapRestaurants.length > 0}
             />
           </>
         ) : (
