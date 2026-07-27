@@ -265,7 +265,7 @@ try {
   // what loadRestaurants() reads server-side for pages that do need those
   // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
   // only the client-fetched public copy is trimmed.
-  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d }) => ({
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon }) => ({
     id,
     slug,
     n,
@@ -274,6 +274,10 @@ try {
     z,
     g,
     d,
+    // Rounded to 5 decimals (~1.1m precision) -- plenty for map pins,
+    // saves bytes across 8,000+ records vs full float precision.
+    lat: lat != null ? Math.round(lat * 100000) / 100000 : null,
+    lon: lon != null ? Math.round(lon * 100000) / 100000 : null,
   }));
 
   fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(browseRestaurants));

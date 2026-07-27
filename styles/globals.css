@@ -698,3 +698,107 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .shame-name-hidden { filter: blur(6px); user-select: none; letter-spacing: 0.02em; }
 .shame-card-meta { font-family: var(--font-mono); color: var(--ink-muted); font-size: 0.75rem; margin-bottom: 4px; }
 .shame-caption { font-family: var(--font-serif); color: var(--ink-muted); font-size: 0.9rem; margin: 6px 0 0; }
+
+
+/* ---------- Near Me / Map ---------- */
+.near-me-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: var(--radius-card);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+.near-me-btn:hover { opacity: 0.88; }
+.near-me-btn:disabled { opacity: 0.6; cursor: default; }
+
+.geo-error {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--stamp-red);
+}
+
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  margin-bottom: 14px;
+}
+.back-to-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.map-count {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.restaurant-map {
+  width: 100%;
+  height: 70vh;
+  min-height: 420px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.map-pin-wrapper { background: transparent; border: none; }
+.map-pin {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 160px;
+  padding: 5px 9px 5px 6px;
+  background: var(--paper);
+  border: 2px solid;
+  border-radius: 999px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.map-pin-emoji { flex-shrink: 0; font-size: 0.9rem; line-height: 1; }
+.map-pin-label { overflow: hidden; text-overflow: ellipsis; }
+.map-pin-arrow {
+  width: 0;
+  height: 0;
+  margin: -2px auto 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.15));
+}
+
+@media (max-width: 640px) {
+  .restaurant-map { height: 60vh; min-height: 360px; }
+  .map-pin { max-width: 120px; font-size: 0.65rem; }
+}
