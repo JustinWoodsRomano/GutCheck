@@ -6,6 +6,7 @@
     "dev": "next dev",
     "prebuild": "node scripts/fetch-data.mjs",
     "build": "next build",
+    "postbuild": "node scripts/ping-indexnow.mjs",
     "start": "next start"
   },
   "dependencies": {
