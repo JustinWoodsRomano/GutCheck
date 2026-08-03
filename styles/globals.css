@@ -999,7 +999,42 @@ a.chip { text-decoration: none; display: inline-block; }
   max-width: 66ch;
   margin: 0 0 16px;
 }
-.viol-intro a { color: var(--ink); }
+/* Inline links inside running prose.
+   The global reset (a { color: inherit; text-decoration: none }) is right
+   for cards and chips, where the whole block is the click target, but it
+   leaves genuine inline links with no affordance at all -- a color shift
+   alone reads as emphasis, not something you can tap. These get the green
+   accent plus a real underline, offset so it doesn't collide with
+   descenders in the serif face. */
+.viol-intro a,
+.finding p a,
+.method-list a,
+.faq-a a,
+.hero p a {
+  color: var(--seal-green);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  transition: text-decoration-thickness 0.12s ease;
+}
+.viol-intro a:hover,
+.finding p a:hover,
+.method-list a:hover,
+.faq-a a:hover,
+.hero p a:hover {
+  text-decoration-thickness: 3px;
+}
+/* Keyboard users need the same target visible without hovering. */
+.viol-intro a:focus-visible,
+.finding p a:focus-visible,
+.method-list a:focus-visible,
+.faq-a a:focus-visible,
+.hero p a:focus-visible {
+  outline: 2px solid var(--seal-green);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
 .viol-list {
   list-style: none;
   counter-reset: viol;
