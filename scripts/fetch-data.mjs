@@ -229,7 +229,7 @@ function buildNeighborhoodStats(restaurants) {
       for (const cat of categorizeViolations(text)) {
         catCounts[cat] = (catCounts[cat] || 0) + 1;
       }
-      const codes = extractViolationCodes(text);
+      const codes = (r.v || []).filter((v) => v.c).map((v) => ({ code: v.c, title: v.ct }));
       if (codes.length) withViolations++;
       // Count each code once per establishment, so this reads as "how many
       // places got cited for this" rather than raw citation volume.
@@ -283,7 +283,7 @@ function buildNeighborhoodStats(restaurants) {
   let cityWithViolations = 0;
   for (const r of restaurants) {
     const text = (r.v || []).map((v) => v.t).join(" | ");
-    const codes = extractViolationCodes(text);
+    const codes = (r.v || []).filter((v) => v.c).map((v) => ({ code: v.c, title: v.ct }));
     if (codes.length) cityWithViolations++;
     const seen = new Set();
     for (const { code, title } of codes) {
