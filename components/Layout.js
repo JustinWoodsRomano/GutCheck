@@ -32,6 +32,7 @@ export function Footer() {
         </p>
         <div className="footer-links">
           <Link href="/faq">FAQ</Link>
+          <Link href="/data">Inspection data analysis</Link>
           <Link href="/about">About the data</Link>
           <Link href="/hall-of-shame">Hall of Shame</Link>
           <Link href="/privacy">Privacy</Link>

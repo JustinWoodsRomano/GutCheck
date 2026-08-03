@@ -104,6 +104,7 @@ function buildSitemap(restaurants, neighborhoods) {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/faq`, priority: "0.6" },
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
+    { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/about`, priority: "0.5" },
     { loc: `${SITE_URL}/privacy`, priority: "0.2" },
     { loc: `${SITE_URL}/terms`, priority: "0.2" },
@@ -132,6 +133,9 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Each restaurant has its own page at /r/{slug} with current grade (Pass / Pass w/ Conditions / Fail), listed violations, and up to 5 most recent inspections.
 - Neighborhood directories are at /n/{neighborhood-slug}.
 - FAQ (methodology, grading system explanation): /faq
+- Original analysis of 16 years of Chicago inspection data -- which violations
+  are cited most, which actually predict a failure, seasonality, and repeat
+  offenders: /data
 - About / data sourcing and update cadence: /about
 
 ## Key facts for citation

@@ -1,0 +1,376 @@
+{
+ "meta": {
+  "generated": "2026-08-03",
+  "source": "City of Chicago Food Inspections (data.cityofchicago.org, dataset 4ijn-s7e5)",
+  "totalInspectionsInDataset": 313601,
+  "restaurantBarInspections": 214830,
+  "gradedInspections": 184618,
+  "earliest": "2010-01-04",
+  "latest": "2026-07-31",
+  "violationWindowStart": "2021-01-01",
+  "violationInspections": 48172
+ },
+ "seasonality": {
+  "months": [
+   {
+    "month": "January",
+    "n": 15283,
+    "fails": 3245,
+    "failRate": 21.2
+   },
+   {
+    "month": "February",
+    "n": 14040,
+    "fails": 2990,
+    "failRate": 21.3
+   },
+   {
+    "month": "March",
+    "n": 16818,
+    "fails": 3487,
+    "failRate": 20.7
+   },
+   {
+    "month": "April",
+    "n": 16351,
+    "fails": 3492,
+    "failRate": 21.4
+   },
+   {
+    "month": "May",
+    "n": 16677,
+    "fails": 3558,
+    "failRate": 21.3
+   },
+   {
+    "month": "June",
+    "n": 17298,
+    "fails": 3963,
+    "failRate": 22.9
+   },
+   {
+    "month": "July",
+    "n": 15098,
+    "fails": 3407,
+    "failRate": 22.6
+   },
+   {
+    "month": "August",
+    "n": 16404,
+    "fails": 3867,
+    "failRate": 23.6
+   },
+   {
+    "month": "September",
+    "n": 14884,
+    "fails": 3490,
+    "failRate": 23.4
+   },
+   {
+    "month": "October",
+    "n": 15893,
+    "fails": 3586,
+    "failRate": 22.6
+   },
+   {
+    "month": "November",
+    "n": 13574,
+    "fails": 2839,
+    "failRate": 20.9
+   },
+   {
+    "month": "December",
+    "n": 12298,
+    "fails": 2335,
+    "failRate": 19.0
+   }
+  ],
+  "worst": {
+   "month": "August",
+   "n": 16404,
+   "fails": 3867,
+   "failRate": 23.6
+  },
+  "best": {
+   "month": "December",
+   "n": 12298,
+   "fails": 2335,
+   "failRate": 19.0
+  },
+  "relativeGapPct": 24
+ },
+ "yearly": [
+  {
+   "year": 2010,
+   "n": 10750,
+   "failRate": 24.4
+  },
+  {
+   "year": 2011,
+   "n": 10967,
+   "failRate": 23.2
+  },
+  {
+   "year": 2012,
+   "n": 10232,
+   "failRate": 21.5
+  },
+  {
+   "year": 2013,
+   "n": 11851,
+   "failRate": 18.7
+  },
+  {
+   "year": 2014,
+   "n": 13485,
+   "failRate": 19.2
+  },
+  {
+   "year": 2015,
+   "n": 12407,
+   "failRate": 20.2
+  },
+  {
+   "year": 2016,
+   "n": 14167,
+   "failRate": 21.1
+  },
+  {
+   "year": 2017,
+   "n": 13213,
+   "failRate": 22.2
+  },
+  {
+   "year": 2018,
+   "n": 10217,
+   "failRate": 21.0
+  },
+  {
+   "year": 2019,
+   "n": 11362,
+   "failRate": 22.0
+  },
+  {
+   "year": 2020,
+   "n": 8143,
+   "failRate": 22.5
+  },
+  {
+   "year": 2021,
+   "n": 9057,
+   "failRate": 23.2
+  },
+  {
+   "year": 2022,
+   "n": 9900,
+   "failRate": 25.0
+  },
+  {
+   "year": 2023,
+   "n": 10574,
+   "failRate": 24.5
+  },
+  {
+   "year": 2024,
+   "n": 11218,
+   "failRate": 21.6
+  },
+  {
+   "year": 2025,
+   "n": 11515,
+   "failRate": 21.2
+  },
+  {
+   "year": 2026,
+   "n": 5560,
+   "failRate": 20.7
+  }
+ ],
+ "violationBaseFailRate": 26.6,
+ "inspectionsParsed": 46495,
+ "mostCited": [
+  {
+   "code": 55,
+   "title": "PHYSICAL FACILITIES INSTALLED, MAINTAINED & CLEAN",
+   "count": 27019,
+   "shareOfInspections": 58.1,
+   "failRate": 29.4,
+   "lift": 1.11
+  },
+  {
+   "code": 51,
+   "title": "PLUMBING INSTALLED; PROPER BACKFLOW DEVICES",
+   "count": 11777,
+   "shareOfInspections": 25.3,
+   "failRate": 31.8,
+   "lift": 1.19
+  },
+  {
+   "code": 58,
+   "title": "ALLERGEN TRAINING AS REQUIRED",
+   "count": 10715,
+   "shareOfInspections": 23.0,
+   "failRate": 30.9,
+   "lift": 1.16
+  },
+  {
+   "code": 56,
+   "title": "ADEQUATE VENTILATION & LIGHTING; DESIGNATED AREAS USED",
+   "count": 10556,
+   "shareOfInspections": 22.7,
+   "failRate": 31.8,
+   "lift": 1.2
+  },
+  {
+   "code": 10,
+   "title": "ADEQUATE HANDWASHING SINKS PROPERLY SUPPLIED AND ACCESSIBLE",
+   "count": 9959,
+   "shareOfInspections": 21.4,
+   "failRate": 46.8,
+   "lift": 1.76
+  },
+  {
+   "code": 38,
+   "title": "INSECTS, RODENTS, & ANIMALS NOT PRESENT",
+   "count": 9525,
+   "shareOfInspections": 20.5,
+   "failRate": 63.5,
+   "lift": 2.39
+  },
+  {
+   "code": 57,
+   "title": "ALL FOOD EMPLOYEES HAVE FOOD HANDLER TRAINING",
+   "count": 7903,
+   "shareOfInspections": 17.0,
+   "failRate": 35.8,
+   "lift": 1.35
+  },
+  {
+   "code": 37,
+   "title": "FOOD PROPERLY LABELED; ORIGINAL CONTAINER",
+   "count": 7044,
+   "shareOfInspections": 15.2,
+   "failRate": 34.0,
+   "lift": 1.28
+  },
+  {
+   "code": 53,
+   "title": "TOILET FACILITIES: PROPERLY CONSTRUCTED, SUPPLIED, & CLEANED",
+   "count": 6943,
+   "shareOfInspections": 14.9,
+   "failRate": 33.3,
+   "lift": 1.25
+  },
+  {
+   "code": 39,
+   "title": "CONTAMINATION PREVENTED DURING FOOD PREPARATION, STORAGE & DISPLAY",
+   "count": 6329,
+   "shareOfInspections": 13.6,
+   "failRate": 35.1,
+   "lift": 1.32
+  }
+ ],
+ "mostPredictive": [
+  {
+   "code": 59,
+   "title": "PREVIOUS PRIORITY FOUNDATION VIOLATION CORRECTED",
+   "count": 814,
+   "failRate": 91.2,
+   "lift": 3.43
+  },
+  {
+   "code": 25,
+   "title": "CONSUMER ADVISORY PROVIDED FOR RAW/UNDERCOOKED FOOD",
+   "count": 1825,
+   "failRate": 85.3,
+   "lift": 3.21
+  },
+  {
+   "code": 60,
+   "title": "PREVIOUS CORE VIOLATION CORRECTED",
+   "count": 3877,
+   "failRate": 76.6,
+   "lift": 2.88
+  },
+  {
+   "code": 48,
+   "title": "WAREWASHING FACILITIES: INSTALLED, MAINTAINED & USED; TEST STRIPS",
+   "count": 3787,
+   "failRate": 69.1,
+   "lift": 2.6
+  },
+  {
+   "code": 38,
+   "title": "INSECTS, RODENTS, & ANIMALS NOT PRESENT",
+   "count": 9525,
+   "failRate": 63.5,
+   "lift": 2.39
+  },
+  {
+   "code": 54,
+   "title": "GARBAGE & REFUSE PROPERLY DISPOSED; FACILITIES MAINTAINED",
+   "count": 2788,
+   "failRate": 59.1,
+   "lift": 2.22
+  },
+  {
+   "code": 52,
+   "title": "SEWAGE & WASTE WATER PROPERLY DISPOSED",
+   "count": 1083,
+   "failRate": 57.2,
+   "lift": 2.15
+  },
+  {
+   "code": 23,
+   "title": "PROPER DATE MARKING AND DISPOSITION",
+   "count": 948,
+   "failRate": 55.1,
+   "lift": 2.07
+  }
+ ],
+ "byInspectionType": [
+  {
+   "type": "canvass",
+   "n": 90748,
+   "passRate": 55.1,
+   "failRate": 22.4
+  },
+  {
+   "type": "canvass re-inspection",
+   "n": 23879,
+   "passRate": 80.0,
+   "failRate": 7.1
+  },
+  {
+   "type": "complaint",
+   "n": 22062,
+   "passRate": 42.5,
+   "failRate": 34.1
+  },
+  {
+   "type": "complaint re-inspection",
+   "n": 9326,
+   "passRate": 76.5,
+   "failRate": 10.9
+  },
+  {
+   "type": "license",
+   "n": 21023,
+   "passRate": 53.8,
+   "failRate": 34.7
+  },
+  {
+   "type": "license re-inspection",
+   "n": 7316,
+   "passRate": 78.3,
+   "failRate": 8.7
+  }
+ ],
+ "repeat": {
+  "establishments": 27755,
+  "everFailed": 16735,
+  "failed3Plus": 5254,
+  "shareOfFailuresFrom3Plus": 62.6,
+  "totalFailureEvents": 40259
+ }
+}
