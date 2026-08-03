@@ -3,17 +3,35 @@
   "redirects": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "gutcheckchicago.com" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "gutcheckchicago.com"
+        }
+      ],
       "destination": "https://www.gutcheckchicago.com/$1",
+      "permanent": true
+    },
+    {
+      "source": "/n/ohare",
+      "destination": "/n/o-hare",
       "permanent": true
     }
   ],
   "headers": [
     {
       "source": "/(.*)",
-      "has": [{ "type": "host", "value": "gutcheck-chicago.vercel.app" }],
+      "has": [
+        {
+          "type": "host",
+          "value": "gutcheck-chicago.vercel.app"
+        }
+      ],
       "headers": [
-        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
       ]
     }
   ]
