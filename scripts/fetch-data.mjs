@@ -167,10 +167,18 @@ function categorizeViolations(violationText) {
 }
 
 function buildNeighborhoodStats(restaurants) {
+  // A restaurant contributes to BOTH its vernacular neighborhood and its
+  // official community area, because both get their own page. Keying only
+  // by nbSlug left every community-area page with no stats at all.
   const byNb = new Map();
+  const push = (slug, r) => {
+    if (!slug) return;
+    if (!byNb.has(slug)) byNb.set(slug, []);
+    byNb.get(slug).push(r);
+  };
   for (const r of restaurants) {
-    if (!byNb.has(r.nbSlug)) byNb.set(r.nbSlug, []);
-    byNb.get(r.nbSlug).push(r);
+    push(r.nbSlug, r);
+    if (r.caSlug && r.caSlug !== r.nbSlug) push(r.caSlug, r);
   }
 
   const citywideTotal = restaurants.length;
