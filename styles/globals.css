@@ -1075,3 +1075,40 @@ a.chip { text-decoration: none; display: inline-block; }
   font-size: 0.75rem;
   color: var(--ink-muted);
 }
+
+/* ---------- Collapsible neighborhood chips (desktop only) ----------
+   Mobile keeps the full list exactly as it was: the toggle is hidden and
+   nothing is collapsed. The chips are always rendered, so all 113
+   internal links stay in the HTML for crawlers whether or not the
+   section is expanded. */
+.chip-toggle {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 8px 18px;
+  margin: -8px 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.chip-toggle:hover {
+  background: var(--paper-light);
+  border-color: var(--ink-muted);
+}
+.chip-toggle:focus-visible {
+  outline: 2px solid var(--seal-green);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .chip-toggle { display: inline-block; }
+  .chip-row-collapsed .chip-extra { display: none; }
+  /* Collapsed rows sit tight against the toggle; expanded ones need the
+     normal gap back before the results list. */
+  .chip-row-collapsed { margin-bottom: 12px; }
+}

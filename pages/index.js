@@ -49,20 +49,40 @@ function distanceMiles(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// How many chips show before "View all". Roughly five rows at desktop
+// widths. Mobile ignores this entirely and renders the full list.
+const COLLAPSED_CHIP_COUNT = 40;
+
 export async function getStaticProps() {
   const neighborhoods = loadNeighborhoods();
   const stats = loadNeighborhoodStats();
+
+  // Which neighborhoods survive the collapse: the ones with the most
+  // places to look up. Restaurant count is a decent stand-in for how
+  // often people want the page, and it stays correct on its own as the
+  // data shifts, unlike a hand-kept list of "popular" names.
+  const popularSlugs = neighborhoods
+    .map((n) => ({ slug: n.slug, total: stats.byNeighborhood?.[n.slug]?.total || 0 }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, COLLAPSED_CHIP_COUNT)
+    .map((n) => n.slug);
+
   return {
     props: {
+      // Render order stays alphabetical. Expanding fills the gaps between
+      // the chips already on screen instead of appending a second block,
+      // so nothing jumps position.
       neighborhoods,
+      popularSlugs,
       citywideTopViolations: stats.citywideTopViolations || [],
       citywideWithViolations: stats.citywideWithViolations || 0,
     },
   };
 }
 
-export default function Home({ neighborhoods, citywideTopViolations, citywideWithViolations }) {
+export default function Home({ neighborhoods, popularSlugs, citywideTopViolations, citywideWithViolations }) {
   const [data, setData] = useState(null);
+  const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loadError, setLoadError] = useState(false);
@@ -300,18 +320,40 @@ export default function Home({ neighborhoods, citywideTopViolations, citywideWit
                 "Nothing on file". The neighborhood pages do this properly --
                 scoped search, stats, FAQ -- and linking out also gives
                 crawlers 91 internal paths straight off the homepage. */}
-            <div className="chip-row">
+            {/* Every chip is always in the DOM so crawlers see all 113
+                internal links and mobile is untouched. The collapse is
+                purely a desktop CSS concern -- see .chip-row-collapsed. */}
+            <div className={`chip-row${showAllNeighborhoods ? "" : " chip-row-collapsed"}`}>
               {neighborhoods.map((n) => (
-                <Link key={n.slug} href={`/n/${n.slug}`} className="chip">
+                <Link
+                  key={n.slug}
+                  href={`/n/${n.slug}`}
+                  className={`chip${popularSlugs.includes(n.slug) ? "" : " chip-extra"}`}
+                >
                   {n.name}
                 </Link>
               ))}
               {COMING_SOON_AREAS.map((name) => (
-                <span key={name} className="chip coming-soon" title="Coming soon — no verified public data source yet">
+                <span
+                  key={name}
+                  className="chip coming-soon chip-extra"
+                  title="Coming soon — no verified public data source yet"
+                >
                   {name} (soon)
                 </span>
               ))}
             </div>
+
+            <button
+              type="button"
+              className="chip-toggle"
+              onClick={() => setShowAllNeighborhoods((v) => !v)}
+              aria-expanded={showAllNeighborhoods}
+            >
+              {showAllNeighborhoods
+                ? "Show fewer neighborhoods"
+                : `View all ${neighborhoods.length} neighborhoods`}
+            </button>
 
             {!data && !loadError && <div className="loading">Loading Chicago&rsquo;s inspection records…</div>}
             {loadError && data?.length === 0 && (
