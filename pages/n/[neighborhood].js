@@ -33,8 +33,15 @@ export async function getStaticProps({ params }) {
   // A restaurant belongs to this page if EITHER its vernacular neighborhood
   // or its official community area matches. Wicker Park sits inside West
   // Town, so a Wicker Park restaurant legitimately appears on both.
+  // Match on any geography this restaurant belongs to: legacy ZIP
+  // neighborhood, official community area, coordinate-derived vernacular
+  // neighborhood, or a legacy alias (Pilsen, Bronzeville, South Loop...).
   const matches = all.filter(
-    (r) => r.nbSlug === params.neighborhood || r.caSlug === params.neighborhood
+    (r) =>
+      r.nbSlug === params.neighborhood ||
+      r.caSlug === params.neighborhood ||
+      r.vnSlug === params.neighborhood ||
+      (r.aliasSlugs || []).includes(params.neighborhood)
   );
   if (matches.length === 0) return { notFound: true };
 
@@ -49,7 +56,7 @@ export async function getStaticProps({ params }) {
   const relatedSlugs = [
     ...new Set(
       matches
-        .map((r) => r.nbSlug)
+        .map((r) => r.vnSlug || r.nbSlug)
         .filter((s) => s && s !== params.neighborhood)
     ),
   ];

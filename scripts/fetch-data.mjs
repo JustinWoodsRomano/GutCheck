@@ -23,7 +23,13 @@ import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF, facilityTypeWhereClause } from "../lib/inspections.mjs";
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
-import { communityAreaFor, allCommunityAreas } from "../lib/communityAreas.mjs";
+import {
+  communityAreaFor,
+  allCommunityAreas,
+  vernacularNeighborhoodFor,
+  allVernacularNeighborhoods,
+  NEIGHBORHOOD_ALIASES,
+} from "../lib/communityAreas.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const SITE_URL = "https://www.gutcheckchicago.com";
@@ -204,8 +210,10 @@ function buildNeighborhoodStats(restaurants) {
     byNb.get(slug).push(r);
   };
   for (const r of restaurants) {
-    push(r.nbSlug, r);
-    if (r.caSlug && r.caSlug !== r.nbSlug) push(r.caSlug, r);
+    const slugs = new Set(
+      [r.nbSlug, r.caSlug, r.vnSlug, ...(r.aliasSlugs || [])].filter(Boolean)
+    );
+    for (const s of slugs) push(s, r);
   }
 
   const citywideTotal = restaurants.length;
@@ -333,14 +341,32 @@ try {
     const ca = communityAreaFor(r.lat, r.lon);
     r.ca = ca ? ca.name : null;
     r.caSlug = ca ? ca.slug : null;
+    // Vernacular neighborhood, also from coordinates. This is the layer
+    // that captures Bucktown, Andersonville, Wrigleyville, Old Town and
+    // 90-odd others that neither ZIP mapping nor community areas reach.
+    const vn = vernacularNeighborhoodFor(r.lat, r.lon);
+    r.vn = vn ? vn.name : null;
+    r.vnSlug = vn ? vn.slug : null;
+    // Legacy names that are still the highest-volume term for their area.
+    r.aliasSlugs = Object.entries(NEIGHBORHOOD_ALIASES)
+      .filter(([, cfg]) => vn && cfg.covers.includes(vn.slug))
+      .map(([slug]) => slug);
   }
 
   const vernacularSlugs = new Set(restaurants.map((r) => r.nbSlug).filter(Boolean));
   const caSlugs = new Set(restaurants.map((r) => r.caSlug).filter(Boolean));
-  const neighborhoods = [...new Set([...vernacularSlugs, ...caSlugs])].sort();
+  const vnSlugs = new Set(restaurants.map((r) => r.vnSlug).filter(Boolean));
+  const aliasSlugs = new Set(restaurants.flatMap((r) => r.aliasSlugs || []));
+  const neighborhoods = [
+    ...new Set([...vernacularSlugs, ...caSlugs, ...vnSlugs, ...aliasSlugs]),
+  ].sort();
 
   const caNameBySlug = {};
   for (const a of allCommunityAreas()) caNameBySlug[a.slug] = a.name;
+  const vnNameBySlug = {};
+  for (const a of allVernacularNeighborhoods()) vnNameBySlug[a.slug] = a.name;
+  const aliasNameBySlug = {};
+  for (const [slug, cfg] of Object.entries(NEIGHBORHOOD_ALIASES)) aliasNameBySlug[slug] = cfg.name;
   const vernacularNameBySlug = {};
   for (const r of restaurants) {
     if (r.nbSlug && !vernacularNameBySlug[r.nbSlug]) vernacularNameBySlug[r.nbSlug] = r.nb;
@@ -348,11 +374,23 @@ try {
   // Vernacular label wins on collision -- it's the name people search.
   const neighborhoodMeta = {};
   for (const slug of neighborhoods) {
-    const isVern = vernacularSlugs.has(slug);
+    // Name priority: the coordinate-derived vernacular name is both accurate
+    // and the one people search, so it wins over the community-area label
+    // and over the old ZIP-derived guess.
+    const name =
+      vnNameBySlug[slug] ||
+      aliasNameBySlug[slug] ||
+      vernacularNameBySlug[slug] ||
+      caNameBySlug[slug] ||
+      slug;
+    let kind = "community-area";
+    if (aliasNameBySlug[slug]) kind = "vernacular";
+    else if (vnSlugs.has(slug)) kind = caSlugs.has(slug) ? "both" : "vernacular";
+    else if (vernacularSlugs.has(slug)) kind = "vernacular";
     neighborhoodMeta[slug] = {
       slug,
-      name: vernacularNameBySlug[slug] || caNameBySlug[slug] || slug,
-      kind: isVern && caSlugs.has(slug) ? "both" : isVern ? "vernacular" : "community-area",
+      name,
+      kind,
       officialName: caNameBySlug[slug] || null,
     };
   }
@@ -360,7 +398,11 @@ try {
   console.log(
     `Community areas: ${caSlugs.size} populated, ${assignedCa}/${restaurants.length} records placed by coordinates.`
   );
-  console.log(`Neighborhood pages: ${neighborhoods.length} (${vernacularSlugs.size} vernacular + ${caSlugs.size} community areas, deduped).`);
+  console.log(
+    `Neighborhood pages: ${neighborhoods.length} ` +
+      `(${vnSlugs.size} vernacular + ${caSlugs.size} community areas + ` +
+      `${aliasSlugs.size} legacy aliases, deduped).`
+  );
   const neighborhoodStats = buildNeighborhoodStats(restaurants);
 
   // Lean slug -> {n: raw dba_name, a: raw address} index. pages/r/[slug]
@@ -398,7 +440,7 @@ try {
   // what loadRestaurants() reads server-side for pages that do need those
   // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
   // only the client-fetched public copy is trimmed.
-  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon, ca, caSlug }) => ({
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon, ca, caSlug, vn, vnSlug }) => ({
     id,
     slug,
     n,
@@ -414,6 +456,8 @@ try {
     // vernacular slugs are what carry the search volume.
     ca,
     caSlug,
+    vn,
+    vnSlug,
     // Rounded to 5 decimals (~1.1m precision) -- plenty for map pins,
     // saves bytes across 8,000+ records vs full float precision.
     lat: lat != null ? Math.round(lat * 100000) / 100000 : null,
