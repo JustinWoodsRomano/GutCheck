@@ -67,7 +67,11 @@ export async function getStaticProps({ params }) {
     .slice(0, 12);
 
   const restaurants = matches
-    .map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, g: r.g, d: r.d }))
+    // vn/ca must survive the trim -- RestaurantCard prefers the
+    // coordinate-derived names, and without them every card silently fell
+    // back to the stale ZIP-derived neighborhood (Bucktown listings were
+    // labelled "Logan Square").
+    .map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, vn: r.vn, ca: r.ca, g: r.g, d: r.d }))
     .sort((a, b) => (a.d < b.d ? 1 : -1));
 
   return {
