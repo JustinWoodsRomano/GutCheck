@@ -1,11 +1,20 @@
+import { useState, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Search, X, ChevronRight } from "lucide-react";
 import { Nav, Footer } from "../../components/Layout";
 import RestaurantCard from "../../components/RestaurantCard";
-import AdSlot from "../../components/AdSlot";
-import { loadRestaurants, loadNeighborhoods, loadNeighborhoodStats } from "../../lib/data";
+import AdSlot, { ADS_ENABLED } from "../../components/AdSlot";
+import {
+  loadRestaurants,
+  loadNeighborhoods,
+  loadNeighborhoodStats,
+  loadNeighborhoodMeta,
+} from "../../lib/data";
 import { buildNeighborhoodIntro, buildNeighborhoodFaqCopy } from "../../lib/neighborhoodCopy";
+
+const SITE = "https://www.gutcheckchicago.com";
+const PAGE_SIZE = 60;
 
 export async function getStaticPaths() {
   const neighborhoods = loadNeighborhoods();
@@ -17,33 +26,100 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   const all = loadRestaurants();
-  const matches = all.filter((r) => r.nbSlug === params.neighborhood);
+  const meta = loadNeighborhoodMeta()[params.neighborhood] || null;
+
+  // A restaurant belongs to this page if EITHER its vernacular neighborhood
+  // or its official community area matches. Wicker Park sits inside West
+  // Town, so a Wicker Park restaurant legitimately appears on both.
+  const matches = all.filter(
+    (r) => r.nbSlug === params.neighborhood || r.caSlug === params.neighborhood
+  );
   if (matches.length === 0) return { notFound: true };
-  const name = matches[0].nb;
+
+  const name = meta?.name || matches[0].nb;
   const passCount = matches.filter((r) => r.g === "PASS").length;
-  const allStats = loadNeighborhoodStats();
-  const stats = allStats.byNeighborhood[params.neighborhood];
-  // Only pass the fields RestaurantCard actually renders — the full
-  // violation/history payload isn't needed here and bloats the page.
-  const restaurants = matches.map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, g: r.g, d: r.d }));
-  return { props: { restaurants, name, slug: params.neighborhood, total: all.length, passCount, stats } };
+  const conditionalCount = matches.filter((r) => r.g === "CONDITIONAL").length;
+  const failCount = matches.filter((r) => r.g === "FAIL").length;
+  const stats = loadNeighborhoodStats().byNeighborhood[params.neighborhood] || null;
+
+  // Vernacular sub-neighborhoods that fall inside this community area --
+  // used for internal linking and to name-drop the terms people search.
+  const relatedSlugs = [
+    ...new Set(
+      matches
+        .map((r) => r.nbSlug)
+        .filter((s) => s && s !== params.neighborhood)
+    ),
+  ];
+  const allMeta = loadNeighborhoodMeta();
+  const related = relatedSlugs
+    .map((s) => ({ slug: s, name: allMeta[s]?.name || s }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .slice(0, 12);
+
+  const restaurants = matches
+    .map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, g: r.g, d: r.d }))
+    .sort((a, b) => (a.d < b.d ? 1 : -1));
+
+  return {
+    props: {
+      restaurants,
+      name,
+      slug: params.neighborhood,
+      total: all.length,
+      passCount,
+      conditionalCount,
+      failCount,
+      stats,
+      related,
+      officialName: meta?.officialName || null,
+      kind: meta?.kind || "vernacular",
+    },
+  };
 }
 
-export default function NeighborhoodPage({ restaurants, name, slug, total, passCount, stats }) {
-  const title = `${name} Restaurant Health Inspections — Chicago | GutCheck`;
-  const description = `Official Chicago health inspection records for ${restaurants.length} restaurants in ${name}, Chicago. ${passCount} currently passing, updated from the city's live data feed.`;
-  const url = `https://www.gutcheckchicago.com/n/${slug}`;
+export default function NeighborhoodPage({
+  restaurants,
+  name,
+  slug,
+  total,
+  passCount,
+  conditionalCount,
+  failCount,
+  stats,
+  related,
+  officialName,
+  kind,
+}) {
+  const [query, setQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase().replace(/['\u2019]/g, "");
+    if (!q) return restaurants;
+    return restaurants.filter((r) => r.n.toLowerCase().replace(/['\u2019]/g, "").includes(q));
+  }, [query, restaurants]);
+
+  const visible = filtered.slice(0, visibleCount);
+
+  // Title/description lead with how people actually search -- "<name>
+  // restaurants" -- rather than the inspection framing, which has
+  // effectively no search volume of its own.
+  const title = `${name} Restaurants & Bars — Health Inspection Records | GutCheck Chicago`;
+  const description = `${restaurants.length} restaurants and bars in ${name}, Chicago. See which passed their latest health inspection — ${passCount} passing, ${conditionalCount} passed with conditions, ${failCount} failing. Official city data, updated daily.`;
+  const url = `${SITE}/n/${slug}`;
   const intro = buildNeighborhoodIntro({ name, stats });
   const faqItems = buildNeighborhoodFaqCopy({ name, stats });
 
   const itemListLd = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `Restaurants in ${name}, Chicago`,
-    itemListElement: restaurants.map((r, i) => ({
+    name: `Restaurants and bars in ${name}, Chicago`,
+    numberOfItems: restaurants.length,
+    itemListElement: restaurants.slice(0, 100).map((r, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://www.gutcheckchicago.com/r/${r.slug}`,
+      url: `${SITE}/r/${r.slug}`,
       name: r.n,
     })),
   };
@@ -52,8 +128,9 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://www.gutcheckchicago.com/" },
-      { "@type": "ListItem", position: 2, name, item: url },
+      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: "Chicago neighborhoods", item: `${SITE}/#neighborhoods` },
+      { "@type": "ListItem", position: 3, name, item: url },
     ],
   };
 
@@ -75,11 +152,12 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
         <link rel="canonical" href={url} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        <meta property="og:url" content={url} />
+        <meta property="og:image" content={`${SITE}/og/default.webp`} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        <meta name="twitter:image" content={`${SITE}/og/default.webp`} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
@@ -87,24 +165,98 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
 
       <Nav total={total} />
 
+      <nav className="crumbs" aria-label="Breadcrumb">
+        <Link href="/">GutCheck Chicago</Link>
+        <ChevronRight size={13} aria-hidden="true" />
+        <span aria-current="page">{name}</span>
+      </nav>
+
       <div className="wrap hero">
-        <Link href="/" className="back-link">
-          <ArrowLeft size={14} /> All neighborhoods
-        </Link>
-        <div className="eyebrow">Chicago neighborhood · health inspection records</div>
-        <h1>{name.toUpperCase()}</h1>
+        <div className="eyebrow">
+          Chicago · {restaurants.length} restaurants &amp; bars · official inspection data
+        </div>
+        <h1 className="nb-title">
+          <span className="nb-brand">GUTCHECK</span>
+          <span className="nb-place">{name}</span>
+        </h1>
         <p>{intro}</p>
+
+        <div className="search-bar">
+          <Search size={18} color="var(--ink-muted)" />
+          <input
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setVisibleCount(PAGE_SIZE);
+            }}
+            placeholder={`Search ${name} restaurants and bars\u2026`}
+            aria-label={`Search restaurants and bars in ${name}`}
+          />
+          {query && (
+            <button className="search-clear" onClick={() => setQuery("")} aria-label="Clear search">
+              <X size={16} />
+            </button>
+          )}
+        </div>
+
+        <div className="nb-stats">
+          <span className="nb-stat pass">{passCount} passing</span>
+          <span className="nb-stat cond">{conditionalCount} w/ conditions</span>
+          <span className="nb-stat fail">{failCount} failing</span>
+        </div>
       </div>
 
       <div className="wrap section">
         <AdSlot variant="banner" />
-        <h2 className="eyebrow" style={{ marginTop: 22 }}>All {name} restaurant health inspections</h2>
+
+        <h2 className="eyebrow" style={{ marginTop: 22 }}>
+          {query.trim()
+            ? `${filtered.length} result${filtered.length === 1 ? "" : "s"} in ${name}`
+            : `All ${name} restaurants & bars`}
+        </h2>
+
+        {filtered.length === 0 && (
+          <div className="empty">
+            Nothing in {name} matching &ldquo;{query.trim()}&rdquo;. Try a different name.
+          </div>
+        )}
+
         <div className="grid">
-          {restaurants.map((r) => (
-            <RestaurantCard key={r.id} r={r} source="neighborhood" />
+          {visible.map((r, i) => (
+            <div key={r.id} style={{ display: "contents" }}>
+              <RestaurantCard r={r} source="neighborhood" />
+              {(i + 1) % 12 === 0 && ADS_ENABLED && (
+                <div className="grid-ad">
+                  <AdSlot variant="infeed" />
+                </div>
+              )}
+            </div>
           ))}
         </div>
+
+        {visibleCount < filtered.length && (
+          <button className="load-more" onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}>
+            Load {Math.min(PAGE_SIZE, filtered.length - visibleCount)} more
+          </button>
+        )}
       </div>
+
+      {related.length > 0 && (
+        <div className="wrap section">
+          <h2 className="eyebrow">
+            {kind === "community-area"
+              ? `Neighborhoods in ${name}`
+              : `Nearby Chicago neighborhoods`}
+          </h2>
+          <div className="chip-row">
+            {related.map((n) => (
+              <Link key={n.slug} href={`/n/${n.slug}`} className="chip">
+                {n.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="wrap section">
         <h2 className="eyebrow">{name} health inspection FAQ</h2>
@@ -116,6 +268,11 @@ export default function NeighborhoodPage({ restaurants, name, slug, total, passC
             </div>
           ))}
         </div>
+        {officialName && officialName !== name && (
+          <p className="hint">
+            {name} sits within the {officialName} community area as defined by the City of Chicago.
+          </p>
+        )}
       </div>
 
       <Footer />

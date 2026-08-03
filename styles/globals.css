@@ -836,3 +836,63 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   font-size: 0.8rem;
   color: var(--ink-muted);
 }
+
+/* ---------- Breadcrumbs ---------- */
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 14px 24px 0;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
+.crumbs a { color: var(--ink-muted); text-decoration: underline; }
+.crumbs a:hover { color: var(--ink); }
+.crumbs span[aria-current] { color: var(--ink); font-weight: 600; }
+
+/* ---------- Neighborhood hero ---------- */
+.nb-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 6px 0 14px;
+}
+.nb-brand {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 9vw, 4.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.nb-place {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 5.5vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--seal-green);
+}
+.nb-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+.nb-stat {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: var(--stamp-border) solid;
+  border-radius: var(--radius-stamp);
+}
+.nb-stat.pass { color: var(--seal-green); background: var(--seal-green-tint); border-color: var(--seal-green); }
+.nb-stat.cond { color: var(--amber); background: var(--amber-tint); border-color: var(--amber); }
+.nb-stat.fail { color: var(--stamp-red); background: var(--stamp-red-tint); border-color: var(--stamp-red); }
+
+a.chip { text-decoration: none; display: inline-block; }
