@@ -23,6 +23,7 @@ import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF, facilityTypeWhereClause } from "../lib/inspections.mjs";
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
+import { communityAreaFor, allCommunityAreas } from "../lib/communityAreas.mjs";
 
 const BASE = "https://data.cityofchicago.org/resource/4ijn-s7e5.json";
 const SITE_URL = "https://www.gutcheckchicago.com";
@@ -227,7 +228,47 @@ try {
   console.log("Fetching live Chicago restaurant inspection data...");
   const rows = await fetchAllRows();
   const restaurants = processRows(rows);
-  const neighborhoods = [...new Set(restaurants.map((r) => r.nbSlug))].sort();
+  // Two complementary geographies:
+  //   nbSlug  - vernacular neighborhood (Wicker Park, West Loop, Pilsen...).
+  //             These carry essentially all the real search demand.
+  //   caSlug  - official City of Chicago community area, derived from the
+  //             record's own lat/lon. Covers all 77 areas, including the 40
+  //             the ZIP mapping never reached.
+  // A restaurant belongs to both, and gets listed on both pages. Where a
+  // vernacular slug and a community-area slug are the same place (e.g.
+  // "loop", "uptown"), it collapses to a single page.
+  for (const r of restaurants) {
+    const ca = communityAreaFor(r.lat, r.lon);
+    r.ca = ca ? ca.name : null;
+    r.caSlug = ca ? ca.slug : null;
+  }
+
+  const vernacularSlugs = new Set(restaurants.map((r) => r.nbSlug).filter(Boolean));
+  const caSlugs = new Set(restaurants.map((r) => r.caSlug).filter(Boolean));
+  const neighborhoods = [...new Set([...vernacularSlugs, ...caSlugs])].sort();
+
+  const caNameBySlug = {};
+  for (const a of allCommunityAreas()) caNameBySlug[a.slug] = a.name;
+  const vernacularNameBySlug = {};
+  for (const r of restaurants) {
+    if (r.nbSlug && !vernacularNameBySlug[r.nbSlug]) vernacularNameBySlug[r.nbSlug] = r.nb;
+  }
+  // Vernacular label wins on collision -- it's the name people search.
+  const neighborhoodMeta = {};
+  for (const slug of neighborhoods) {
+    const isVern = vernacularSlugs.has(slug);
+    neighborhoodMeta[slug] = {
+      slug,
+      name: vernacularNameBySlug[slug] || caNameBySlug[slug] || slug,
+      kind: isVern && caSlugs.has(slug) ? "both" : isVern ? "vernacular" : "community-area",
+      officialName: caNameBySlug[slug] || null,
+    };
+  }
+  const assignedCa = restaurants.filter((r) => r.caSlug).length;
+  console.log(
+    `Community areas: ${caSlugs.size} populated, ${assignedCa}/${restaurants.length} records placed by coordinates.`
+  );
+  console.log(`Neighborhood pages: ${neighborhoods.length} (${vernacularSlugs.size} vernacular + ${caSlugs.size} community areas, deduped).`);
   const neighborhoodStats = buildNeighborhoodStats(restaurants);
 
   // Lean slug -> {n: raw dba_name, a: raw address} index. pages/r/[slug]
@@ -283,6 +324,7 @@ try {
   fs.writeFileSync(path.join(outDataDir, "restaurants.json"), JSON.stringify(browseRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
+  fs.writeFileSync(path.join(outBuildDir, "neighborhood-meta.json"), JSON.stringify(neighborhoodMeta));
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(publicRestaurants, neighborhoods));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(publicRestaurants.length, neighborhoods));
 
