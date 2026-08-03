@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { Search, X, ChevronRight } from "lucide-react";
+import { GRADE_EMOJI } from "../../lib/constants";
 import { Nav, Footer } from "../../components/Layout";
 import RestaurantCard from "../../components/RestaurantCard";
 import AdSlot, { ADS_ENABLED } from "../../components/AdSlot";
@@ -15,6 +16,7 @@ import { buildNeighborhoodIntro, buildNeighborhoodFaqCopy } from "../../lib/neig
 
 const SITE = "https://www.gutcheckchicago.com";
 const PAGE_SIZE = 60;
+const GRADE_LABEL_SHORT = { PASS: "passing", CONDITIONAL: "passed with conditions", FAIL: "failing" };
 
 export async function getStaticPaths() {
   const neighborhoods = loadNeighborhoods();
@@ -92,13 +94,21 @@ export default function NeighborhoodPage({
   kind,
 }) {
   const [query, setQuery] = useState("");
+  const [grade, setGrade] = useState(null); // null | PASS | CONDITIONAL | FAIL
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const filtered = useMemo(() => {
+    let list = restaurants;
+    if (grade) list = list.filter((r) => r.g === grade);
     const q = query.trim().toLowerCase().replace(/['\u2019]/g, "");
-    if (!q) return restaurants;
-    return restaurants.filter((r) => r.n.toLowerCase().replace(/['\u2019]/g, "").includes(q));
-  }, [query, restaurants]);
+    if (q) list = list.filter((r) => r.n.toLowerCase().replace(/['\u2019]/g, "").includes(q));
+    return list;
+  }, [query, grade, restaurants]);
+
+  function toggleGrade(g) {
+    setGrade((cur) => (cur === g ? null : g));
+    setVisibleCount(PAGE_SIZE);
+  }
 
   const visible = filtered.slice(0, visibleCount);
 
@@ -177,7 +187,7 @@ export default function NeighborhoodPage({
         </div>
         <h1 className="nb-title">
           <span className="nb-brand">GUTCHECK</span>
-          <span className="nb-place">{name}</span>
+          <span className="nb-place">{name.toUpperCase()}</span>
         </h1>
         <p>{intro}</p>
 
@@ -199,10 +209,39 @@ export default function NeighborhoodPage({
           )}
         </div>
 
-        <div className="nb-stats">
-          <span className="nb-stat pass">{passCount} passing</span>
-          <span className="nb-stat cond">{conditionalCount} w/ conditions</span>
-          <span className="nb-stat fail">{failCount} failing</span>
+        {/* Clickable grade filters. Same emoji + tint tokens as the Stamp
+            component so a filter chip reads as the same object as the badge
+            on each card. */}
+        <div className="nb-stats" role="group" aria-label={`Filter ${name} restaurants by inspection result`}>
+          <button
+            type="button"
+            className={`nb-stat pass ${grade === "PASS" ? "is-active" : ""}`}
+            onClick={() => toggleGrade("PASS")}
+            aria-pressed={grade === "PASS"}
+          >
+            <span className="nb-stat-emoji">{GRADE_EMOJI.PASS}</span> {passCount} passing
+          </button>
+          <button
+            type="button"
+            className={`nb-stat cond ${grade === "CONDITIONAL" ? "is-active" : ""}`}
+            onClick={() => toggleGrade("CONDITIONAL")}
+            aria-pressed={grade === "CONDITIONAL"}
+          >
+            <span className="nb-stat-emoji">{GRADE_EMOJI.CONDITIONAL}</span> {conditionalCount} w/ conditions
+          </button>
+          <button
+            type="button"
+            className={`nb-stat fail ${grade === "FAIL" ? "is-active" : ""}`}
+            onClick={() => toggleGrade("FAIL")}
+            aria-pressed={grade === "FAIL"}
+          >
+            <span className="nb-stat-emoji">{GRADE_EMOJI.FAIL}</span> {failCount} failing
+          </button>
+          {grade && (
+            <button type="button" className="nb-stat-clear" onClick={() => setGrade(null)}>
+              Clear filter
+            </button>
+          )}
         </div>
       </div>
 
@@ -210,14 +249,17 @@ export default function NeighborhoodPage({
         <AdSlot variant="banner" />
 
         <h2 className="eyebrow" style={{ marginTop: 22 }}>
-          {query.trim()
-            ? `${filtered.length} result${filtered.length === 1 ? "" : "s"} in ${name}`
+          {query.trim() || grade
+            ? `${filtered.length} result${filtered.length === 1 ? "" : "s"} in ${name}` +
+              (grade ? ` \u00b7 ${GRADE_LABEL_SHORT[grade]}` : "")
             : `All ${name} restaurants & bars`}
         </h2>
 
         {filtered.length === 0 && (
           <div className="empty">
-            Nothing in {name} matching &ldquo;{query.trim()}&rdquo;. Try a different name.
+            {query.trim()
+              ? `Nothing in ${name} matching \u201c${query.trim()}\u201d.`
+              : `No ${name} restaurants currently have that inspection result.`}
           </div>
         )}
 
@@ -243,11 +285,12 @@ export default function NeighborhoodPage({
 
       {related.length > 0 && (
         <div className="wrap section">
-          <h2 className="eyebrow">
-            {kind === "community-area"
-              ? `Neighborhoods in ${name}`
-              : `Nearby Chicago neighborhoods`}
-          </h2>
+          {/* Deliberately "nearby", not "in". These are derived from
+              restaurants whose coordinates fall inside this area but whose
+              vernacular (ZIP-derived) neighborhood differs -- real overlap
+              at the edges, not containment. Labeling Logan Square as being
+              "in Avondale" would simply be wrong. */}
+          <h2 className="eyebrow">Nearby Chicago neighborhoods</h2>
           <div className="chip-row">
             {related.map((n) => (
               <Link key={n.slug} href={`/n/${n.slug}`} className="chip">

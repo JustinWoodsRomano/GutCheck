@@ -314,7 +314,7 @@ try {
   // what loadRestaurants() reads server-side for pages that do need those
   // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
   // only the client-fetched public copy is trimmed.
-  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon }) => ({
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon, ca, caSlug }) => ({
     id,
     slug,
     n,
@@ -323,6 +323,13 @@ try {
     z,
     g,
     d,
+    // Coordinate-derived official community area. This is the ACCURATE
+    // geography -- the ZIP-derived `nb` above is wrong for a large share of
+    // records (only 17 of 117 "Portage Park" ZIP restaurants are actually
+    // in Portage Park). Cards display `ca`; `nb` is retained because the
+    // vernacular slugs are what carry the search volume.
+    ca,
+    caSlug,
     // Rounded to 5 decimals (~1.1m precision) -- plenty for map pins,
     // saves bytes across 8,000+ records vs full float precision.
     lat: lat != null ? Math.round(lat * 100000) / 100000 : null,

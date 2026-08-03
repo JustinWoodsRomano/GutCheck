@@ -857,42 +857,69 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .nb-title {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  /* Tight -- the neighborhood reads as a second line of the wordmark,
+     not a separate heading sitting under it. */
+  gap: 0;
   margin: 6px 0 14px;
 }
 .nb-brand {
   font-family: var(--font-display);
   font-size: clamp(2.4rem, 9vw, 4.2rem);
-  line-height: 0.95;
+  line-height: 0.92;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
 .nb-place {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: clamp(1.5rem, 5.5vw, 2.6rem);
-  line-height: 1.1;
+  /* Same display face as the wordmark, stepped down and set in the green
+     so the hierarchy reads without switching typefaces. */
+  font-family: var(--font-display);
+  font-size: clamp(1.35rem, 4.6vw, 2.2rem);
+  line-height: 1;
+  letter-spacing: -0.005em;
   color: var(--seal-green);
 }
 .nb-stats {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-top: 14px;
 }
 .nb-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border: var(--stamp-border) solid;
   border-radius: var(--radius-stamp);
+  background: none;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.05s ease;
 }
+.nb-stat:hover { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); }
+.nb-stat:active { transform: translateY(1px); }
+.nb-stat-emoji { font-size: 1.05em; line-height: 1; }
 .nb-stat.pass { color: var(--seal-green); background: var(--seal-green-tint); border-color: var(--seal-green); }
 .nb-stat.cond { color: var(--amber); background: var(--amber-tint); border-color: var(--amber); }
 .nb-stat.fail { color: var(--stamp-red); background: var(--stamp-red-tint); border-color: var(--stamp-red); }
+/* Active filter inverts so the current selection is unmistakable. */
+.nb-stat.is-active.pass { background: var(--seal-green); color: var(--paper); }
+.nb-stat.is-active.cond { background: var(--amber); color: var(--paper); }
+.nb-stat.is-active.fail { background: var(--stamp-red); color: var(--paper); }
+.nb-stat-clear {
+  background: none;
+  border: none;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 a.chip { text-decoration: none; display: inline-block; }

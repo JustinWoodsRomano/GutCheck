@@ -27,7 +27,10 @@ export default function RestaurantCard({ r, source = "unknown" }) {
       <div style={{ minWidth: 0 }}>
         <div className="card-name">{r.n}</div>
         <div className="card-meta">
-          <MapPin size={12} /> {r.nb}, Chicago
+          {/* Prefer the coordinate-derived community area -- the ZIP-derived
+              neighborhood is frequently wrong. Falls back to it only when a
+              record has no usable coordinates. */}
+          <MapPin size={12} /> {r.ca || r.nb}, Chicago
         </div>
         <div className="card-meta">
           <Clock size={12} /> Last inspected {r.d}

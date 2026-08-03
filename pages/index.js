@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import dynamic from "next/dynamic";
 import { Search, LocateFixed, ArrowLeft, X } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
@@ -56,7 +57,6 @@ export async function getStaticProps() {
 export default function Home({ neighborhoods }) {
   const [data, setData] = useState(null);
   const [query, setQuery] = useState("");
-  const [neighborhood, setNeighborhood] = useState(null);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loadError, setLoadError] = useState(false);
   const [mapCenter, setMapCenter] = useState(null); // { lat, lng, isUser } or null (list view)
@@ -98,10 +98,9 @@ export default function Home({ neighborhoods }) {
   const filtered = useMemo(() => {
     if (!data) return [];
     let list = data;
-    if (neighborhood) list = list.filter((r) => r.nbSlug === neighborhood);
     if (query.trim()) list = list.filter((r) => matchesQuery(r, query));
     return list;
-  }, [data, neighborhood, query]);
+  }, [data, query]);
 
   // Restaurants within a lunch-break-relevant radius of the user, falling
   // back to the full dataset if fewer than 5 are within range (edge case
@@ -288,21 +287,17 @@ export default function Home({ neighborhoods }) {
               {query.trim() ? `Results for "${query}"` : "All Chicago restaurants & bars"}
             </h2>
 
+            {/* These are links, not filters. As filters they matched on
+                nbSlug only, so every community-area chip (Avondale, West
+                Town, Bridgeport...) selected zero restaurants and showed
+                "Nothing on file". The neighborhood pages do this properly --
+                scoped search, stats, FAQ -- and linking out also gives
+                crawlers 91 internal paths straight off the homepage. */}
             <div className="chip-row">
-              <button className={`chip ${!neighborhood ? "active" : ""}`} onClick={() => { setNeighborhood(null); setVisibleCount(PAGE_SIZE); }}>
-                All neighborhoods
-              </button>
               {neighborhoods.map((n) => (
-                <button
-                  key={n.slug}
-                  className={`chip ${neighborhood === n.slug ? "active" : ""}`}
-                  onClick={() => {
-                    setNeighborhood(neighborhood === n.slug ? null : n.slug);
-                    setVisibleCount(PAGE_SIZE);
-                  }}
-                >
+                <Link key={n.slug} href={`/n/${n.slug}`} className="chip">
                   {n.name}
-                </button>
+                </Link>
               ))}
               {COMING_SOON_AREAS.map((name) => (
                 <span key={name} className="chip coming-soon" title="Coming soon — no verified public data source yet">
