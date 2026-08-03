@@ -6,7 +6,7 @@ import { Search, LocateFixed, ArrowLeft, X } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
 import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
-import { loadNeighborhoods } from "../lib/data";
+import { loadNeighborhoods, loadNeighborhoodStats } from "../lib/data";
 import { COMING_SOON_AREAS } from "../lib/constants";
 
 // Leaflet touches window/document directly, so it can only run client-side --
@@ -51,10 +51,17 @@ function distanceMiles(lat1, lon1, lat2, lon2) {
 
 export async function getStaticProps() {
   const neighborhoods = loadNeighborhoods();
-  return { props: { neighborhoods } };
+  const stats = loadNeighborhoodStats();
+  return {
+    props: {
+      neighborhoods,
+      citywideTopViolations: stats.citywideTopViolations || [],
+      citywideWithViolations: stats.citywideWithViolations || 0,
+    },
+  };
 }
 
-export default function Home({ neighborhoods }) {
+export default function Home({ neighborhoods, citywideTopViolations, citywideWithViolations }) {
   const [data, setData] = useState(null);
   const [query, setQuery] = useState("");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -339,6 +346,28 @@ export default function Home({ neighborhoods }) {
           </>
         )}
       </div>
+
+      {citywideTopViolations.length > 0 && (
+        <div className="wrap section">
+          <h2 className="eyebrow">Chicago&rsquo;s most-cited health violations</h2>
+          <p className="viol-intro">
+            Across {citywideWithViolations.toLocaleString()} Chicago restaurants and bars carrying any
+            violation on their latest inspection. Frequency is not severity &mdash; the most-written-up
+            item is one of the least predictive of an actual failure, which we{" "}
+            <Link href="/data">analyzed across 184,618 inspections</Link>.
+          </p>
+          <ol className="viol-list">
+            {citywideTopViolations.map((v) => (
+              <li key={v.code}>
+                <span className="viol-title">{v.title}</span>
+                <span className="viol-meta">
+                  cited at {v.count.toLocaleString()} places · {v.share}% of those with violations
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       <Footer />
     </div>

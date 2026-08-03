@@ -283,6 +283,28 @@ export default function NeighborhoodPage({
         )}
       </div>
 
+      {stats?.topViolations?.length > 0 && (
+        <div className="wrap section">
+          <h2 className="eyebrow">Most-cited violations in {name}</h2>
+          <p className="viol-intro">
+            Across {name} establishments with any violation on their latest inspection, these come up
+            most often. Citation frequency isn&rsquo;t the same as severity &mdash; see{" "}
+            <Link href="/data">our analysis of which violations actually predict a failure</Link>.
+          </p>
+          <ol className="viol-list">
+            {stats.topViolations.map((v) => (
+              <li key={v.code}>
+                <span className="viol-title">{v.title}</span>
+                <span className="viol-meta">
+                  cited at {v.count} {v.count === 1 ? "place" : "places"} · {v.share}% of those with
+                  violations
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
       {related.length > 0 && (
         <div className="wrap section">
           {/* Deliberately "nearby", not "in". These are derived from

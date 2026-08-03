@@ -170,6 +170,29 @@ function categorizeViolations(violationText) {
   return hits;
 }
 
+// Chicago writes violations as "NN. TITLE - Comments: ...", pipe-separated.
+// Pulling the numbered code is far more precise than keyword matching --
+// it's the city's own classification rather than our inference about it.
+const VIOLATION_CODE_RE = /(?:^|\|)\s*(\d{1,2})\.\s*([^-]+?)\s*-\s*Comments:/gi;
+
+function extractViolationCodes(text) {
+  const out = [];
+  VIOLATION_CODE_RE.lastIndex = 0;
+  let m;
+  while ((m = VIOLATION_CODE_RE.exec(text || "")) !== null) {
+    out.push({ code: parseInt(m[1], 10), title: m[2].replace(/\s+/g, " ").trim() });
+  }
+  return out;
+}
+
+function titleCaseViolation(s) {
+  return s
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w.length > 2 || w === "&" ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
 function buildNeighborhoodStats(restaurants) {
   // A restaurant contributes to BOTH its vernacular neighborhood and its
   // official community area, because both get their own page. Keying only
@@ -198,16 +221,40 @@ function buildNeighborhoodStats(restaurants) {
     const passRate = Math.round((pass / total) * 100);
 
     const catCounts = {};
+    const codeCounts = {};
+    const codeTitles = {};
+    let withViolations = 0;
     for (const r of list) {
-      const text = (r.v || []).map((v) => v.t).join(" ");
+      const text = (r.v || []).map((v) => v.t).join(" | ");
       for (const cat of categorizeViolations(text)) {
         catCounts[cat] = (catCounts[cat] || 0) + 1;
+      }
+      const codes = extractViolationCodes(text);
+      if (codes.length) withViolations++;
+      // Count each code once per establishment, so this reads as "how many
+      // places got cited for this" rather than raw citation volume.
+      const seen = new Set();
+      for (const { code, title } of codes) {
+        if (!codeTitles[code]) codeTitles[code] = titleCaseViolation(title);
+        if (seen.has(code)) continue;
+        seen.add(code);
+        codeCounts[code] = (codeCounts[code] || 0) + 1;
       }
     }
     const topCategories = Object.entries(catCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([key]) => key);
+
+    const topViolations = Object.entries(codeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([code, n]) => ({
+        code: Number(code),
+        title: codeTitles[code],
+        count: n,
+        share: withViolations ? Math.round((n / withViolations) * 100) : 0,
+      }));
 
     // Recent activity window: inspections in the last 30 days of data.
     const dates = list.map((r) => r.d).filter(Boolean).sort();
@@ -225,10 +272,43 @@ function buildNeighborhoodStats(restaurants) {
       passRate,
       vsCitywide: passRate - citywidePassRate,
       topCategories,
+      topViolations,
+      establishmentsWithViolations: withViolations,
       recentInspectionCount,
     };
   }
-  return { citywidePassRate, byNeighborhood: stats };
+  // Citywide equivalent, for the homepage.
+  const cityCodeCounts = {};
+  const cityCodeTitles = {};
+  let cityWithViolations = 0;
+  for (const r of restaurants) {
+    const text = (r.v || []).map((v) => v.t).join(" | ");
+    const codes = extractViolationCodes(text);
+    if (codes.length) cityWithViolations++;
+    const seen = new Set();
+    for (const { code, title } of codes) {
+      if (!cityCodeTitles[code]) cityCodeTitles[code] = titleCaseViolation(title);
+      if (seen.has(code)) continue;
+      seen.add(code);
+      cityCodeCounts[code] = (cityCodeCounts[code] || 0) + 1;
+    }
+  }
+  const citywideTopViolations = Object.entries(cityCodeCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([code, n]) => ({
+      code: Number(code),
+      title: cityCodeTitles[code],
+      count: n,
+      share: cityWithViolations ? Math.round((n / cityWithViolations) * 100) : 0,
+    }));
+
+  return {
+    citywidePassRate,
+    citywideTopViolations,
+    citywideWithViolations: cityWithViolations,
+    byNeighborhood: stats,
+  };
 }
 
 const outDataDir = path.resolve("public/data");

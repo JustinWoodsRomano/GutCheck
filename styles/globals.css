@@ -989,3 +989,54 @@ a.chip { text-decoration: none; display: inline-block; }
 .data-table td:nth-child(2) { white-space: normal; min-width: 200px; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 .data-table tbody tr:nth-child(odd) { background: var(--paper-light); }
+
+/* ---------- Top violations block ---------- */
+.viol-intro {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 66ch;
+  margin: 0 0 16px;
+}
+.viol-intro a { color: var(--ink); }
+.viol-list {
+  list-style: none;
+  counter-reset: viol;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.viol-list li {
+  counter-increment: viol;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 16px 12px 44px;
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper-light);
+}
+.viol-list li::before {
+  content: counter(viol);
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+.viol-title {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.viol-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+}
