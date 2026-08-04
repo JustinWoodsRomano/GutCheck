@@ -11,7 +11,7 @@ import { GRADE_LABEL } from "../../../lib/constants";
 import { buildRestaurantFaq } from "../../../lib/restaurantCopy";
 import { buildRestaurantFromRows, fetchRowsForRestaurant } from "../../../lib/inspections.mjs";
 import { neighborhoodFor } from "../../../lib/zipNeighborhoods.mjs";
-import { detectPests } from "../../../lib/pests.mjs";
+import { detectPests, inspectionReason } from "../../../lib/pests.mjs";
 
 // getStaticProps now does a live, scoped Socrata call per restaurant (see
 // below) instead of reading a pre-baked snapshot -- so pre-rendering all
@@ -178,6 +178,16 @@ export default function RestaurantPage({ restaurant: r, total }) {
         <div className="detail-sub2">
           <Link href={`/n/${r.nbSlug}`} style={{ textDecoration: "underline" }}>{r.nb}</Link> · Chicago Dept. of Public Health · Last inspected {r.d}
         </div>
+        {/* Why this inspection happened. Complaint-driven visits fail at 34%
+            against 22% for routine ones, so the trigger is real context for
+            reading the result -- not just metadata. */}
+        {inspectionReason(r.it) && (
+          <div className="reason-row">
+            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+              {inspectionReason(r.it).label}
+            </span>
+          </div>
+        )}
 
         <ContactRow
           address={`${r.a}, Chicago, IL ${r.z}`}

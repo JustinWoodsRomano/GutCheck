@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { detectPests } from "../lib/pests.mjs";
+import { detectPests, inspectionReason } from "../lib/pests.mjs";
 import { ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
 import Stamp from "./Stamp";
 
@@ -45,6 +45,11 @@ export default function HistoryAccordion({ history }) {
               <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, maxWidth: "100%" }}>
                 {h.d}
                 <Stamp grade={h.g} size="sm" />
+                {inspectionReason(h.it) && (
+                  <span className={`reason-tag reason-${inspectionReason(h.it).tone}`}>
+                    {inspectionReason(h.it).label}
+                  </span>
+                )}
               </span>
               <ChevronDown size={16} className="accordion-chevron" />
             </button>
