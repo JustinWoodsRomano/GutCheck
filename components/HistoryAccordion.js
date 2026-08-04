@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { detectPests } from "../lib/pests.mjs";
 import { ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
 import Stamp from "./Stamp";
 
@@ -39,6 +40,15 @@ export default function HistoryAccordion({ history }) {
                   <div key={vi} className={`violation ${v.s === "c" ? "critical" : "noncritical"}`} style={{ marginTop: vi === 0 ? 0 : 8 }}>
                     <AlertTriangle size={16} color={v.s === "c" ? "var(--stamp-red)" : "var(--amber)"} style={{ flexShrink: 0, marginTop: 2 }} />
                     <div className="violation-body">
+                      {detectPests(v.t).length > 0 && (
+                        <div className="pest-tags">
+                          {detectPests(v.t).map((p) => (
+                            <span key={p.key} className="pest-tag">
+                              <span aria-hidden="true">{p.emoji}</span> {p.label}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <div className="violation-text">{v.t}</div>
                       <div className="violation-sev">{v.s === "c" ? "priority violation" : "core violation"}</div>
                     </div>

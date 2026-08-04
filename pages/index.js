@@ -320,6 +320,12 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                 "Nothing on file". The neighborhood pages do this properly --
                 scoped search, stats, FAQ -- and linking out also gives
                 crawlers 91 internal paths straight off the homepage. */}
+            {/* Hidden entirely while a search is active. The chips are
+                links to neighborhood pages, not filters, so leaving them
+                under "Results for X" reads as though they're part of the
+                result set. Returns on its own when the box is cleared. */}
+            {!query.trim() && (
+              <>
             {/* Every chip is always in the DOM so crawlers see all 113
                 internal links and mobile is untouched. The collapse is
                 purely a desktop CSS concern -- see .chip-row-collapsed. */}
@@ -354,6 +360,8 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                 ? "Show fewer neighborhoods"
                 : `View all ${neighborhoods.length} neighborhoods`}
             </button>
+              </>
+            )}
 
             {!data && !loadError && <div className="loading">Loading Chicago&rsquo;s inspection records…</div>}
             {loadError && data?.length === 0 && (

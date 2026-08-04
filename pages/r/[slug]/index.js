@@ -11,6 +11,7 @@ import { GRADE_LABEL } from "../../../lib/constants";
 import { buildRestaurantFaq } from "../../../lib/restaurantCopy";
 import { buildRestaurantFromRows, fetchRowsForRestaurant } from "../../../lib/inspections.mjs";
 import { neighborhoodFor } from "../../../lib/zipNeighborhoods.mjs";
+import { detectPests } from "../../../lib/pests.mjs";
 
 // getStaticProps now does a live, scoped Socrata call per restaurant (see
 // below) instead of reading a pre-baked snapshot -- so pre-rendering all
@@ -201,15 +202,27 @@ export default function RestaurantPage({ restaurant: r, total }) {
               </span>
             </div>
           )}
-          {r.v.map((v, i) => (
-            <div key={i} className={`violation ${v.s === "c" ? "critical" : "noncritical"}`}>
-              <AlertTriangle size={16} color={v.s === "c" ? "var(--stamp-red)" : "var(--amber)"} style={{ flexShrink: 0, marginTop: 2 }} />
-              <div className="violation-body">
-                <div className="violation-text">{v.t}</div>
-                <div className="violation-sev">{v.s === "c" ? "priority violation" : "core violation"}</div>
+          {r.v.map((v, i) => {
+            const pests = detectPests(v.t);
+            return (
+              <div key={i} className={`violation ${v.s === "c" ? "critical" : "noncritical"}`}>
+                <AlertTriangle size={16} color={v.s === "c" ? "var(--stamp-red)" : "var(--amber)"} style={{ flexShrink: 0, marginTop: 2 }} />
+                <div className="violation-body">
+                  {pests.length > 0 && (
+                    <div className="pest-tags">
+                      {pests.map((p) => (
+                        <span key={p.key} className="pest-tag">
+                          <span aria-hidden="true">{p.emoji}</span> {p.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <div className="violation-text">{v.t}</div>
+                  <div className="violation-sev">{v.s === "c" ? "priority violation" : "core violation"}</div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <AdSlot variant="banner" />

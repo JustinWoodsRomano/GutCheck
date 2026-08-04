@@ -1135,3 +1135,31 @@ a.chip { text-decoration: none; display: inline-block; }
      normal gap back before the results list. */
   .chip-row-collapsed { margin-bottom: 12px; }
 }
+
+/* ---------- Pest tags on individual violations ----------
+   Sits above the violation text so a long report can be scanned for the
+   findings people actually care about without reading every line. Tagged
+   per violation, not per inspection -- one bad finding shouldn't imply
+   the whole report was about pests. */
+.pest-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.pest-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--radius-stamp);
+  border: 1px solid var(--stamp-red);
+  background: var(--stamp-red-tint);
+  color: var(--stamp-red);
+  white-space: nowrap;
+}
