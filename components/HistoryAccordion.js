@@ -6,11 +6,36 @@ import Stamp from "./Stamp";
 export default function HistoryAccordion({ history }) {
   const [openIndex, setOpenIndex] = useState(null);
 
+  // Group into years so a record running back to 2010 stays scannable.
+  // History arrives newest-first and the grouping preserves that order,
+  // so years descend and inspections descend within each year.
+  const years = [];
+  const byYear = new Map();
+  history.forEach((h, i) => {
+    const year = (h.d || "").slice(0, 4) || "Undated";
+    if (!byYear.has(year)) {
+      byYear.set(year, []);
+      years.push(year);
+    }
+    // Carry the original index so open/closed state survives grouping.
+    byYear.get(year).push({ ...h, _i: i });
+  });
+
   return (
     <div>
-      {history.map((h, i) => {
-        const open = openIndex === i;
-        return (
+      {years.map((year) => (
+        <div className="history-year" key={year}>
+          <div className="history-year-head">
+            <span className="history-year-label">{year}</span>
+            <span className="history-year-count">
+              {byYear.get(year).length}{" "}
+              {byYear.get(year).length === 1 ? "inspection" : "inspections"}
+            </span>
+          </div>
+          {byYear.get(year).map((h) => {
+            const i = h._i;
+            const open = openIndex === i;
+            return (
           <div className="accordion-item" key={i}>
             <button
               className="accordion-trigger"
@@ -57,8 +82,10 @@ export default function HistoryAccordion({ history }) {
               </div>
             )}
           </div>
-        );
-      })}
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

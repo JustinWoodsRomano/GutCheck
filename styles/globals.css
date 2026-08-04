@@ -1163,3 +1163,36 @@ a.chip { text-decoration: none; display: inline-block; }
   color: var(--stamp-red);
   white-space: nowrap;
 }
+
+/* ---------- Year sections in the inspection history ----------
+   A record reaching back to 2010 is a long scroll; the year headers give
+   it structure without adding another thing to click. Sticky so the year
+   stays visible while reading a long stretch of one year's inspections. */
+.history-year { margin-bottom: 18px; }
+.history-year-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 7px 0 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: var(--paper);
+  z-index: 2;
+}
+.history-year-label {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.history-year-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}

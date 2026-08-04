@@ -44,7 +44,12 @@ export async function getStaticProps({ params }) {
   let restaurant = null;
   try {
     const rows = await fetchRowsForRestaurant(entry.n, entry.a, entry.l);
-    restaurant = buildRestaurantFromRows(rows, { neighborhoodFor });
+    restaurant = buildRestaurantFromRows(rows, {
+    neighborhoodFor,
+    // Full record on a restaurant's own page: Infinity keeps every graded
+    // inspection back to 2010 instead of the 5 the citywide build caps at.
+    historyLimit: Infinity,
+  });
   } catch (err) {
     console.error(`ISR revalidate fetch failed for ${params.slug}:`, err);
   }
