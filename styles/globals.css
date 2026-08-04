@@ -1083,22 +1083,45 @@ a.chip { text-decoration: none; display: inline-block; }
    section is expanded. */
 .chip-toggle {
   display: none;
+  align-items: center;
+  gap: 8px;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  padding: 8px 18px;
-  margin: -8px 0 18px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-pill);
+  padding: 9px 16px;
+  margin: 6px 0 20px;
+  /* Deliberately NOT a chip. The chips are solid-bordered pills that
+     navigate somewhere; this is a control that expands the list in place.
+     Dashed border + stamp radius pulls it out of the pill family without
+     making it louder -- it reads as a tear-off line rather than a button,
+     which suits the inspection-stamp language of the rest of the site. */
+  border: 1px dashed var(--ink-muted);
+  border-radius: var(--radius-stamp);
   background: transparent;
-  color: var(--ink);
+  color: var(--ink-muted);
   cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+}
+/* Chevron marks this as a disclosure control. Driven by aria-expanded, which
+   is already on the element, so the arrow can never disagree with the state. */
+.chip-toggle::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.chip-toggle[aria-expanded="true"]::after {
+  transform: translateY(1px) rotate(-135deg);
 }
 .chip-toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink);
   background: var(--paper-light);
-  border-color: var(--ink-muted);
 }
 .chip-toggle:focus-visible {
   outline: 2px solid var(--seal-green);
@@ -1106,7 +1129,7 @@ a.chip { text-decoration: none; display: inline-block; }
 }
 
 @media (min-width: 768px) {
-  .chip-toggle { display: inline-block; }
+  .chip-toggle { display: inline-flex; }
   .chip-row-collapsed .chip-extra { display: none; }
   /* Collapsed rows sit tight against the toggle; expanded ones need the
      normal gap back before the results list. */
