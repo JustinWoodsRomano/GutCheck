@@ -144,10 +144,34 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   min-width: 0;
   max-width: 100%;
 }
+/* Was a plain span; now a link to /data. Outlined rather than filled so it
+   reads as secondary -- same family as .chip-toggle, not a CTA. */
 .live-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  color: var(--ink-muted);
+  transition: border-color 0.12s ease, color 0.12s ease, background 0.12s ease;
+}
+.live-badge:hover {
+  border-color: var(--seal-green);
+  color: var(--ink);
+  background: var(--seal-green-tint);
+}
+.live-badge:focus-visible {
+  outline: 2px solid var(--seal-green);
+  outline-offset: 2px;
+}
+/* Clickable but undecorated -- no underline, no color shift at rest. */
+.nav-count-link { color: inherit; }
+.nav-count-link:hover { color: var(--ink); }
+.nav-count-link:focus-visible {
+  outline: 2px solid var(--seal-green);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .live-dot {

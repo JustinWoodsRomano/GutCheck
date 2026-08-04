@@ -34,5 +34,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/refresh-data",
+      "schedule": "0 11 * * *"
+    }
   ]
 }

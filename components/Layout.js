@@ -9,10 +9,18 @@ export function Nav({ total }) {
           <span className="brand-name">GUTCHECK</span>
         </Link>
         <div className="nav-count">
-          CHICAGO · {total.toLocaleString()} RESTAURANTS & BARS ·{" "}
-          <span className="live-badge">
+          {/* Plain clickable text, not a button -- it's a way back home,
+              not an action worth competing with the logo. */}
+          <Link href="/" className="nav-count-link">
+            CHICAGO · {total.toLocaleString()} RESTAURANTS &amp; BARS
+          </Link>{" "}
+          ·{" "}
+          {/* Outlined, deliberately quiet. The pulse already draws the eye;
+              a filled accent here would read as the page's primary action,
+              which it isn't. */}
+          <Link href="/data" className="live-badge" title="See our analysis of Chicago inspection data">
             <span className="live-dot" aria-hidden="true" /> LIVE DATA
-          </span>
+          </Link>
         </div>
       </div>
     </div>
