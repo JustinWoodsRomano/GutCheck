@@ -194,8 +194,13 @@ def build_html(rows, tokens, logo, today):
   }}
   @page {{ size: Letter; margin: 14mm 13mm 16mm 13mm; }}
   * {{ box-sizing: border-box; }}
+  /* Printer-first palette. The site's cream paper is right on screen and
+     expensive on a laser printer: a full-bleed fill across 14 pages burns a
+     lot of toner for no information. Structure is carried by rules and
+     borders instead, and colour is reserved for the small marks that mean
+     something -- result stamps, pest tags, priority indicators. */
   body {{
-    margin: 0; background: var(--paper); color: var(--ink);
+    margin: 0; background: #fff; color: var(--ink);
     font-family: 'Source Serif 4', Georgia, serif;
     font-size: 10pt; line-height: 1.52;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
@@ -209,7 +214,7 @@ def build_html(rows, tokens, logo, today):
   .masthead-sub {{ margin-left: auto; text-align: right;
     font-family: 'IBM Plex Mono', monospace; font-size: 7pt;
     letter-spacing: 1.1px; text-transform: uppercase; color: var(--ink-muted); }}
-  .prepared {{ background: var(--paper-light); border: 1px solid var(--line);
+  .prepared {{ background: #fff; border: 1px solid var(--line);
     border-radius: var(--r-card); padding: 13px 16px; margin-bottom: 18px; font-size: 9.5pt; }}
   .prepared b {{ font-family: 'IBM Plex Mono', monospace; font-size: 7.5pt;
     letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink-muted);
@@ -224,14 +229,14 @@ def build_html(rows, tokens, logo, today):
     font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 13pt;
     letter-spacing: 1.5px; padding: 7px 17px; border-radius: var(--r-stamp);
     margin: 11px 0 4px; }}
-  .note {{ background: var(--amber-tint); border: 1px solid var(--amber);
+  .note {{ background: #fff; border: 1px solid var(--amber); border-left-width: 4px;
     border-radius: var(--r-stamp); padding: 11px 14px; font-size: 9pt; margin: 15px 0; }}
   table.kv {{ width: 100%; border-collapse: collapse; font-size: 9.5pt; margin: 11px 0; }}
   table.kv td {{ padding: 7px 9px; border-bottom: 1px solid var(--line); }}
   table.kv td:first-child {{ font-family: 'IBM Plex Mono', monospace; font-size: 7.5pt;
     letter-spacing: 0.7px; text-transform: uppercase; color: var(--ink-muted); width: 40%; }}
   .insp {{ border: 1px solid var(--line); border-radius: var(--r-card);
-    background: var(--paper-light); padding: 13px 15px; margin-bottom: 13px;
+    background: #fff; padding: 13px 15px; margin-bottom: 13px;
     break-inside: avoid; }}
   .ihead {{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }}
   .idate {{ font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 10.5pt; }}
@@ -245,7 +250,7 @@ def build_html(rows, tokens, logo, today):
   .itype {{ font-family: 'IBM Plex Mono', monospace; font-size: 7.5pt;
     letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink-muted); }}
   .cite {{ font-family: 'IBM Plex Mono', monospace; font-size: 7pt; color: var(--ink-muted);
-    background: var(--paper); border-left: 3px solid var(--green);
+    background: #fff; border-left: 3px solid var(--green);
     padding: 7px 10px; border-radius: 0 4px 4px 0; margin-bottom: 10px; }}
   .cite-label {{ display: block; font-weight: 700; color: var(--green);
     letter-spacing: 1px; margin-bottom: 2px; }}
