@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { detectPests, inspectionReason } from "../lib/pests.mjs";
+import { detectPests, inspectionReason, sortViolations } from "../lib/pests.mjs";
 import { ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
 import Stamp from "./Stamp";
 
@@ -66,7 +66,7 @@ export default function HistoryAccordion({ history }) {
                     inspection doesn&rsquo;t include itemized violation text.
                   </div>
                 )}
-                {h.v?.map((v, vi) => (
+                {sortViolations(h.v).map((v, vi) => (
                   <div key={vi} className={`violation ${v.s === "c" ? "critical" : "noncritical"}`} style={{ marginTop: vi === 0 ? 0 : 8 }}>
                     <AlertTriangle size={16} color={v.s === "c" ? "var(--stamp-red)" : "var(--amber)"} style={{ flexShrink: 0, marginTop: 2 }} />
                     <div className="violation-body">

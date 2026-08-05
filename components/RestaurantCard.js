@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { MapPin, Clock } from "lucide-react";
 import Stamp, { gradeAccentVar } from "./Stamp";
+import { inspectionReason } from "../lib/pests.mjs";
 
-export default function RestaurantCard({ r, source = "unknown" }) {
+export default function RestaurantCard({ r, source = "unknown", showReason = false }) {
   function handleClick() {
     // GA4 select_content event -- item_name + source lets us see both
     // which restaurants get clicked most and which entry point (homepage
@@ -25,6 +26,16 @@ export default function RestaurantCard({ r, source = "unknown" }) {
       onClick={handleClick}
     >
       <div style={{ minWidth: 0 }}>
+        {/* Sits above the name, matching the vertical rhythm of the meta rows
+            below it. Only rendered when asked for, so the standard grid
+            doesn't gain a tag on every card. */}
+        {showReason && inspectionReason(r.it) && (
+          <div className="card-reason">
+            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+              {inspectionReason(r.it).label}
+            </span>
+          </div>
+        )}
         <div className="card-name">{r.n}</div>
         <div className="card-meta">
           {/* Name priority: vernacular neighborhood (Bucktown, Andersonville)

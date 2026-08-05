@@ -615,9 +615,25 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   font-size: 0.85rem;
 }
 .accordion-trigger[aria-expanded="true"] { color: var(--ink); }
-.accordion-chevron { transition: transform 0.15s ease; flex-shrink: 0; }
+.accordion-chevron { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; }
 .accordion-trigger[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
-.accordion-panel { padding: 4px 16px 16px; }
+.accordion-panel {
+  padding: 4px 16px 16px;
+  /* Grid-row trick: animates to the content's natural height without
+     hard-coding a max-height that would either clip long reports or make
+     short ones crawl. */
+  animation: accordion-open 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes accordion-open {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.accordion-trigger { transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease; }
+/* Respect users who've asked the OS to reduce motion. */
+@media (prefers-reduced-motion: reduce) {
+  .accordion-panel { animation: none; }
+  .accordion-chevron { transition: none; }
+}
 .accordion-clean {
   font-family: var(--font-serif);
   color: var(--seal-green);
@@ -1295,6 +1311,8 @@ a.chip { text-decoration: none; display: inline-block; }
 .map-embed-wrap {
   position: relative;
   width: 100%;
+  /* The city's embed hard-codes width/height attributes; the wrapper and the
+     !important below force it to fill whatever container it lands in. */
   height: 620px;
   margin: 18px 0 8px;
   border: 1px solid var(--line);
@@ -1302,11 +1320,144 @@ a.chip { text-decoration: none; display: inline-block; }
   overflow: hidden;
 }
 .map-embed-wrap iframe {
-  width: 100%;
-  height: 100%;
+  width: 100% !important;
+  min-width: 100%;
+  max-width: 100%;
+  height: 100% !important;
   border: 0;
   display: block;
 }
 @media (max-width: 640px) {
   .map-embed-wrap { height: 460px; }
+}
+
+/* Reason tag above a card's name -- matches the gap between the meta rows
+   beneath it so the card keeps one vertical rhythm. */
+.card-reason { margin-bottom: 6px; }
+.card-reason .reason-tag { font-size: 0.6rem; padding: 2px 7px; }
+
+/* ---------- New restaurants & bars ---------- */
+.section-note {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  text-align: center;
+  margin-top: 12px;
+}
+.new-intro {
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+  max-width: 66ch;
+  margin: 0 0 16px;
+}
+
+/* ---------- Report request form ---------- */
+.sample-link {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 15px 18px;
+  margin: 6px 0 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--paper-light);
+  color: var(--ink);
+  transition: border-color 0.14s ease, background 0.14s ease;
+}
+.sample-link:hover { border-color: var(--seal-green); background: var(--seal-green-tint); }
+.sample-link strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+.sample-link em {
+  display: block;
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-muted);
+  margin-top: 2px;
+}
+.report-form { max-width: 640px; }
+.field-row { display: flex; gap: 14px; }
+.field-row .field { flex: 1; min-width: 0; }
+.field { display: block; margin-bottom: 14px; }
+.field-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 5px;
+}
+.field input,
+.field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: var(--font-serif);
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-stamp);
+  padding: 10px 12px;
+  transition: border-color 0.12s ease;
+}
+.field textarea { resize: vertical; line-height: 1.5; }
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--seal-green);
+  box-shadow: 0 0 0 2px var(--seal-green-tint);
+}
+/* Honeypot: off-screen rather than display:none, which some bots skip. */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.form-submit {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 11px 26px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--paper);
+  cursor: pointer;
+  transition: opacity 0.12s ease;
+}
+.form-submit:hover { opacity: 0.86; }
+.form-submit:disabled { opacity: 0.5; cursor: default; }
+.form-submit:focus-visible { outline: 2px solid var(--seal-green); outline-offset: 3px; }
+.form-error {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--stamp-red);
+  background: var(--stamp-red-tint);
+  border: 1px solid var(--stamp-red);
+  border-radius: var(--radius-stamp);
+  padding: 10px 13px;
+  margin-bottom: 14px;
+}
+.form-sent {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  line-height: 1.55;
+  border: 1px solid var(--seal-green);
+  background: var(--seal-green-tint);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+}
+@media (max-width: 640px) {
+  .field-row { flex-direction: column; gap: 0; }
 }

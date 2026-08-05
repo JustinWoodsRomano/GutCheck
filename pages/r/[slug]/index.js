@@ -11,7 +11,7 @@ import { GRADE_LABEL } from "../../../lib/constants";
 import { buildRestaurantFaq } from "../../../lib/restaurantCopy";
 import { buildRestaurantFromRows, fetchRowsForRestaurant } from "../../../lib/inspections.mjs";
 import { neighborhoodFor } from "../../../lib/zipNeighborhoods.mjs";
-import { detectPests, inspectionReason } from "../../../lib/pests.mjs";
+import { detectPests, inspectionReason, sortViolations } from "../../../lib/pests.mjs";
 
 // getStaticProps now does a live, scoped Socrata call per restaurant (see
 // below) instead of reading a pre-baked snapshot -- so pre-rendering all
@@ -177,17 +177,18 @@ export default function RestaurantPage({ restaurant: r, total }) {
         </div>
         <div className="detail-sub2">
           <Link href={`/n/${r.nbSlug}`} style={{ textDecoration: "underline" }}>{r.nb}</Link> · Chicago Dept. of Public Health · Last inspected {r.d}
+          {/* Sits inline with the date it describes. Complaint-driven visits
+              fail at 34% against 22% for routine ones, so the trigger belongs
+              next to the result, not on its own line below it. */}
+          {inspectionReason(r.it) && (
+            <>
+              {" "}
+              <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+                {inspectionReason(r.it).label}
+              </span>
+            </>
+          )}
         </div>
-        {/* Why this inspection happened. Complaint-driven visits fail at 34%
-            against 22% for routine ones, so the trigger is real context for
-            reading the result -- not just metadata. */}
-        {inspectionReason(r.it) && (
-          <div className="reason-row">
-            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
-              {inspectionReason(r.it).label}
-            </span>
-          </div>
-        )}
 
         <ContactRow
           address={`${r.a}, Chicago, IL ${r.z}`}
@@ -217,7 +218,7 @@ export default function RestaurantPage({ restaurant: r, total }) {
               </span>
             </div>
           )}
-          {r.v.map((v, i) => {
+          {sortViolations(r.v).map((v, i) => {
             const pests = detectPests(v.t);
             return (
               <div key={i} className={`violation ${v.s === "c" ? "critical" : "noncritical"}`}>

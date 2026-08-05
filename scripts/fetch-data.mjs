@@ -112,6 +112,7 @@ function buildSitemap(restaurants, neighborhoods) {
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
     { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/food-inspection-map`, priority: "0.7" },
+    { loc: `${SITE_URL}/reports`, priority: "0.7" },
     { loc: `${SITE_URL}/about`, priority: "0.5" },
     { loc: `${SITE_URL}/privacy`, priority: "0.2" },
     { loc: `${SITE_URL}/terms`, priority: "0.2" },
@@ -140,6 +141,8 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Each restaurant has its own page at /r/{slug} with current grade (Pass / Pass w/ Conditions / Fail), listed violations, and up to 5 most recent inspections.
 - Neighborhood directories are at /n/{neighborhood-slug}.
 - FAQ (methodology, grading system explanation): /faq
+- Free custom inspection reports for journalists and researchers, with a
+  sample PDF and a request form: /reports
 - Chicago food inspection map, inspection types explained, and what Pass /
   Pass w Conditions / Fail actually mean: /food-inspection-map
 - Original analysis of 16 years of Chicago inspection data -- which violations
@@ -443,7 +446,7 @@ try {
   // what loadRestaurants() reads server-side for pages that do need those
   // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
   // only the client-fetched public copy is trimmed.
-  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, lat, lon, ca, caSlug, vn, vnSlug }) => ({
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, it, lat, lon, ca, caSlug, vn, vnSlug }) => ({
     id,
     slug,
     n,
@@ -461,6 +464,7 @@ try {
     caSlug,
     vn,
     vnSlug,
+    it,
     // Rounded to 5 decimals (~1.1m precision) -- plenty for map pins,
     // saves bytes across 8,000+ records vs full float precision.
     lat: lat != null ? Math.round(lat * 100000) / 100000 : null,

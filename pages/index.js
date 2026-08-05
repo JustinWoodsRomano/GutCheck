@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { Search, LocateFixed, ArrowLeft, X } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
+import { inspectionReason } from "../lib/pests.mjs";
 import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
 import { loadNeighborhoods, loadNeighborhoodStats } from "../lib/data";
 import { COMING_SOON_AREAS } from "../lib/constants";
@@ -14,6 +15,9 @@ import { COMING_SOON_AREAS } from "../lib/constants";
 const RestaurantMap = dynamic(() => import("../components/RestaurantMap"), { ssr: false });
 
 const PAGE_SIZE = 60;
+// Show fewer up front than we load per click: 60 cards is a wall on first
+// paint, but once someone has chosen to load more they want a real batch.
+const INITIAL_COUNT = 20;
 const AD_EVERY = 12;
 
 // Strips apostrophes (straight ' and curly ') before matching, so
@@ -84,7 +88,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
   const [data, setData] = useState(null);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const [query, setQuery] = useState("");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT);
   const [loadError, setLoadError] = useState(false);
   const [mapCenter, setMapCenter] = useState(null); // { lat, lng, isUser } or null (list view)
   const [geoStatus, setGeoStatus] = useState("idle"); // idle | requesting | denied | error
@@ -198,6 +202,18 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
 
   const total = data ? data.length : 0;
   const visible = filtered.slice(0, visibleCount);
+
+  // Restaurants whose latest inspection was a licence check. These are
+  // genuinely new openings rather than a random sample, and their thin
+  // inspection history is worth explaining rather than leaving to look
+  // suspicious.
+  const newlyLicensed = useMemo(() => {
+    if (!data) return [];
+    return data
+      .filter((r) => inspectionReason(r.it)?.label === "New license")
+      .sort((a, b) => (a.d < b.d ? 1 : -1))
+      .slice(0, 12);
+  }, [data]);
 
   const title = "Chicago Restaurant & Bar Health Inspections — GutCheck";
   const description =
@@ -391,11 +407,32 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                     Load {Math.min(PAGE_SIZE, filtered.length - visibleCount)} more
                   </button>
                 )}
+                <div className="section-note">
+                  Showing {visible.length.toLocaleString()} of{" "}
+                  {filtered.length.toLocaleString()}
+                  {query.trim() ? " matching" : ""} Chicago restaurants &amp; bars
+                </div>
               </>
             )}
           </>
         )}
       </div>
+
+      {!query.trim() && newlyLicensed.length > 0 && (
+        <div className="wrap section">
+          <h2 className="eyebrow">New restaurants &amp; bars</h2>
+          <p className="new-intro">
+            Places whose most recent inspection was a licensing check &mdash; typically a new or
+            renewed food licence, often before opening. A short record here means the business is
+            new, not that it has been avoiding inspectors.
+          </p>
+          <div className="grid">
+            {newlyLicensed.map((r) => (
+              <RestaurantCard key={r.id} r={r} source="homepage-new" showReason />
+            ))}
+          </div>
+        </div>
+      )}
 
       {citywideTopViolations.length > 0 && (
         <div className="wrap section">
