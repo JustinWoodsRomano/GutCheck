@@ -653,7 +653,15 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .footer-inner { padding-top: 28px; padding-bottom: 28px; font-family: var(--font-mono); color: var(--ink-muted); }
 .footer-inner p { font-size: 0.75rem; line-height: 1.6; max-width: 680px; }
 .footer-links { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
-.footer-links a { font-size: 0.75rem; text-decoration: underline; }
+.footer-links a {
+  /* Ten links sat at 15px tall. inline-flex + min-height makes each a
+     legitimate touch target without changing the row's look. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
 .footer-copyright {
   font-size: 0.75rem; /* was 0.68rem (10.9px) -- under Lighthouse's 12px legibility floor */
   color: var(--ink-muted);
@@ -1727,4 +1735,20 @@ a.chip { text-decoration: none; display: inline-block; }
 @media (max-width: 639px) {
   .nav-count-link,
   .live-badge { min-height: 44px; }
+}
+
+/* Remaining sub-44px controls. Inline links inside sentences are exempt
+   under WCAG 2.5.8 and are deliberately left alone -- padding them out
+   would wreck the line spacing of the paragraphs they sit in. */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.load-more { min-height: 44px; }
+.skip-link { min-height: 44px; box-sizing: border-box; }
+.search-bar input {
+  min-height: 44px;
+  /* 16px stops iOS Safari zooming the viewport on focus. */
+  font-size: max(16px, 1rem);
 }
