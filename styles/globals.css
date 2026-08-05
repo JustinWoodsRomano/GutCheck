@@ -976,7 +976,18 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   cursor: pointer;
 }
 
-a.chip { text-decoration: none; display: inline-block; }
+/* inline-flex, not inline-block: chips are flex children of .chip-row, so
+   the browser blockifies whatever is set here (inline-block -> block,
+   inline-flex -> flex). Under `block` the align-items:center on .chip did
+   nothing and the label sat 8px from the top against 21px from the bottom.
+   This rule is `a.chip` -- higher specificity and later in the file -- so it
+   was silently overriding the .chip display. */
+a.chip {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* ---------- Data analysis page ---------- */
 .finding { margin-bottom: 46px; }
