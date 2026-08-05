@@ -1461,3 +1461,57 @@ a.chip { text-decoration: none; display: inline-block; }
 @media (max-width: 640px) {
   .field-row { flex-direction: column; gap: 0; }
 }
+
+/* ---------- Hall of Shame easter eggs ----------
+   Purely decorative. aria-hidden on the container keeps all of it out of the
+   accessibility tree, pointer-events:none means it can never swallow a click,
+   and the component returns null entirely under prefers-reduced-motion. */
+.critters {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 40;
+}
+.nausea-rain { position: absolute; inset: 0; }
+.nausea-drop {
+  position: absolute;
+  top: -8vh;
+  line-height: 1;
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: nausea-fall;
+  animation-timing-function: cubic-bezier(0.4, 0.05, 0.6, 1);
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+}
+@keyframes nausea-fall {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  8%   { opacity: 0.95; }
+  85%  { opacity: 0.95; }
+  100% { transform: translate3d(var(--drift), 118vh, 0) rotate(var(--spin)); opacity: 0; }
+}
+.critter {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: 26px;
+  line-height: 1;
+  will-change: transform;
+  /* Transform is written directly per frame; this only smooths the gaps
+     between frames rather than driving the motion. */
+  transition: none;
+}
+.critter-fly { font-size: 22px; opacity: 0.92; animation: critter-in 0.5s ease-out both; }
+.critter-roach { font-size: 28px; opacity: 0.92; animation: critter-in 0.6s ease-out 0.9s both; }
+@keyframes critter-in {
+  from { opacity: 0; }
+  to   { opacity: 0.92; }
+}
+.shame-historical {
+  color: var(--seal-green);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .critters { display: none; }
+}
