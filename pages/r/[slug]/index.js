@@ -133,7 +133,20 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
         : baseTitle;
   const description = `${r.n} in ${r.nb}, Chicago most recently ${gradeLabel === "Fail" ? "failed" : gradeLabel === "Pass" ? "passed" : "received a Pass w/ Conditions on"} its Chicago health inspection on ${r.d}. See full violation details and inspection history.`;
   const url = `https://www.gutcheckchicago.com/r/${r.slug}`;
-  const isBar = /\b(bar|tavern|pub|lounge|brew)\b/i.test(r.n || "");
+  // Schema type inferred from the name, because the city's facility_type
+  // isn't carried through to this page. Deliberately conservative: only
+  // unambiguous drinking establishments get BarOrPub, everything else falls
+  // back to Restaurant. A naive /bar|lounge/ test mislabelled 53 places --
+  // "Kimberli Sushi Bar", "Hero Coffee Bar", "Protein Bar", "Lem's Bar-B-Q"
+  // (the hyphen tokenises as a standalone "bar"). Validated against all
+  // 8,153 names; yields 345 bars, under the ~600-700 bar licences known to
+  // be in the dataset, which is the intended direction to err.
+  const nm = r.n || "";
+  const isBar =
+    !/bar\s?-?\s?b\s?-?\s?q|barbecue|barbeque/i.test(nm) &&
+    (/\b(tavern|saloon|taproom|tap\s?house|brew\s?pub|brewery|brewing|cocktail|ale\s?house|speakeasy|pub)\b/i.test(nm) ||
+      (/\b(bar|lounge)\b/i.test(nm) &&
+        !/\b(sushi|juice|coffee|salad|oyster|snack|candy|milk|taco|noodle|espresso|smoothie|raw|sandwich|pizza|burrito|poke|tea|dessert|donut|doughnut|bagel|cereal|yogurt|waffle|crepe|churro|hookah|nail|barber|protein|boba|bubble|acai|granola|energy|vitamin|nutrition|wellness|loaf|bakery|bread|soup|pasta|rice|bowl|water|oxygen|blow\s?dry|ice\s?cream|gelato|cake|chocolate|wing)\s+(bar|lounge)\b/i.test(nm)));
 
   const jsonLd = {
     "@context": "https://schema.org",
