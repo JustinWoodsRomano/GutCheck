@@ -9,11 +9,11 @@ import { loadRestaurants } from "../lib/data";
 import { HALL_OF_SHAME } from "../lib/hallOfShame";
 import { getAnonymizedViolationShareMessage } from "../lib/share";
 import { detectPests } from "../lib/pests.mjs";
-import dynamic from "next/dynamic";
-
-// Client-only: it reads window dimensions and scroll position, and there is
-// nothing meaningful to server-render for a decorative overlay.
-const ShameCritters = dynamic(() => import("../components/ShameCritters"), { ssr: false });
+// Imported statically now that it's just the drop animation. It builds its
+// state inside useEffect, so it renders nothing on the server and there's no
+// hydration mismatch -- the lazy chunk was buying nothing and made the thing
+// harder to verify shipped.
+import ShameCritters from "../components/ShameCritters";
 
 // Reads from the same build-time restaurants.json every other page not on
 // the ISR path uses (homepage, neighborhood pages) -- always this
