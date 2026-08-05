@@ -1752,3 +1752,23 @@ a.chip { text-decoration: none; display: inline-block; }
   /* 16px stops iOS Safari zooming the viewport on focus. */
   font-size: max(16px, 1rem);
 }
+
+/* Last of the sub-44px controls. .contact-chip covers Back / Directions /
+   Share on restaurant pages; .nb-stat are the tappable grade filters on
+   neighbourhood pages; .breadcrumb links were 15px. */
+.contact-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.nb-stat {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.breadcrumb a,
+.breadcrumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
