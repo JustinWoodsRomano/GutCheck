@@ -3,6 +3,11 @@ import Link from "next/link";
 export function Nav({ total }) {
   return (
     <div className="nav">
+      {/* 165 focusable elements sit between the top of the page and the
+          first result, most of them neighbourhood chips. Without this a
+          keyboard user tabs through all of them on every single page. */}
+      <a href="#main" className="skip-link">Skip to main content</a>
+      {/* Rendered inside Nav so every page gets the target from one edit. */}
       <div className="wrap nav-inner">
         <Link href="/" className="brand">
           <img className="brand-mark" src="/gutcheck-mark.png" alt="" width="20" height="20" />
@@ -23,6 +28,7 @@ export function Nav({ total }) {
           </Link>
         </div>
       </div>
+      <span id="main" tabIndex={-1} className="skip-target" />
     </div>
   );
 }

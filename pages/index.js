@@ -321,9 +321,30 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           Search official Chicago restaurant and bar health inspection records — pass/fail
           results, violations, and full history, straight from the city&rsquo;s own data.
         </p>
+        {/* The chip block below runs to 113 links. This is the skip that
+            actually saves keyboard users the tab-through. */}
+        <a href="#results" className="skip-link skip-link-inline">Skip to results</a>
         <div className="search-bar">
-          <Search size={18} color="var(--ink-muted)" />
+          <Search size={18} color="var(--ink-muted)" aria-hidden="true" />
+          {/* A placeholder is not a label: it is unreadable to a screen
+              reader and disappears the moment someone types. This is the
+              primary interaction on the site, so it gets a real label --
+              visually hidden, since the placeholder already carries the
+              hint sighted users need. */}
+          <label htmlFor="site-search" className="sr-only">
+            Search Chicago restaurants and bars by name, neighborhood, or ZIP code
+          </label>
           <input
+            id="site-search"
+            /* type=search gives iOS/Android the Search key and a native
+               clear affordance; autocorrect and capitalisation fight
+               restaurant names, so both are off. */
+            type="search"
+            enterKeyHint="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="none"
+            spellCheck="false"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search any Chicago restaurant or bar, neighborhood, or ZIP code…"
@@ -447,7 +468,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
 
             {data && filtered.length > 0 && (
               <>
-                <div className="grid">
+                <div className="grid" id="results">
                   {visible.map((r, i) => (
                     <div key={r.id} style={{ display: "contents" }}>
                       <RestaurantCard r={r} source="homepage" />

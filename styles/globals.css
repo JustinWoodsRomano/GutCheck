@@ -84,7 +84,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   color: var(--ink-muted);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 500;
   margin: 0 0 10px;
 }
@@ -140,7 +140,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .nav-count {
   font-family: var(--font-mono);
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   min-width: 0;
   max-width: 100%;
 }
@@ -237,7 +237,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .hint {
   font-family: var(--font-mono);
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   margin-top: 10px;
 }
 
@@ -268,8 +268,14 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   .chip-row::-webkit-scrollbar { display: none; }
 }
 .chip {
+  /* min-height rather than taller padding: keeps the pill's visual weight
+     while meeting the 44px minimum touch target. These are the primary
+     navigation on mobile and were 31px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   padding: 7px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
@@ -328,7 +334,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .card-meta {
   font-family: var(--font-mono);
   color: var(--ink-muted);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -645,7 +651,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 .footer { border-top: 1px solid var(--line); }
 .footer-inner { padding-top: 28px; padding-bottom: 28px; font-family: var(--font-mono); color: var(--ink-muted); }
-.footer-inner p { font-size: 0.72rem; line-height: 1.6; max-width: 680px; }
+.footer-inner p { font-size: 0.75rem; line-height: 1.6; max-width: 680px; }
 .footer-links { display: flex; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
 .footer-links a { font-size: 0.75rem; text-decoration: underline; }
 .footer-copyright {
@@ -956,7 +962,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   border: none;
   padding: 0 4px;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--ink-muted);
   text-decoration: underline;
   cursor: pointer;
@@ -1006,7 +1012,7 @@ a.chip { text-decoration: none; display: inline-block; }
   caption-side: top;
   text-align: left;
   padding: 12px 14px 10px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -1021,7 +1027,7 @@ a.chip { text-decoration: none; display: inline-block; }
 }
 .data-table th {
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -1126,7 +1132,7 @@ a.chip { text-decoration: none; display: inline-block; }
   align-items: center;
   gap: 8px;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -1192,7 +1198,7 @@ a.chip { text-decoration: none; display: inline-block; }
   align-items: center;
   gap: 5px;
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -1230,7 +1236,7 @@ a.chip { text-decoration: none; display: inline-block; }
 }
 .history-year-count {
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -1246,7 +1252,7 @@ a.chip { text-decoration: none; display: inline-block; }
   display: inline-flex;
   align-items: center;
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -1270,7 +1276,7 @@ a.chip { text-decoration: none; display: inline-block; }
   background: var(--stamp-red-tint);
 }
 @media (max-width: 640px) {
-  .reason-tag { font-size: 0.6rem; padding: 2px 7px; }
+  .reason-tag { font-size: 0.75rem; padding: 2px 7px; }
 }
 
 /* ---------- City map embed ----------
@@ -1305,7 +1311,7 @@ a.chip { text-decoration: none; display: inline-block; }
 .map-loader-sub {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--ink-muted);
 }
 .map-embed-wrap {
@@ -1334,12 +1340,12 @@ a.chip { text-decoration: none; display: inline-block; }
 /* Reason tag above a card's name -- matches the gap between the meta rows
    beneath it so the card keeps one vertical rhythm. */
 .card-reason { margin-bottom: 6px; }
-.card-reason .reason-tag { font-size: 0.6rem; padding: 2px 7px; }
+.card-reason .reason-tag { font-size: 0.75rem; padding: 2px 7px; }
 
 /* ---------- New restaurants & bars ---------- */
 .section-note {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--ink-muted);
   text-align: center;
   margin-top: 12px;
@@ -1377,7 +1383,7 @@ a.chip { text-decoration: none; display: inline-block; }
   display: block;
   font-style: normal;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--ink-muted);
   margin-top: 2px;
 }
@@ -1388,7 +1394,7 @@ a.chip { text-decoration: none; display: inline-block; }
 .field-label {
   display: block;
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-muted);
@@ -1662,4 +1668,63 @@ a.chip { text-decoration: none; display: inline-block; }
   /* The date is the first thing to go when space is tight -- the grade and
      the name are what the row is actually for. */
   .nearby-meta { display: none; }
+}
+
+/* ---------- accessibility utilities ---------- */
+/* Visually hidden but read by screen readers. Used for the search input's
+   real label, which a placeholder cannot substitute for. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Off-screen until focused, then pinned top-left. Keyboard users get a way
+   past the nav and, on the homepage, past the 113 neighbourhood chips. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 12px 18px;
+  background: var(--ink);
+  color: var(--paper-light);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius-stamp, 6px) 0;
+}
+.skip-link:focus {
+  left: 0;
+}
+.skip-link-inline:focus {
+  position: static;
+  display: inline-block;
+  margin-bottom: 10px;
+  border-radius: var(--radius-pill, 999px);
+}
+/* Focusable landing point, but never a visible tab stop of its own. */
+.skip-target {
+  display: block;
+  height: 0;
+  outline: none;
+}
+
+/* Nav links were 15-23px tall. Padding brings them to a real tap target
+   without changing how the bar looks. */
+.nav-count-link,
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+@media (max-width: 639px) {
+  .nav-count-link,
+  .live-badge { min-height: 44px; }
 }
