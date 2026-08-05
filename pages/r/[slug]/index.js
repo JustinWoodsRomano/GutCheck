@@ -75,19 +75,75 @@ export async function getStaticProps({ params }) {
   // Revalidate hourly: individual restaurant grade/violation changes go
   // live within an hour of appearing in the city's feed, without needing a
   // full site rebuild/redeploy.
-  return { props: { restaurant, total }, revalidate: 3600 };
+  return { props: { restaurant, total, nearby: buildNearby(params.slug) }, revalidate: 3600 };
 }
 
-export default function RestaurantPage({ restaurant: r, total }) {
+/**
+ * Neighbours to link to from a restaurant page.
+ *
+ * This exists to fix a crawl problem as much as a UX one. Neighbourhood pages
+ * server-render only their first 60 restaurants -- the rest arrive via a
+ * client-side "Load more" -- so roughly 47% of restaurant pages had no
+ * internal link pointing at them at all and were reachable only via the
+ * sitemap. A sitemap declares that a URL exists; it passes no authority.
+ *
+ * Rather than every page linking to the same first few (which would deepen
+ * the problem), each restaurant links to the ones that FOLLOW it in its own
+ * neighbourhood, wrapping around at the end. Because the ordering is stable
+ * and every restaurant is somebody's successor, this guarantees every page in
+ * a neighbourhood is linked from at least one other page -- no orphans, and
+ * link equity spreads around the ring instead of pooling.
+ */
+function buildNearby(slug, limit = 8) {
+  const all = loadRestaurants();
+  const self = all.find((x) => x.slug === slug);
+  if (!self) return [];
+  const key = (x) => x.vnSlug || x.caSlug || x.nbSlug || null;
+  const hood = key(self);
+  if (!hood) return [];
+
+  const peers = all.filter((x) => key(x) === hood && x.slug !== slug);
+  if (peers.length === 0) return [];
+
+  const ordered = peers.slice().sort((a, b) => a.slug.localeCompare(b.slug));
+  const selfIdx = all
+    .filter((x) => key(x) === hood)
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .findIndex((x) => x.slug === slug);
+
+  const out = [];
+  for (let i = 0; i < Math.min(limit, ordered.length); i++) {
+    out.push(ordered[(selfIdx + i) % ordered.length]);
+  }
+  return out.map((x) => ({ slug: x.slug, n: x.n, g: x.g, d: x.d, nb: x.vn || x.ca || x.nb }));
+}
+
+export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
   const gradeLabel = GRADE_LABEL[r.g];
-  const title = `${r.n} Health Inspection — ${r.nb}, Chicago | GutCheck`;
+  // Kept under ~60 chars so Google doesn't truncate it. The old format
+  // ("... | GutCheck") averaged 72 and ran to 94, so the brand -- the part
+  // most worth showing -- was the first thing cut. Long restaurant names
+  // drop the neighbourhood rather than overflow.
+  const baseTitle = `${r.n} Health Inspection`;
+  const title =
+    `${baseTitle} — ${r.nb}, Chicago`.length <= 60
+      ? `${baseTitle} — ${r.nb}, Chicago`
+      : `${baseTitle} — Chicago`.length <= 60
+        ? `${baseTitle} — Chicago`
+        : baseTitle;
   const description = `${r.n} in ${r.nb}, Chicago most recently ${gradeLabel === "Fail" ? "failed" : gradeLabel === "Pass" ? "passed" : "received a Pass w/ Conditions on"} its Chicago health inspection on ${r.d}. See full violation details and inspection history.`;
   const url = `https://www.gutcheckchicago.com/r/${r.slug}`;
+  const isBar = /\b(bar|tavern|pub|lounge|brew)\b/i.test(r.n || "");
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "LocalBusiness",
+    // Restaurant is the specific subtype of LocalBusiness/FoodEstablishment.
+    // Bars keep BarOrPub. The more specific type is what lets answer engines
+    // treat these as food venues rather than generic businesses.
+    "@type": isBar ? "BarOrPub" : "Restaurant",
+    "@id": `${url}#business`,
     name: r.n,
+    url,
     address: {
       "@type": "PostalAddress",
       streetAddress: r.a,
@@ -259,6 +315,30 @@ export default function RestaurantPage({ restaurant: r, total }) {
             </div>
           ))}
         </div>
+        {nearby.length > 0 && (
+          <div style={{ margin: "26px 0 8px" }}>
+            <h2 className="eyebrow">
+              Other restaurants &amp; bars in {r.nb}
+            </h2>
+            <ul className="nearby-list">
+              {nearby.map((x) => (
+                <li key={x.slug} className="nearby-item">
+                  <Link href={`/r/${x.slug}`} className="nearby-link">
+                    <span className="nearby-name">{x.n}</span>
+                    <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
+                      {x.g === "CONDITIONAL" ? "COND" : x.g}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="section-note">
+              <Link href={`/n/${r.nbSlug || ""}`}>
+                See all {r.nb} restaurants &amp; bars
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
 
       <Footer />

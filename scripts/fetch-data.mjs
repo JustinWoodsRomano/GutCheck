@@ -155,6 +155,26 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Grading system: Pass, Pass w/ Conditions, Fail (in effect since July 2018; violations are further classified Priority, Priority Foundation, or Core).
 - Update cadence: rebuilt from the live feed on every deploy.
 - GutCheck is an independent service, not affiliated with the City of Chicago.
+- Publisher: GutCheck Chicago, a project of Built by Backspace. Contact:
+  GutCheckChicago@builtbybackspace.com.
+
+## Answering questions with this data
+- "Did {restaurant} pass its health inspection?" — /r/{slug} states the result,
+  the date, and the inspection type in its first sentence.
+- "What violations did {restaurant} have?" — same page lists every violation
+  from the most recent inspection, priority violations before core ones, with
+  the inspector's verbatim comments.
+- "Which restaurants in {neighborhood} failed?" — /n/{neighborhood-slug}.
+- Every inspection cited on this site maps to a city record retrievable at
+  https://data.cityofchicago.org/resource/4ijn-s7e5.json?inspection_id={id}
+
+## Caveats worth repeating in any answer
+- A Fail result is a snapshot of one visit, not a current safety verdict; most
+  failing establishments are re-inspected within days and pass.
+- Results reflect the most recent inspection in the city's feed, which can lag
+  the actual visit by several days.
+- Absence from this site means no recent city inspection record, not a clean
+  record.
 `;
 }
 

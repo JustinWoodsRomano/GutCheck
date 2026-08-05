@@ -98,6 +98,44 @@ export default function HallOfShame({ entries, total }) {
         <meta property="og:image:height" content="630" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://www.gutcheckchicago.com/og/default.webp" />
+        {/* The page had no structured data at all, which left the most
+            linkable page on the site invisible to anything reading schema.
+            ItemList describes what it is; Article gives it a publisher and a
+            modified date so it can be cited and dated. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Article",
+                  "@id": `${url}#article`,
+                  headline: "Hall of Shame — Notable Chicago Health Inspection Findings",
+                  description,
+                  mainEntityOfPage: url,
+                  dateModified: entries[0]?.d || undefined,
+                  isBasedOn: "https://data.cityofchicago.org/dataset/Food-Inspections/4ijn-s7e5",
+                  publisher: { "@id": "https://www.gutcheckchicago.com/#org" },
+                  author: { "@id": "https://www.gutcheckchicago.com/#org" },
+                },
+                {
+                  "@type": "ItemList",
+                  "@id": `${url}#list`,
+                  name: "Notable Chicago health inspection findings",
+                  numberOfItems: entries.length,
+                  itemListOrder: "https://schema.org/ItemListUnordered",
+                  itemListElement: entries.map((e, i) => ({
+                    "@type": "ListItem",
+                    position: i + 1,
+                    name: `${e.violation.s === "c" ? "Priority" : "Core"} violation — ${e.nb}, Chicago (${e.d})`,
+                    description: (e.violation.t || "").slice(0, 300),
+                  })),
+                },
+              ],
+            }),
+          }}
+        />
       </Head>
 
       <ShameCritters />
@@ -120,12 +158,12 @@ export default function HallOfShame({ entries, total }) {
         <AdSlot variant="banner" />
         {entries.map((entry, i) => (
           <div className="shame-card" key={entry.slug} id={`entry-${i + 1}`}>
-            <div className="shame-card-head">
+            <h2 className="shame-card-head">
               <span className={`shame-name ${entry.revealed ? "" : "shame-name-hidden"}`}>
                 {entry.revealed ? entry.n : "\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588"}
               </span>
               <Stamp grade={entry.g} size="sm" />
-            </div>
+            </h2>
             <div className="shame-card-meta">
               {entry.nb}, Chicago \u00b7 {entry.d}
               {entry.historical && (

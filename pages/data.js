@@ -74,8 +74,16 @@ export default function DataPage({ total }) {
     description,
     datePublished: meta.generated,
     dateModified: meta.generated,
-    author: { "@type": "Organization", name: "GutCheck Chicago", url: SITE },
-    publisher: { "@type": "Organization", name: "GutCheck Chicago", url: SITE },
+    // A named human author is one of the stronger signals an answer engine
+    // has when deciding whether original analysis is worth citing. An
+    // organisation authoring itself says nothing about who did the work.
+    author: {
+      "@type": "Person",
+      name: "Justin Woods-Romano",
+      url: `${SITE}/about`,
+      affiliation: { "@type": "Organization", name: "Built by Backspace" },
+    },
+    publisher: { "@id": `${SITE}/#org` },
     mainEntityOfPage: url,
   };
 

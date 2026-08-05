@@ -7,7 +7,7 @@ import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
 import { inspectionReason } from "../lib/pests.mjs";
 import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
-import { loadNeighborhoods, loadNeighborhoodStats } from "../lib/data";
+import { loadNeighborhoods, loadNeighborhoodStats, loadRestaurants } from "../lib/data";
 import { COMING_SOON_AREAS } from "../lib/constants";
 
 // Leaflet touches window/document directly, so it can only run client-side --
@@ -80,11 +80,44 @@ export async function getStaticProps() {
       popularSlugs,
       citywideTopViolations: stats.citywideTopViolations || [],
       citywideWithViolations: stats.citywideWithViolations || 0,
+      // Server-rendered so there is real content here without JavaScript.
+      // The main restaurant list is built client-side from restaurants.json,
+      // which Googlebot renders but GPTBot, ClaudeBot and PerplexityBot do
+      // not -- to them the homepage was a search box and a list of
+      // neighbourhood names, with zero restaurants on the site's highest-
+      // authority page. These 24 are in the HTML for every crawler.
+      recentlyInspected: buildRecentlyInspected(24),
     },
   };
 }
 
-export default function Home({ neighborhoods, popularSlugs, citywideTopViolations, citywideWithViolations }) {
+// Most recently inspected places, newest first, one per neighbourhood where
+// possible so the block reads as a spread across the city rather than
+// whichever neighbourhood happened to be inspected that week.
+function buildRecentlyInspected(limit) {
+  const all = loadRestaurants();
+  const sorted = all
+    .filter((r) => r.d && r.n)
+    .sort((a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0));
+  const seen = new Set();
+  const out = [];
+  for (const r of sorted) {
+    const hood = r.vnSlug || r.caSlug || r.nbSlug || "";
+    if (seen.has(hood)) continue;
+    seen.add(hood);
+    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, nb: r.vn || r.ca || r.nb });
+    if (out.length >= limit) break;
+  }
+  // Top up from the plain recency list if there weren't enough neighbourhoods.
+  for (const r of sorted) {
+    if (out.length >= limit) break;
+    if (out.some((x) => x.slug === r.slug)) continue;
+    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, nb: r.vn || r.ca || r.nb });
+  }
+  return out;
+}
+
+export default function Home({ neighborhoods, popularSlugs, citywideTopViolations, citywideWithViolations, recentlyInspected = [] }) {
   const [data, setData] = useState(null);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
   const [query, setQuery] = useState("");
@@ -238,14 +271,38 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebSite",
-              name: "GutCheck Chicago",
-              url: "https://www.gutcheckchicago.com/",
-              potentialAction: {
-                "@type": "SearchAction",
-                target: "https://www.gutcheckchicago.com/?q={search_term_string}",
-                "query-input": "required name=search_term_string",
-              },
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.gutcheckchicago.com/#website",
+                  name: "GutCheck Chicago",
+                  url: "https://www.gutcheckchicago.com/",
+                  publisher: { "@id": "https://www.gutcheckchicago.com/#org" },
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: "https://www.gutcheckchicago.com/?q={search_term_string}",
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+                {
+                  // Named publisher entity. Answer engines weigh who is behind
+                  // a claim when deciding whether to cite it; a WebSite alone
+                  // says nothing about who is making the claim.
+                  "@type": "Organization",
+                  "@id": "https://www.gutcheckchicago.com/#org",
+                  name: "GutCheck Chicago",
+                  url: "https://www.gutcheckchicago.com/",
+                  email: "GutCheckChicago@builtbybackspace.com",
+                  logo: {
+                    "@type": "ImageObject",
+                    url: "https://www.gutcheckchicago.com/gutcheck-mark.png",
+                  },
+                  description:
+                    "Independent service publishing City of Chicago restaurant and bar health inspection records in a searchable format. Not affiliated with the City of Chicago.",
+                  areaServed: { "@type": "City", name: "Chicago", sameAs: "https://en.wikipedia.org/wiki/Chicago" },
+                  parentOrganization: { "@type": "Organization", name: "Built by Backspace" },
+                },
+              ],
             }),
           }}
         />
@@ -431,6 +488,32 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
               <RestaurantCard key={r.id} r={r} source="homepage-new" showReason />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Server-rendered, and deliberately NOT gated on the client-side
+          `data` load -- this is the block that gives a non-JS crawler
+          something to read. It stays out of the way during an active search. */}
+      {!query.trim() && recentlyInspected.length > 0 && (
+        <div className="wrap" style={{ marginTop: 34 }}>
+          <h2 className="eyebrow">Recently inspected across Chicago</h2>
+          <p className="section-note" style={{ marginTop: 4 }}>
+            The latest health inspection results filed by the Chicago Department of
+            Public Health, one per neighborhood.
+          </p>
+          <ul className="nearby-list" style={{ marginTop: 12 }}>
+            {recentlyInspected.map((x) => (
+              <li key={x.slug} className="nearby-item">
+                <Link href={`/r/${x.slug}`} className="nearby-link">
+                  <span className="nearby-name">{x.n}</span>
+                  <span className="nearby-meta">{x.nb} · {x.d}</span>
+                  <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
+                    {x.g === "CONDITIONAL" ? "COND" : x.g}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
