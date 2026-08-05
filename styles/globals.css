@@ -1495,6 +1495,7 @@ a.chip { text-decoration: none; display: inline-block; }
   position: absolute;
   top: 0;
   left: 0;
+  transform-origin: 50% 50%;
   font-size: 26px;
   line-height: 1;
   will-change: transform;
@@ -1502,7 +1503,10 @@ a.chip { text-decoration: none; display: inline-block; }
      between frames rather than driving the motion. */
   transition: none;
 }
-.critter-fly { font-size: 22px; opacity: 0.92; animation: critter-in 0.5s ease-out both; }
+/* No CSS entrance animation: the landing (3x -> 1x scale plus the fade) is
+   driven frame by frame in ShameCritters so it can hand straight off to the
+   dart state machine. A CSS animation here would fight the JS transform. */
+.critter-fly { font-size: 26px; }
 .critter-roach { font-size: 28px; opacity: 0.92; animation: critter-in 0.6s ease-out 0.9s both; }
 @keyframes critter-in {
   from { opacity: 0; }
