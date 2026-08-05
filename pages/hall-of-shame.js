@@ -8,6 +8,7 @@ import ShareButton from "../components/ShareButton";
 import { loadRestaurants } from "../lib/data";
 import { HALL_OF_SHAME } from "../lib/hallOfShame";
 import { getAnonymizedViolationShareMessage } from "../lib/share";
+import { detectPests } from "../lib/pests.mjs";
 
 // Reads from the same build-time restaurants.json every other page not on
 // the ISR path uses (homepage, neighborhood pages) -- always this
@@ -97,6 +98,15 @@ export default function HallOfShame({ entries, total }) {
                 style={{ flexShrink: 0, marginTop: 2 }}
               />
               <div className="violation-body">
+                {detectPests(entry.violation.t).length > 0 && (
+                  <div className="pest-tags">
+                    {detectPests(entry.violation.t).map((p) => (
+                      <span key={p.key} className="pest-tag">
+                        <span aria-hidden="true">{p.emoji}</span> {p.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <div className="violation-text">{entry.violation.t}</div>
                 <div className="violation-sev">{entry.violation.s === "c" ? "priority violation" : "core violation"}</div>
               </div>
