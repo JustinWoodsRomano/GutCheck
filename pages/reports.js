@@ -71,7 +71,7 @@ export default function Reports({ total }) {
       setState({
         status: "error",
         message:
-          "Couldn't reach the server. Email justin@builtbybackspace.com directly and I'll pick it up.",
+          "Couldn't reach the server. Email GutCheckChicago@builtbybackspace.com directly and I'll pick it up.",
       });
     }
   }
@@ -265,7 +265,7 @@ export default function Reports({ total }) {
                 {state.status === "sending" ? "Sending…" : "Send request"}
               </button>
               <p className="hint">
-                Goes straight to a person. Prefer email? justin@builtbybackspace.com
+                Goes straight to a person. Prefer email? GutCheckChicago@builtbybackspace.com
               </p>
             </div>
           )}

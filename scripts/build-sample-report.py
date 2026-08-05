@@ -166,7 +166,7 @@ def build_html(rows, tokens, logo, today):
             <span class="cite-label">Source</span>
             City of Chicago Food Inspections &middot; dataset 4ijn-s7e5 &middot;
             inspection_id <b>{esc(r['inspection_id'])}</b>
-            <span class="citeurl">{CITE}{esc(r['inspection_id'])}</span>
+            <a class="citeurl" href="{CITE}{esc(r['inspection_id'])}">{CITE}{esc(r['inspection_id'])}</a>
           </div>
           {rows_html}
         </section>""")
@@ -254,7 +254,8 @@ def build_html(rows, tokens, logo, today):
     padding: 7px 10px; border-radius: 0 4px 4px 0; margin-bottom: 10px; }}
   .cite-label {{ display: block; font-weight: 700; color: var(--green);
     letter-spacing: 1px; margin-bottom: 2px; }}
-  .citeurl {{ display: block; color: var(--green); word-break: break-all; margin-top: 3px; }}
+  .citeurl {{ display: block; color: var(--green); margin-top: 3px;
+    text-decoration: none; white-space: nowrap; font-size: 6.6pt; }}
   .viol {{ border-left: 3px solid var(--line); padding: 5px 0 5px 11px; margin-bottom: 10px; }}
   .viol.crit {{ border-left-color: var(--red); }}
   .vmeta {{ display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 3px; }}

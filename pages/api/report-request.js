@@ -9,7 +9,7 @@
  * requests is worse than no form: the requester thinks they've reached
  * someone and hasn't.
  */
-const TO = "justin@builtbybackspace.com";
+const TO = "GutCheckChicago@builtbybackspace.com";
 const SUBJECT = "GutCheck Report Request";
 
 function esc(s) {
