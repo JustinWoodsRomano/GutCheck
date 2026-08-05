@@ -1,32 +1,35 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 /**
  * Hall of Shame easter egg.
  *
- * Two beats, staged so they don't compete:
- *
  *  1. A rain of 🤢 on load.
- *  2. Five seconds later a 🪰 lands on the glass -- rushing in at 3x scale
- *     and snapping down to 1x -- sits still for a moment, then starts
- *     darting around.
+ *  2. After five seconds a 🪰 rushes the screen at 3x scale, snaps to 1x,
+ *     holds, then darts around on a jittery state machine.
+ *  3. Tap or click it and it splatters, then stays stuck to the PAGE at the
+ *     spot it died.
  *
- * The movement is a deliberate state machine rather than smooth easing.
- * Sine-wave drift reads as a balloon; a fly reads as *stillness punctuated by
- * sudden darts*, so it holds position, snaps to a new spot in under a fifth
- * of a second, holds again. A little per-frame jitter on top keeps it from
- * ever looking parked.
+ * That last point is the fiddly one. The live fly lives in a position:fixed
+ * layer, which is right while it's flying -- it should roam the viewport, not
+ * the document. But a splat parked in that layer would follow the viewport
+ * forever and could never scroll out of view. So on impact the viewport
+ * coordinates are converted to document coordinates (+ scrollX/scrollY) and
+ * the splat is portalled into a position:absolute layer on <body>, where it
+ * behaves like part of the page: scroll past it, scroll back, it's still
+ * there. It survives until reload, which is as far as the brief goes -- there
+ * is no persistence to storage.
  *
- * Everything is aria-hidden and pointer-events:none, and the whole component
- * returns null under prefers-reduced-motion -- an insect twitching across the
- * viewport is exactly what that setting is for.
+ * The whole thing is aria-hidden and returns null under
+ * prefers-reduced-motion. The fly itself is the only element that takes
+ * pointer events; everything else stays pointer-events:none so it can never
+ * swallow a click meant for the page.
  *
- * The roach is currently hidden. Its styles remain in globals.css
- * (.critter-roach) so it can be reinstated without rebuilding this.
+ * The roach is still hidden -- .critter-roach styles remain in globals.css.
  */
 
 const DROP_COUNT = 180;
 const FLY_DELAY_MS = 5000;
-// How long the fly sits still after touching down, before the first dart.
 const LANDING_HOLD_MS = 1400;
 
 function prefersReducedMotion() {
@@ -39,10 +42,17 @@ const rand = (min, max) => min + Math.random() * (max - min);
 export default function ShameCritters() {
   const [drops, setDrops] = useState([]);
   const [flyVisible, setFlyVisible] = useState(false);
+  const [splat, setSplat] = useState(null);
+  const [mounted, setMounted] = useState(false);
   const flyRef = useRef(null);
+  // Live viewport position, kept in a ref so the click handler can read it
+  // without the animation loop having to push it through React state.
+  const posRef = useRef({ x: 0, y: 0, rot: 0 });
+  const smashedRef = useRef(false);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
+    setMounted(true);
 
     setDrops(
       Array.from({ length: DROP_COUNT }, (_, i) => ({
@@ -60,17 +70,31 @@ export default function ShameCritters() {
     return () => clearTimeout(t);
   }, []);
 
+  const smash = useCallback((e) => {
+    if (smashedRef.current) return;
+    smashedRef.current = true;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const { x, y, rot } = posRef.current;
+    // Viewport -> document. This is what lets the splat scroll away and come
+    // back rather than riding along with the fixed layer.
+    setSplat({
+      x: x + window.scrollX,
+      y: y + window.scrollY,
+      rot,
+    });
+    setFlyVisible(false);
+  }, []);
+
   useEffect(() => {
     if (!flyVisible) return;
-
     const el = flyRef.current;
     if (!el) return;
 
     const w = () => window.innerWidth;
     const h = () => window.innerHeight;
 
-    // Touches down somewhere in the middle band -- not against an edge,
-    // where it would look like a rendering glitch rather than a fly.
     let x = rand(0.2, 0.8) * w();
     let y = rand(0.2, 0.75) * h();
     let fromX = x;
@@ -81,7 +105,6 @@ export default function ShameCritters() {
     let targetRot = rot;
 
     const start = performance.now();
-    // "landing" -> "hold" -> alternating "dart" and "rest"
     let phase = "landing";
     let phaseStart = start;
     let phaseDur = 420;
@@ -90,8 +113,6 @@ export default function ShameCritters() {
     const pickTarget = () => {
       fromX = x;
       fromY = y;
-      // Mostly short hops with the occasional longer break for the other
-      // side of the screen -- the mix is what makes it read as erratic.
       const long = Math.random() < 0.22;
       const reach = long ? rand(0.25, 0.5) : rand(0.03, 0.14);
       const angle = rand(0, Math.PI * 2);
@@ -106,8 +127,6 @@ export default function ShameCritters() {
 
       if (phase === "landing") {
         const p = Math.min(elapsed / phaseDur, 1);
-        // Cubic ease-in: hangs large for a beat then collapses to 1x, which
-        // reads as rushing at the glass rather than gently zooming out.
         const scale = 3 - 2 * (p * p * p);
         el.style.opacity = String(Math.min(p * 2.2, 1));
         el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg) scale(${scale})`;
@@ -117,7 +136,6 @@ export default function ShameCritters() {
           phaseDur = LANDING_HOLD_MS;
         }
       } else if (phase === "hold" || phase === "rest") {
-        // Never perfectly still -- a sub-pixel tremble sells "alive".
         const jx = rand(-0.7, 0.7);
         const jy = rand(-0.7, 0.7);
         el.style.transform = `translate3d(${x + jx}px, ${y + jy}px, 0) rotate(${rot}deg) scale(1)`;
@@ -128,7 +146,6 @@ export default function ShameCritters() {
         }
       } else if (phase === "dart") {
         const p = Math.min(elapsed / phaseDur, 1);
-        // Ease-out: leaves fast, arrives soft, like an actual landing.
         const e = 1 - Math.pow(1 - p, 3);
         x = fromX + (toX - fromX) * e;
         y = fromY + (toY - fromY) * e;
@@ -141,11 +158,11 @@ export default function ShameCritters() {
           y = toY;
           phase = "rest";
           phaseStart = now;
-          // Wildly uneven pauses. Even spacing would read as a metronome.
           phaseDur = Math.random() < 0.3 ? rand(900, 2200) : rand(120, 700);
         }
       }
 
+      posRef.current = { x, y, rot };
       raf = requestAnimationFrame(tick);
     };
 
@@ -156,30 +173,59 @@ export default function ShameCritters() {
   if (drops.length === 0) return null;
 
   return (
-    <div className="critters" aria-hidden="true">
-      <div className="nausea-rain">
-        {drops.map((d) => (
+    <>
+      <div className="critters" aria-hidden="true">
+        <div className="nausea-rain">
+          {drops.map((d) => (
+            <span
+              key={d.id}
+              className="nausea-drop"
+              style={{
+                left: `${d.left}%`,
+                fontSize: `${d.size}px`,
+                animationDelay: `${d.delay}s`,
+                animationDuration: `${d.duration}s`,
+                "--drift": `${d.drift}px`,
+                "--spin": `${d.spin}deg`,
+              }}
+            >
+              🤢
+            </span>
+          ))}
+        </div>
+        {flyVisible && (
           <span
-            key={d.id}
-            className="nausea-drop"
-            style={{
-              left: `${d.left}%`,
-              fontSize: `${d.size}px`,
-              animationDelay: `${d.delay}s`,
-              animationDuration: `${d.duration}s`,
-              "--drift": `${d.drift}px`,
-              "--spin": `${d.spin}deg`,
-            }}
+            ref={flyRef}
+            className="critter critter-fly"
+            style={{ opacity: 0 }}
+            onPointerDown={smash}
           >
-            🤢
+            🪰
           </span>
-        ))}
+        )}
       </div>
-      {flyVisible && (
-        <span ref={flyRef} className="critter critter-fly" style={{ opacity: 0 }}>
-          🪰
-        </span>
-      )}
-    </div>
+
+      {/* Portalled to <body> so it anchors to the document rather than the
+          viewport -- see the note at the top of this file. */}
+      {mounted &&
+        splat &&
+        createPortal(
+          <div className="splat-layer" aria-hidden="true">
+            <span
+              className="splat"
+              style={{ transform: `translate3d(${splat.x}px, ${splat.y}px, 0)` }}
+            >
+              <span className="splat-smear" />
+              <span
+                className="splat-fly"
+                style={{ "--splat-rot": `${splat.rot}deg` }}
+              >
+                🪰
+              </span>
+            </span>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
