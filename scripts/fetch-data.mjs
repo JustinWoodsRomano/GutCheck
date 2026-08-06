@@ -410,10 +410,17 @@ function buildClosures(rows, processed) {
 
     let known = byLicense.get(String(lic));
     if (!known) {
-      // Licence is closed, so it never appears in the active set. Build the
-      // same shape from its own rows via the shared builder so the slug,
-      // display name and address match how every other record is formatted.
-      const own = rows.filter((x) => x.license_ === lic);
+      // Licence is closed, so it never appears in the active set. Rebuild it
+      // from its own rows via the shared builder, so slug, display name and
+      // address are formatted exactly like every other record.
+      //
+      // Only rows from BEFORE the closure are passed in: buildRestaurantFromRows
+      // returns null by design when the newest visit is an out-of-business one
+      // (lib/inspections.mjs), which is right for the active list and fatal
+      // here. Feeding it the pre-closure history gives a normal graded record.
+      const own = rows.filter(
+        (x) => x.license_ === lic && (x.inspection_date || "").slice(0, 10) < d
+      );
       const built = own.length ? buildRestaurantFromRows(own, { neighborhoodFor }) : null;
       if (built) {
         const ca = communityAreaFor(built.lat, built.lon);
