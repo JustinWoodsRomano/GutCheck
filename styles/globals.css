@@ -2180,3 +2180,10 @@ a.chip {
   .viol-cell-link { flex-direction: column; align-items: flex-start; gap: 12px; }
   .viol-cta { align-self: stretch; text-align: center; }
 }
+
+/* When the cell is a link, the padding moves off the <li> and onto the anchor
+   so the whole cell -- including what was previously dead padding -- is the
+   click target. The counter is absolutely positioned against the <li>, so it
+   stays put either way. */
+.viol-li-linked { padding: 0; }
+.viol-li-linked .viol-cell-link { padding: 12px 16px 12px 44px; width: 100%; }

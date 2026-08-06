@@ -550,7 +550,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           </p>
           <ol className="viol-list">
             {citywideTopViolations.map((v) => (
-              <li key={v.code}>
+              <li key={v.code} className={v.code === 55 ? "viol-li-linked" : undefined}>
                 {/* Only #55 has a resource page so far; the rest stay plain
                     text until theirs exist rather than linking nowhere. The
                     whole cell is the target where one exists -- a title-only
