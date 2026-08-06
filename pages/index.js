@@ -117,6 +117,20 @@ function buildRecentlyInspected(limit) {
   return out;
 }
 
+/** Mirrors violationSlug in lib/violations.mjs. */
+function violationSlugFor(v) {
+  const words = v.title
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .split("-")
+    .filter(Boolean)
+    .slice(0, 7)
+    .join("-");
+  return `${v.code}-${words}`;
+}
+
 export default function Home({ neighborhoods, popularSlugs, citywideTopViolations, citywideWithViolations, recentlyInspected = [] }) {
   const [data, setData] = useState(null);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
@@ -550,34 +564,25 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           </p>
           <ol className="viol-list">
             {citywideTopViolations.map((v) => (
-              <li key={v.code} className={v.code === 55 ? "viol-li-linked" : undefined}>
-                {/* Only #55 has a resource page so far; the rest stay plain
-                    text until theirs exist rather than linking nowhere. The
-                    whole cell is the target where one exists -- a title-only
-                    link was a thin strip to hit on a card this size. */}
-                {v.code === 55 ? (
-                  <Link href="/violations/physical-facilities" className="viol-cell-link">
-                    <span className="viol-cell-body">
-                      <span className="viol-title">{v.title}</span>
-                      <span className="viol-meta">
-                        cited at {v.count.toLocaleString()} places &middot; {v.share}% of those with violations
-                      </span>
+              <li key={v.code} className="viol-li-linked">
+                {/* Every code now has a generated page, so every cell links.
+                    The slug is derived the same way lib/violations.mjs does it,
+                    inline here because this list is built server-side from a
+                    separate citywide aggregate. */}
+                <Link href={`/violations/${violationSlugFor(v)}`} className="viol-cell-link">
+                  <span className="viol-cell-body">
+                    <span className="viol-title">{v.title}</span>
+                    <span className="viol-meta">
+                      cited at {v.count.toLocaleString()} places &middot; {v.share}% of those with violations
                     </span>
-                    <span className="viol-cta" aria-hidden="true">Learn more</span>
-                  </Link>
-                ) : (
-                  <span className="viol-title">{v.title}</span>
-                )}
-                {v.code !== 55 && (
-                  <span className="viol-meta">
-                    cited at {v.count.toLocaleString()} places · {v.share}% of those with violations
                   </span>
-                )}
+                  <span className="viol-cta" aria-hidden="true">Learn more</span>
+                </Link>
               </li>
             ))}
           </ol>
-          <Link href="/data" className="cta-btn">
-            See the full inspection data analysis
+          <Link href="/violations" className="cta-btn">
+            Browse all 50 violation codes
           </Link>
         </div>
       )}

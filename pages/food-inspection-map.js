@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronRight } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
+import Stamp from "../components/Stamp";
 import AdSlot from "../components/AdSlot";
 import { loadRestaurants } from "../lib/data";
 
@@ -208,17 +209,27 @@ export default function FoodInspectionMap({ total }) {
             Chicago does not use letter grades or numeric scores. Every inspection ends one of three
             ways, and the middle one causes most of the confusion:
           </p>
-          <ul className="method-list">
+          {/* The stamps carry the label, so the bullet is redundant -- and
+              showing the real badge here is what makes the rest of the site
+              legible at a glance afterwards. */}
+          <ul className="result-list">
             <li>
-              <strong>Pass</strong> &mdash; no violations serious enough to require correction.
+              <Stamp grade="PASS" size="sm" />
+              <span>No violations serious enough to require correction.</span>
             </li>
             <li>
-              <strong>Pass with Conditions</strong> &mdash; violations were found but judged
-              correctable, and the place stayed open. About one inspection in five.
+              <Stamp grade="CONDITIONAL" size="sm" />
+              <span>
+                Violations were found but judged correctable, and the place stayed open. About one
+                inspection in five.
+              </span>
             </li>
             <li>
-              <strong>Fail</strong> &mdash; serious enough to warrant a failure, sometimes a closure.
-              Roughly 80% of re-inspections afterwards pass.
+              <Stamp grade="FAIL" size="sm" />
+              <span>
+                Serious enough to warrant a failure, sometimes a closure. Roughly 80% of
+                re-inspections afterwards pass.
+              </span>
             </li>
           </ul>
         </section>

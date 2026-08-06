@@ -1432,12 +1432,13 @@ a.chip {
 .card-top .reason-tag {
   flex: 0 0 auto;
   font-size: 0.7rem;
-  padding: 1px 6px;
-  /* No border: at this size the outline read as a button and fought the
-     grade stamp for attention. Colour alone carries the meaning. */
-  border: none;
+  padding: 2px 7px;
+  /* Square corners only -- the border stays. Rounded, it read as a pill
+     competing with the grade stamp; squared off it reads as a label. */
+  border-radius: 0;
   letter-spacing: 0.04em;
 }
+.card-top-tag { min-width: 0; }
 
 /* ---------- New restaurants & bars ---------- */
 .section-note {
@@ -2187,3 +2188,158 @@ a.chip {
    stays put either way. */
 .viol-list li.viol-li-linked { padding: 0; }
 .viol-list li.viol-li-linked .viol-cell-link { padding: 12px 16px 12px 44px; width: 100%; }
+
+/* ---------- inspection result list (map page) ---------- */
+.result-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 14px; }
+.result-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-family: var(--font-serif), Georgia, serif;
+  line-height: 1.6;
+}
+.result-list li > .stamp { flex: 0 0 auto; margin-top: 2px; }
+
+/* ---------- violations index ---------- */
+.viol-controls { display: grid; gap: 12px; margin-top: 16px; }
+.viol-search {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--paper-light);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+}
+.viol-search:focus-visible { outline: 2px solid var(--seal-green); outline-offset: 2px; }
+.viol-sorts { display: flex; flex-wrap: wrap; gap: 8px; }
+.viol-sort {
+  min-height: 44px;
+  padding: 8px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.viol-sort-on { color: var(--ink); border-color: var(--ink); background: var(--paper-light); }
+
+.viol-table { margin-top: 12px; border-top: 1px solid var(--line); }
+.viol-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 120px;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--line);
+  color: inherit;
+  text-decoration: none;
+  min-height: 44px;
+}
+.viol-row-head {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.viol-row-link:hover { background: var(--paper-light); }
+.viol-row-link:focus-visible { outline: 2px solid var(--seal-green); outline-offset: -2px; }
+.viol-row-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  min-width: 0;
+}
+.viol-row-code { color: var(--ink-muted); flex: 0 0 auto; }
+.viol-row-num { font-family: var(--font-mono); font-size: 0.8rem; text-align: right; }
+.viol-row-lift { color: var(--ink-muted); }
+@media (max-width: 720px) {
+  .viol-row { grid-template-columns: minmax(0, 1fr) 92px; }
+  .viol-row > :nth-child(2) { display: none; }
+  .viol-row-head > :nth-child(2) { display: none; }
+}
+
+/* Severity tier, inferred from the code's position on the city's form. */
+.sev-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border: 1px solid currentColor;
+  flex: 0 0 auto;
+}
+.sev-priority { color: var(--stamp-red); }
+.sev-foundation { color: var(--amber); }
+.sev-core { color: var(--ink-muted); }
+
+/* ---------- per-violation stat grid ---------- */
+.viol-stat-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  margin: 18px 0 20px;
+}
+@media (min-width: 640px) { .viol-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.viol-stat {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  background: var(--paper-light);
+}
+.viol-stat-accent { border-color: var(--seal-green); background: var(--seal-green-tint); }
+.viol-stat-num {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+.viol-stat-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+/* ---------- footer brand ---------- */
+.footer-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.footer-mark { display: block; }
+.footer-wordmark {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+/* ---------- fly swatter cursor (Hall of Shame only) ----------
+   Applied to <body> by ShameCritters while the fly is alive, and removed on
+   the smash so the page reverts to a normal cursor. The * selector is needed
+   because links and buttons set their own cursor and would otherwise win. */
+body.swatter-cursor,
+body.swatter-cursor * {
+  cursor: url("/swatter.png") 10 10, crosshair;
+}
+body.swatter-cursor:active,
+body.swatter-cursor *:active {
+  cursor: url("/swatter-down.png") 10 10, crosshair;
+}
+@media (hover: none) {
+  /* Touch devices have no cursor to change. */
+  body.swatter-cursor, body.swatter-cursor * { cursor: auto; }
+}

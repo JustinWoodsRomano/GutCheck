@@ -98,7 +98,7 @@ export default function ShameCritters() {
   // ordinary clicks on the page are unaffected.
   useEffect(() => {
     if (!flyVisible) return;
-    const HIT_RADIUS = 34;
+    const HIT_RADIUS = 58;
 
     const onDown = (e) => {
       if (smashedRef.current) return;
@@ -111,6 +111,18 @@ export default function ShameCritters() {
     document.addEventListener("pointerdown", onDown, true);
     return () => document.removeEventListener("pointerdown", onDown, true);
   }, [flyVisible, smash]);
+
+  // Swatter cursor while there is something to swat. Set on <body> rather than
+  // a wrapper because the fly roams the whole viewport, and removed the moment
+  // it is squashed so the rest of the page behaves normally again. Scoped to
+  // this component, which only mounts on Hall of Shame.
+  useEffect(() => {
+    // splat, not smashedRef: a ref mutation does not re-run an effect, so the
+    // cursor would have stayed a swatter after the fly was already dead.
+    if (!flyVisible || splat) return;
+    document.body.classList.add("swatter-cursor");
+    return () => document.body.classList.remove("swatter-cursor");
+  }, [flyVisible, splat]);
 
   useEffect(() => {
     if (!flyVisible) return;

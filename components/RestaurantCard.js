@@ -30,17 +30,21 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
           name, neighbourhood and last-inspected rows were all squeezed into
           whatever was left and truncated early. */}
       <div className="card-top">
+        {/* Tag left, grade right. The tag sits above the name; the grade keeps
+            the right-hand position it has everywhere else on the site. */}
+        <span className="card-top-tag" suppressHydrationWarning>
+          {isNewLicense(r.it, r.d) ? (
+            <span className="reason-tag reason-new">New license</span>
+          ) : (
+            showReason &&
+            inspectionReason(r.it) && (
+              <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+                {inspectionReason(r.it).label}
+              </span>
+            )
+          )}
+        </span>
         <Stamp grade={r.g} size="sm" />
-        {isNewLicense(r.it, r.d) ? (
-          <span className="reason-tag reason-new" suppressHydrationWarning>New</span>
-        ) : (
-          showReason &&
-          inspectionReason(r.it) && (
-            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
-              {inspectionReason(r.it).label}
-            </span>
-          )
-        )}
       </div>
       <div className="card-body">
         <div className="card-name">{r.n}</div>

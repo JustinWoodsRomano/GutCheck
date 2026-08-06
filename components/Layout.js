@@ -42,6 +42,12 @@ export function Footer() {
   return (
     <div className="footer">
       <div className="wrap footer-inner">
+        {/* Brand mark and wordmark, matching the nav lockup. Decorative here --
+            the nav already carries the linked, labelled version. */}
+        <div className="footer-brand" aria-hidden="true">
+          <img className="footer-mark" src="/gutcheck-mark.png" alt="" width="22" height="22" />
+          <span className="footer-wordmark">GUTCHECK</span>
+        </div>
         <p>
           Independent service — not affiliated with the City of Chicago, Cook County, or any
           restaurant. Health inspection data sourced directly from the City of Chicago's public
@@ -55,6 +61,7 @@ export function Footer() {
           <Link href="/food-inspection-map">Inspection map</Link>
           <Link href="/reports">Custom reports</Link>
           <Link href="/about">About the data</Link>
+          <Link href="/violations">Violation codes</Link>
           <Link href="/new-restaurants">New restaurants</Link>
           <Link href="/closed-restaurants">Recently closed</Link>
           <Link href="/hall-of-shame">

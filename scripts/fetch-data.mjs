@@ -23,6 +23,8 @@ import path from "node:path";
 import { generateAllOgImages, generateGenericOgImage, OG_DESIGN_VERSION } from "./generate-og-images.mjs";
 import { buildRestaurantFromRows, mergeSlugCollisions, CUTOFF, facilityTypeWhereClause } from "../lib/inspections.mjs";
 import { neighborhoodFor } from "../lib/zipNeighborhoods.mjs";
+import { violationSlug } from "../lib/violations.mjs";
+import VIOLATION_DATA from "../data/violations.json" with { type: "json" };
 import {
   communityAreaFor,
   allCommunityAreas,
@@ -106,13 +108,17 @@ function processRows(rows) {
 }
 
 function buildSitemap(restaurants, neighborhoods) {
+  // Same helper the pages route on, so a sitemap entry can never point at a
+  // slug the route does not generate.
+  const violationSlugs = VIOLATION_DATA.violations.map(violationSlug);
   const urls = [
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/faq`, priority: "0.6" },
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
     { loc: `${SITE_URL}/new-restaurants`, priority: "0.8" },
     { loc: `${SITE_URL}/closed-restaurants`, priority: "0.7" },
-    { loc: `${SITE_URL}/violations/physical-facilities`, priority: "0.7" },
+    { loc: `${SITE_URL}/violations`, priority: "0.8" },
+    ...violationSlugs.map((s) => ({ loc: `${SITE_URL}/violations/${s}`, priority: "0.6" })),
     { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/food-inspection-map`, priority: "0.7" },
     { loc: `${SITE_URL}/reports`, priority: "0.7" },
@@ -153,8 +159,10 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
   sample PDF and a request form: /reports
 - Chicago food inspection map, inspection types explained, and what Pass /
   Pass w Conditions / Fail actually mean: /food-inspection-map
-- Explainers for individual violation codes, including how often each one is
-  cited and how strongly it predicts a failure: /violations/{slug}
+- Every violation code, searchable, with citation frequency and failure rate:
+  /violations. Individual explainers at /violations/{code}-{slug}. The city
+  publishes the records but not the failure rates; those are derived here and
+  the method is stated on each page.
 - Original analysis of 16 years of Chicago inspection data -- which violations
   are cited most, which actually predict a failure, seasonality, and repeat
   offenders: /data
