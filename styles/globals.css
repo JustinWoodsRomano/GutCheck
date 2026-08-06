@@ -1,4 +1,7 @@
 :root {
+  /* Horizontal padding inside a .reason-tag. Anything that needs to align
+     with a tag's TEXT (rather than its edge) reuses this. */
+  --reason-tag-pad-x: 9px;
   --paper: #EDEDE6;
   --paper-light: #F5F5EF;
   --ink: #1C2333;
@@ -691,9 +694,8 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .accordion-chevron { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; }
 .accordion-trigger[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
 .accordion-panel {
-  /* Even on all four sides. */
+  /* Even on all four sides -- the side padding applied to top and bottom too. */
   padding: 16px;
-  padding-top: 4px;
   animation: accordion-open 0.24s ease-out;
 }
 /* Opacity only. The old keyframe also ran translateY(-6px) -> 0, and because
@@ -1346,7 +1348,7 @@ a.chip {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 3px 9px;
+  padding: 3px var(--reason-tag-pad-x);
   /* Rounded, no stroke. Defined once here so every instance -- card, section
      header, detail page, search result -- is identical by default. The tonal
      background carries the shape now that the outline is gone, so the base
@@ -1369,7 +1371,10 @@ a.chip {
   background: var(--stamp-red-tint);
 }
 @media (max-width: 640px) {
-  .reason-tag { font-size: 0.75rem; padding: 2px 7px; }
+  /* Overriding the variable rather than the padding keeps .hist-date in step
+     automatically. */
+  :root { --reason-tag-pad-x: 7px; }
+  .reason-tag { font-size: 0.75rem; padding: 2px var(--reason-tag-pad-x); }
 }
 
 /* ---------- City map embed ----------
@@ -2432,7 +2437,7 @@ body.swatter-near * { cursor: none; }
   white-space: nowrap;
   /* Matches .reason-tag's horizontal padding so the date's first letter lines
      up with the tag's first letter rather than with the tag's outer edge. */
-  padding-left: 9px;
+  padding-left: var(--reason-tag-pad-x);
 }
 .accordion-trigger[aria-expanded="true"] .hist-date { color: var(--ink); }
 /* The tag may wrap its own text on a narrow screen; it must not force the
