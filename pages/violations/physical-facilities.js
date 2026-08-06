@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Nav, Footer } from "../../components/Layout";
-import { loadSlugIndex, loadNeighborhoodStats } from "../../lib/data";
+import { loadSlugIndex } from "../../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
