@@ -2,14 +2,21 @@ import Head from "next/head";
 import Link from "next/link";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
+import { useState } from "react";
 import { loadRestaurants, loadSlugIndex } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
-// Licence inspections older than this stop being "new". Sixty days is long
-// enough that the list never empties in a slow month, short enough that
-// everything on it is genuinely recent.
-const WINDOW_DAYS = 60;
+// Shared with the badge that appears on every listing sitewide, so "new"
+// means the same thing on this page as it does on a card anywhere else.
+import { NEW_LICENCE_DAYS } from "../lib/pests.mjs";
+
+const WINDOW_DAYS = NEW_LICENCE_DAYS;
+
+// How many are visible before the reader asks for more. The rest are still
+// in the HTML -- hidden with CSS, not withheld from the markup -- so every
+// listing keeps its crawlable internal link.
+const INITIAL_VISIBLE = 20;
 
 /**
  * New Chicago restaurants and bars, defined as: most recent inspection was a
@@ -67,6 +74,7 @@ export async function getStaticProps() {
 export default function NewRestaurants({
   items, total, topHoods, counts, newest, oldest, windowDays,
 }) {
+  const [expanded, setExpanded] = useState(false);
   const n = items.length;
   const passRate = n ? Math.round(((counts.PASS || 0) / n) * 100) : 0;
 
@@ -246,11 +254,27 @@ export default function NewRestaurants({
             shortly.
           </p>
         ) : (
-          <div className="grid">
-            {items.map((i) => (
-              <RestaurantCard key={i.slug} r={i} source="new-restaurants" showReason />
-            ))}
-          </div>
+          <>
+            <div className="grid">
+              {items.map((i, idx) => (
+                <div
+                  key={i.slug}
+                  className={idx >= INITIAL_VISIBLE && !expanded ? "reveal-hidden" : undefined}
+                >
+                  <RestaurantCard r={i} source="new-restaurants" />
+                </div>
+              ))}
+            </div>
+            {items.length > INITIAL_VISIBLE && !expanded && (
+              <button className="cta-btn" onClick={() => setExpanded(true)}>
+                Show all {items.length} newly licensed restaurants &amp; bars
+              </button>
+            )}
+            <div className="section-note">
+              Showing {expanded ? items.length : Math.min(INITIAL_VISIBLE, items.length)} of{" "}
+              {items.length} licensed in the last {windowDays} days
+            </div>
+          </>
         )}
       </div>
 

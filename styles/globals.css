@@ -164,7 +164,10 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 10px;
+  /* Optically balanced rather than numerically equal: the dot sits closer to
+     the pill edge than the cap-height text does, so the left side needs more
+     room to read as even. */
+  padding: 3px 16px 3px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
   color: var(--ink-muted);
@@ -1790,29 +1793,6 @@ a.chip {
   min-height: 44px;
 }
 
-/* ---------- view-all button ---------- */
-.view-all-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  margin-top: 18px;
-  padding: 10px 20px;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  letter-spacing: 0.04em;
-  color: var(--ink);
-  background: transparent;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius-stamp, 8px);
-  text-decoration: none;
-}
-.view-all-btn:hover {
-  border-style: solid;
-  border-color: var(--seal-green);
-  color: var(--seal-green);
-}
-
 /* ---------- Built with 💪 by Backspace ----------
    Ported from vidarlaw.com. The arm is a Lottie loaded lazily on scroll --
    see components/BackspaceBadge.js. */
@@ -1883,3 +1863,62 @@ a.chip {
   border-radius: var(--radius-pill, 999px);
   padding: 1px 8px;
 }
+
+/* ---------- section header with trailing badge ---------- */
+.section-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 34px;
+  margin-bottom: 14px;
+}
+.section-head > .eyebrow { margin: 0; }
+.section-head-badge { flex: 0 0 auto; }
+/* The qualifying word carries the emphasis; the underline ties it to the
+   badge alongside it. */
+.word-new {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+}
+.reason-tag.reason-new {
+  color: var(--seal-green);
+  border-color: var(--seal-green);
+  background: var(--seal-green-tint);
+}
+
+/* ---------- primary CTA, reused ----------
+   Same treatment as "What's near me right now" so a primary action looks the
+   same wherever it appears. Full width on mobile. */
+.cta-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 22px;
+  padding: 14px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: var(--radius-card);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+.cta-btn:hover { background: var(--seal-green); }
+@media (min-width: 640px) {
+  /* Sized to its label on wider screens rather than stretching across the
+     grid, where a full-bleed bar would overpower the cards above it. */
+  .cta-btn { width: auto; align-self: flex-start; padding-left: 32px; padding-right: 32px; }
+}
+
+/* Beyond the initial batch: hidden from view, still present in the markup so
+   every listing keeps a crawlable link. */
+.reveal-hidden { display: none; }

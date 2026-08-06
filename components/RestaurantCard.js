@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, Clock } from "lucide-react";
 import Stamp, { gradeAccentVar } from "./Stamp";
-import { inspectionReason } from "../lib/pests.mjs";
+import { inspectionReason, isNewLicense } from "../lib/pests.mjs";
 
 export default function RestaurantCard({ r, source = "unknown", showReason = false }) {
   function handleClick() {
@@ -29,12 +29,29 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
         {/* Sits above the name, matching the vertical rhythm of the meta rows
             below it. Only rendered when asked for, so the standard grid
             doesn't gain a tag on every card. */}
-        {showReason && inspectionReason(r.it) && (
-          <div className="card-reason">
-            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
-              {inspectionReason(r.it).label}
-            </span>
+        {/* A recently licensed place is flagged everywhere it appears --
+            homepage grid, neighbourhood pages, search results, the "nearby"
+            block -- not only in sections that opted in via showReason. Whether
+            a listing is brand new is context a reader needs wherever they meet
+            it, and it explains a short inspection history on the spot.
+
+            suppressHydrationWarning because the cutoff is relative to now:
+            the server renders at build time and the client at view time, so a
+            listing sitting exactly on the 90-day boundary can legitimately
+            differ between the two. */}
+        {isNewLicense(r.it, r.d) ? (
+          <div className="card-reason" suppressHydrationWarning>
+            <span className="reason-tag reason-new">New license</span>
           </div>
+        ) : (
+          showReason &&
+          inspectionReason(r.it) && (
+            <div className="card-reason">
+              <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+                {inspectionReason(r.it).label}
+              </span>
+            </div>
+          )
         )}
         <div className="card-name">{r.n}</div>
         <div className="card-meta">

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { Search, LocateFixed, ArrowLeft, X } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
-import { inspectionReason } from "../lib/pests.mjs";
+import { isNewLicense } from "../lib/pests.mjs";
 import AdSlot, { ADS_ENABLED } from "../components/AdSlot";
 import { loadNeighborhoods, loadNeighborhoodStats, loadRestaurants } from "../lib/data";
 import { COMING_SOON_AREAS } from "../lib/constants";
@@ -242,8 +242,9 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
   // suspicious.
   const newlyLicensed = useMemo(() => {
     if (!data) return [];
+    // Same 90-day definition of "new" the rest of the site uses.
     return data
-      .filter((r) => inspectionReason(r.it)?.label === "New license")
+      .filter((r) => isNewLicense(r.it, r.d))
       .sort((a, b) => (a.d < b.d ? 1 : -1))
       .slice(0, 8);
   }, [data]);
@@ -498,7 +499,12 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
 
       {!query.trim() && newlyLicensed.length > 0 && (
         <div className="wrap section">
-          <h2 className="eyebrow">New restaurants &amp; bars</h2>
+          <div className="section-head">
+            <h2 className="eyebrow">
+              <span className="word-new">NEW</span> restaurants &amp; bars
+            </h2>
+            <span className="reason-tag reason-new section-head-badge">New license</span>
+          </div>
           <p className="new-intro">
             Places whose most recent inspection was a licensing check &mdash; typically a new or
             renewed food licence, often before opening. A short record here means the business is
@@ -509,7 +515,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
               <RestaurantCard key={r.id} r={r} source="homepage-new" showReason />
             ))}
           </div>
-          <Link href="/new-restaurants" className="view-all-btn">
+          <Link href="/new-restaurants" className="cta-btn">
             View all new Chicago restaurants &amp; bars
           </Link>
         </div>
