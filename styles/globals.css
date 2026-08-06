@@ -667,6 +667,10 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   border-radius: var(--radius-card);
   margin-bottom: 8px;
   overflow: hidden;
+  /* Applied here, not on the trigger. With the fill on the trigger alone the
+     expanded panel fell back to the page colour, leaving a grey band under the
+     last violation that looked like a rendering fault. */
+  background: var(--paper-light);
 }
 .accordion-trigger {
   width: 100%;
@@ -677,7 +681,7 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 16px;
-  background: var(--paper-light);
+  background: transparent;
   border: none;
   font-family: var(--font-mono);
   color: var(--ink-muted);
@@ -687,15 +691,18 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .accordion-chevron { transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1); flex-shrink: 0; }
 .accordion-trigger[aria-expanded="true"] .accordion-chevron { transform: rotate(180deg); }
 .accordion-panel {
-  padding: 4px 16px 16px;
-  /* Grid-row trick: animates to the content's natural height without
-     hard-coding a max-height that would either clip long reports or make
-     short ones crawl. */
-  animation: accordion-open 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Even on all four sides. */
+  padding: 16px;
+  padding-top: 4px;
+  animation: accordion-open 0.24s ease-out;
 }
+/* Opacity only. The old keyframe also ran translateY(-6px) -> 0, and because
+   .accordion-item is overflow:hidden the content was lifted out of the card
+   for the length of the animation -- which read as the panel being clipped at
+   the bottom, with the exposed strip left looking like a stuck grey band. */
 @keyframes accordion-open {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 .accordion-trigger { transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease; }
 /* Respect users who've asked the OS to reduce motion. */
@@ -1303,7 +1310,8 @@ a.chip {
   justify-content: space-between;
   gap: 12px;
   padding: 7px 0 6px;
-  margin-bottom: 6px;
+  /* The rule sat almost on top of the first card. */
+  margin-bottom: 16px;
   border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
@@ -2422,6 +2430,9 @@ body.swatter-near * { cursor: none; }
   color: var(--ink);
   /* Never wrap. This is the specific failure in the old layout. */
   white-space: nowrap;
+  /* Matches .reason-tag's horizontal padding so the date's first letter lines
+     up with the tag's first letter rather than with the tag's outer edge. */
+  padding-left: 9px;
 }
 .accordion-trigger[aria-expanded="true"] .hist-date { color: var(--ink); }
 /* The tag may wrap its own text on a narrow screen; it must not force the
