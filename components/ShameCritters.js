@@ -39,47 +39,12 @@ function prefersReducedMotion() {
 
 const rand = (min, max) => min + Math.random() * (max - min);
 
-const SPLATTER = "\u{1FADF}"; // 🫟 splatter, Unicode 16 (2024)
-
-/**
- * 🫟 only shipped in Unicode 16, so it's missing on iOS below 18.4 and on
- * older Android, where it renders as a tofu box. Draw it to a canvas and
- * compare against U+FFFF -- a permanently unassigned codepoint that is
- * guaranteed to render as tofu. Identical pixels mean no glyph, and we fall
- * back to a flattened 🪰 instead of showing the visitor an empty rectangle.
- */
-function canRenderSplatter() {
-  try {
-    const canvas = document.createElement("canvas");
-    canvas.width = 32;
-    canvas.height = 32;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return false;
-    ctx.font = "24px sans-serif";
-    ctx.textBaseline = "top";
-
-    const draw = (ch) => {
-      ctx.clearRect(0, 0, 32, 32);
-      ctx.fillText(ch, 0, 0);
-      return canvas.toDataURL();
-    };
-
-    const splatter = draw(SPLATTER);
-    const tofu = draw("\uFFFF");
-    const blank = (ctx.clearRect(0, 0, 32, 32), canvas.toDataURL());
-    // Must differ from tofu AND actually put ink down.
-    return splatter !== tofu && splatter !== blank;
-  } catch {
-    return false;
-  }
-}
 
 export default function ShameCritters() {
   const [drops, setDrops] = useState([]);
   const [flyVisible, setFlyVisible] = useState(false);
   const [splat, setSplat] = useState(null);
   const [mounted, setMounted] = useState(false);
-  const [hasSplatter, setHasSplatter] = useState(false);
   const flyRef = useRef(null);
   // Live viewport position, kept in a ref so the click handler can read it
   // without the animation loop having to push it through React state.
@@ -89,7 +54,6 @@ export default function ShameCritters() {
   useEffect(() => {
     if (prefersReducedMotion()) return;
     setMounted(true);
-    setHasSplatter(canRenderSplatter());
 
     setDrops(
       Array.from({ length: DROP_COUNT }, (_, i) => ({
@@ -276,26 +240,20 @@ export default function ShameCritters() {
               className="splat"
               style={{ transform: `translate3d(${splat.x}px, ${splat.y}px, 0)` }}
             >
-              {hasSplatter ? (
-                <span
-                  className="splat-mark"
-                  style={{ "--splat-rot": `${splat.rot}deg` }}
-                >
-                  {SPLATTER}
-                </span>
-              ) : (
-                // Older devices with no 🫟 glyph get the squashed fly they'd
-                // have got before, rather than a tofu box.
-                <>
-                  <span className="splat-smear" />
-                  <span
-                    className="splat-fly"
-                    style={{ "--splat-rot": `${splat.rot}deg` }}
-                  >
-                    🪰
-                  </span>
-                </>
-              )}
+              {/* An image, not the 🫟 emoji. U+1FADF only shipped in Unicode
+                  16 (2024), so it is absent from the system fonts on most
+                  devices in use -- the glyph test was correctly falling
+                  through to the squashed fly nearly everywhere, which is why
+                  the splatter never actually appeared. A PNG renders the same
+                  on every platform and needs no font support. */}
+              <img
+                className="splat-img"
+                src="/splat.png"
+                alt=""
+                width="46"
+                height="46"
+                style={{ "--splat-rot": `${splat.rot}deg` }}
+              />
             </span>
           </div>,
           document.body

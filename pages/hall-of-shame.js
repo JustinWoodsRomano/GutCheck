@@ -80,7 +80,7 @@ export async function getStaticProps() {
 }
 
 export default function HallOfShame({ entries, total }) {
-  const title = "Hall of Shame \u2014 Notable Chicago Health Inspection Findings | GutCheck";
+  const title = "Hall of Shame \u2014 Notable Chicago Health Inspection Findings | GUTCHECK";
   const description =
     "Some of the more notable violations found in recent Chicago restaurant health inspections, sourced directly from the City of Chicago's official public records.";
   const url = "https://www.gutcheckchicago.com/hall-of-shame";
@@ -154,8 +154,12 @@ export default function HallOfShame({ entries, total }) {
         </p>
       </div>
 
-      <div className="wrap section" style={{ maxWidth: 760 }}>
+      {/* The 760px cap keeps violation comments readable at one column. Above
+          1200px the cap lifts and the cards run in two masonry columns -- see
+          .shame-wide / .shame-list in globals.css. */}
+      <div className="wrap section shame-wide">
         <AdSlot variant="banner" />
+        <div className="shame-list">
         {entries.map((entry, i) => (
           <div className="shame-card" key={entry.slug} id={`entry-${i + 1}`}>
             <h2 className="shame-card-head">
@@ -211,6 +215,7 @@ export default function HallOfShame({ entries, total }) {
             )}
           </div>
         ))}
+        </div>
         {entries.length === 0 && (
           <div className="empty">No entries yet.</div>
         )}

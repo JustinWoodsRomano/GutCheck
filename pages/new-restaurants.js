@@ -25,7 +25,7 @@ const INITIAL_VISIBLE = 20;
  * Search positioning matters here. "new restaurants chicago" (2,400/mo) is
  * owned end to end by editorial round-ups -- Chicago Magazine, Eater,
  * Infatuation, Reddit, Resy -- all answering "which new restaurants are
- * GOOD". GutCheck has no reviews and would lose that fight on merit.
+ * GOOD". GUTCHECK has no reviews and would lose that fight on merit.
  *
  * What nobody on that SERP answers is "which places just got licensed, and
  * did they pass". That is a different question, this is the only public

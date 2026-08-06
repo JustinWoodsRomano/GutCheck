@@ -128,6 +128,16 @@ function describeClosure(c) {
   return parts.join(" ");
 }
 
+/** Wraps the card body in a link only when a detail page exists for it. */
+function CardShell({ hasPage, slug, children }) {
+  if (!hasPage) return <>{children}</>;
+  return (
+    <Link href={`/r/${slug}`} className="closure-card-link">
+      {children}
+    </Link>
+  );
+}
+
 export default function ClosedRestaurants({
   items, total, topHoods, windowDays, newest, oldest, yearTotal, medianYears,
 }) {
@@ -308,10 +318,11 @@ export default function ClosedRestaurants({
                   key={c.slug}
                   className={`closure-card${idx >= INITIAL_VISIBLE && !expanded ? " reveal-hidden" : ""}`}
                 >
+                  {/* Whole card is the target when a detail page exists --
+                      the name alone was a small hit area for a card this size. */}
+                  <CardShell hasPage={c.hasPage} slug={c.slug}>
                   <div className="closure-head">
-                    <h3 className="closure-name">
-                      {c.hasPage ? <Link href={`/r/${c.slug}`}>{c.n}</Link> : c.n}
-                    </h3>
+                    <h3 className="closure-name">{c.n}</h3>
                     <span className="closed-tag">Closed</span>
                   </div>
                   <div className="closure-meta">
@@ -319,6 +330,7 @@ export default function ClosedRestaurants({
                     recorded {c.d}
                   </div>
                   <p className="closure-summary">{c.summary}</p>
+                  </CardShell>
                 </article>
               ))}
             </div>

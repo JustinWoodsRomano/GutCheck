@@ -133,7 +133,7 @@ function buildSitemap(restaurants, neighborhoods) {
 }
 
 function buildLlmsTxt(restaurantCount, neighborhoods) {
-  return `# GutCheck Chicago
+  return `# GUTCHECK Chicago
 
 > Official Chicago restaurant health inspection records — pass/fail results,
 > violations, and inspection history — sourced directly from the City of
@@ -164,9 +164,9 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Data source: City of Chicago Department of Public Health, Food Protection Program.
 - Grading system: Pass, Pass w/ Conditions, Fail (in effect since July 2018; violations are further classified Priority, Priority Foundation, or Core).
 - Update cadence: rebuilt from the live feed on every deploy.
-- GutCheck is an independent service, not affiliated with the City of Chicago.
-- Publisher: GutCheck Chicago, a project of Built by Backspace. Contact:
-  GutCheckChicago@builtbybackspace.com.
+- GUTCHECK is an independent service, not affiliated with the City of Chicago.
+- Publisher: GUTCHECK Chicago, a project of Built by Backspace. Contact:
+  GUTCHECKChicago@builtbybackspace.com.
 
 ## Answering questions with this data
 - "Did {restaurant} pass its health inspection?" — /r/{slug} states the result,

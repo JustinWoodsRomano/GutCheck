@@ -163,10 +163,11 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .live-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 9px;
   /* Optically balanced rather than numerically equal: the dot sits closer to
      the pill edge than the cap-height text does, so the left side needs more
-     room to read as even. */
+     room to read as even. The gap is larger than it looks it should be because
+     the pulse ring around the dot eats into the apparent space. */
   padding: 3px 16px 3px 14px;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
@@ -366,10 +367,14 @@ button:focus-visible, input:focus-visible, a:focus-visible {
   border-radius: var(--radius-card);
   text-align: left;
   width: 100%;
+  /* Fill the grid row: a card next to a taller neighbour stretches rather
+     than leaving a ragged bottom edge. */
+  height: 100%;
   min-width: 0;
   max-width: 100%;
   transition: border-color 0.15s ease;
 }
+.grid { align-items: stretch; }
 .card:hover,
 .card:focus-visible {
   border-color: var(--card-accent, var(--ink));
@@ -1410,8 +1415,25 @@ a.chip {
 
 /* Reason tag above a card's name -- matches the gap between the meta rows
    beneath it so the card keeps one vertical rhythm. */
-.card-reason { margin-bottom: 6px; }
-.card-reason .reason-tag { font-size: 0.75rem; padding: 2px 7px; }
+/* Superseded by .card-head -- the tag now shares the name row instead of
+   occupying one of its own, which was forcing the meta rows to wrap. */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+.card-head .card-name { flex: 1 1 auto; min-width: 0; }
+.card-head .reason-tag {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  /* No border: at this size the outline read as a button and fought the
+     grade stamp for attention. Colour alone carries the meaning. */
+  border: none;
+  letter-spacing: 0.04em;
+}
 
 /* ---------- New restaurants & bars ---------- */
 .section-note {
@@ -1922,6 +1944,11 @@ a.chip {
 /* Beyond the initial batch: hidden from view, still present in the markup so
    every listing keeps a crawlable link. */
 .reveal-hidden { display: none; }
+/* On desktop a full-width-block CTA left-aligns inside the content column and
+   reads as stray. Centre it once there is room to. */
+@media (min-width: 640px) {
+  .cta-btn { display: block; margin-left: auto; margin-right: auto; }
+}
 
 /* ---------- closures ----------
    Grey rather than red: red already means Fail in this system, and a closure
@@ -2019,4 +2046,83 @@ a.chip {
 .source-note {
   display: block; font-family: var(--font-serif), Georgia, serif;
   font-size: 0.9rem; color: var(--ink-muted); margin-top: 4px; line-height: 1.5;
+}
+
+/* ---------- Hall of Shame: two columns on wide screens ----------
+   CSS columns rather than grid: the cards vary a lot in height (violation
+   comments run from one line to fifteen), and columns pack them without the
+   row-locked gaps a grid would leave. break-inside guards against a card
+   being split across the column boundary. */
+.shame-wide { max-width: 760px; }
+@media (min-width: 1200px) {
+  .shame-wide { max-width: 1180px; }
+  .shame-list { column-count: 2; column-gap: 20px; }
+  .shame-card {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+/* ---------- map loading ---------- */
+.map-spinner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  position: absolute;
+  inset: 0;
+  background: var(--paper-light);
+  z-index: 2;
+}
+.map-spinner { width: 46px; height: 46px; }
+/* Ink, matching the display headings rather than the muted body copy. */
+.map-spinner-plate {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 40 120;
+  transform-origin: 24px 24px;
+  animation: map-spin 1.1s linear infinite;
+}
+.map-spinner-cutlery { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+@keyframes map-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .map-spinner-plate { animation: none; stroke-dasharray: none; opacity: 0.35; }
+}
+.map-spinner-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* ---------- closure cards ---------- */
+.closure-card-link { display: block; color: inherit; text-decoration: none; }
+.closure-card-link:hover .closure-name { text-decoration: underline; }
+.closure-card-link:focus-visible { outline: 2px solid var(--seal-green); outline-offset: 2px; }
+
+/* Image splat -- replaces the .splat-mark / .splat-fly emoji pair, which
+   depended on Unicode 16 font coverage that most devices do not have. */
+.splat-img {
+  display: block;
+  width: 46px;
+  height: 46px;
+  transform: rotate(var(--splat-rot, 0deg));
+  animation: splat-land 0.22s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  pointer-events: none;
+}
+@keyframes splat-land {
+  from { transform: rotate(var(--splat-rot, 0deg)) scale(0.35); opacity: 0.4; }
+  to   { transform: rotate(var(--splat-rot, 0deg)) scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splat-img { animation: none; }
 }

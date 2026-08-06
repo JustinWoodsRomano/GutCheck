@@ -39,21 +39,28 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
             the server renders at build time and the client at view time, so a
             listing sitting exactly on the 90-day boundary can legitimately
             differ between the two. */}
-        {isNewLicense(r.it, r.d) ? (
-          <div className="card-reason" suppressHydrationWarning>
-            <span className="reason-tag reason-new">New license</span>
-          </div>
-        ) : (
-          showReason &&
-          inspectionReason(r.it) && (
-            <div className="card-reason">
+        {/* The tag shares the name row rather than sitting above it. As its
+            own line it pushed the neighbourhood and last-inspected rows down
+            and made them wrap; names truncate here anyway, so the right end of
+            that row is the cheapest space on the card.
+
+            suppressHydrationWarning because the cutoff is relative to now: the
+            server renders at build time and the client at view time, so a
+            listing sitting exactly on the 90-day boundary can legitimately
+            differ between the two. */}
+        <div className="card-head" suppressHydrationWarning>
+          <div className="card-name">{r.n}</div>
+          {isNewLicense(r.it, r.d) ? (
+            <span className="reason-tag reason-new">New</span>
+          ) : (
+            showReason &&
+            inspectionReason(r.it) && (
               <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
                 {inspectionReason(r.it).label}
               </span>
-            </div>
-          )
-        )}
-        <div className="card-name">{r.n}</div>
+            )
+          )}
+        </div>
         <div className="card-meta">
           {/* Name priority: vernacular neighborhood (Bucktown, Andersonville)
               first, since it's both coordinate-accurate and how people

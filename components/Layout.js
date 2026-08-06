@@ -68,7 +68,7 @@ export function Footer() {
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/cookies">Cookies</Link>
-          <a href="mailto:GutCheckChicago@builtbybackspace.com">Contact</a>
+          <a href="mailto:GUTCHECKChicago@builtbybackspace.com">Contact</a>
         </div>
         <div className="footer-copyright">
           &copy; {new Date().getFullYear()} All Rights Reserved{" \u00B7 "}

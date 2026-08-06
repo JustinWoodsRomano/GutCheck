@@ -53,7 +53,7 @@ export default function FoodInspectionMap({ total }) {
   // the critical path for the people who never scroll this far.
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const title = "Chicago Food Inspection Map & Health Inspection Records | GutCheck";
+  const title = "Chicago Food Inspection Map & Health Inspection Records | GUTCHECK";
   const description =
     "See Chicago restaurant health inspections on a map, and look up any restaurant's full inspection record. Official city data covering every food inspection since 2010, explained.";
   const url = `${SITE}/food-inspection-map`;
@@ -71,7 +71,7 @@ export default function FoodInspectionMap({ total }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: `${SITE}/` },
+      { "@type": "ListItem", position: 1, name: "GUTCHECK Chicago", item: `${SITE}/` },
       { "@type": "ListItem", position: 2, name: "Food inspection map", item: url },
     ],
   };
@@ -95,7 +95,7 @@ export default function FoodInspectionMap({ total }) {
       <Nav total={total} />
 
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">GutCheck Chicago</Link>
+        <Link href="/">GUTCHECK Chicago</Link>
         <ChevronRight size={13} aria-hidden="true" />
         <span aria-current="page">Food inspection map</span>
       </nav>
@@ -125,26 +125,48 @@ export default function FoodInspectionMap({ total }) {
             default and colour-codes each point by why the inspection happened. It covers every food
             establishment &mdash; including schools, daycares and grocers &mdash; not just restaurants.
           </p>
-          {!mapLoaded ? (
-            <button type="button" className="map-loader" onClick={() => setMapLoaded(true)}>
-              <span className="map-loader-title">Load the city&rsquo;s inspection map</span>
-              <span className="map-loader-sub">
-                Loads from data.cityofchicago.org · takes a few seconds to draw
-              </span>
-            </button>
-          ) : (
-            <div className="map-embed-wrap">
-              <iframe
-                allow="geolocation"
-                src="https://data.cityofchicago.org/dataset/Food-Inspections-Map/cnfp-tsxc/embed?width=800&height=600"
-                title="City of Chicago Food Inspections Map"
-                loading="lazy"
-              />
-            </div>
-          )}
+          {/* Loads on its own rather than behind a click. The spinner covers
+              the frame until the city's embed fires onLoad, so the wait reads
+              as loading rather than as an empty box.
+
+              The embed's width/height query params set the map's INTERNAL
+              canvas size; at the old 800x600 it drew letterboxed inside a
+              full-width iframe. Asking for a larger canvas lets it fill. */}
+          <div className="map-embed-wrap">
+            {!mapLoaded && (
+              <div className="map-spinner-wrap" role="status" aria-live="polite">
+                <svg className="map-spinner" viewBox="0 0 48 48" aria-hidden="true">
+                  {/* Plate rim, spinning */}
+                  <circle className="map-spinner-plate" cx="24" cy="24" r="20" />
+                  {/* Fork and knife, still */}
+                  <g className="map-spinner-cutlery">
+                    <path d="M19 14v8a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-8" />
+                    <path d="M21 24v10" />
+                    <path d="M29 14c-1.6 0-2.5 2-2.5 5s.9 5 2.5 5" />
+                    <path d="M29 24v10" />
+                  </g>
+                </svg>
+                <span className="map-spinner-label">Map loading</span>
+              </div>
+            )}
+            <iframe
+              allow="geolocation"
+              src="https://data.cityofchicago.org/dataset/Food-Inspections-Map/cnfp-tsxc/embed?width=1600&height=800"
+              title="City of Chicago Food Inspections Map"
+              loading="lazy"
+              onLoad={() => setMapLoaded(true)}
+            />
+          </div>
           <p className="hint">
-            Source: City of Chicago Food Inspections &mdash; Map (dataset cnfp-tsxc). GutCheck is
-            independent and not affiliated with the City of Chicago.
+            Source:{" "}
+            <a
+              href="https://data.cityofchicago.org/dataset/Food-Inspections-Map/cnfp-tsxc"
+              rel="nofollow noopener"
+              target="_blank"
+            >
+              City of Chicago Food Inspections &mdash; Map (dataset cnfp-tsxc)
+            </a>
+            . GUTCHECK is independent and not affiliated with the City of Chicago.
           </p>
         </section>
 
@@ -175,7 +197,7 @@ export default function FoodInspectionMap({ total }) {
             </table>
           </div>
           <p>
-            GutCheck labels every inspection with this reason, so you can see at a glance whether a
+            GUTCHECK labels every inspection with this reason, so you can see at a glance whether a
             result came from a routine visit or a complaint.
           </p>
         </section>
@@ -202,7 +224,7 @@ export default function FoodInspectionMap({ total }) {
         </section>
 
         <section className="finding">
-          <h2>City map or GutCheck?</h2>
+          <h2>City map or GUTCHECK?</h2>
           <p>
             They answer different questions, and the city&rsquo;s map is the better tool for some of
             them:
@@ -226,15 +248,15 @@ export default function FoodInspectionMap({ total }) {
                 </tr>
                 <tr>
                   <td>Look up one restaurant&rsquo;s full history</td>
-                  <td><Link href="/">GutCheck</Link></td>
+                  <td><Link href="/">GUTCHECK</Link></td>
                 </tr>
                 <tr>
                   <td>Read violations in plain language, with pests flagged</td>
-                  <td><Link href="/">GutCheck</Link></td>
+                  <td><Link href="/">GUTCHECK</Link></td>
                 </tr>
                 <tr>
                   <td>Compare a neighbourhood&rsquo;s restaurants</td>
-                  <td><Link href="/">GutCheck</Link></td>
+                  <td><Link href="/">GUTCHECK</Link></td>
                 </tr>
                 <tr>
                   <td>Analyse citywide patterns across 16 years</td>
