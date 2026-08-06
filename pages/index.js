@@ -133,6 +133,28 @@ function violationSlugFor(v) {
   return `${v.code}-${words}`;
 }
 
+/**
+ * Scroll the search field up against the sticky nav when it takes focus.
+ *
+ * On a phone the hero copy sits between the nav and the input, so tapping
+ * search leaves a band of marketing text wedged above the field with the
+ * results pushed off-screen below the keyboard. Pulling the field to the top
+ * of the usable area puts the query and its results in the same view.
+ *
+ * Deferred by a frame because iOS runs its own scroll-into-view on focus and
+ * would otherwise land last and undo this.
+ */
+function anchorSearchUnderNav(e) {
+  if (typeof window === "undefined" || window.innerWidth > 640) return;
+  const input = e.currentTarget;
+  const nav = document.querySelector(".nav");
+  window.setTimeout(() => {
+    const navH = nav ? nav.getBoundingClientRect().height : 0;
+    const top = window.scrollY + input.getBoundingClientRect().top - navH - 8;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }, 120);
+}
+
 export default function Home({ neighborhoods, popularSlugs, citywideTopViolations, citywideWithViolations, recentlyInspected = [] }) {
   const [data, setData] = useState(null);
   const [showAllNeighborhoods, setShowAllNeighborhoods] = useState(false);
@@ -327,7 +349,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
 
       <Nav total={total} />
 
-      <div className="wrap hero">
+      <div className={`wrap hero${query.trim() ? " hero-searching" : ""}`}>
         <div className="eyebrow">Health inspection records · official public data</div>
         <h1>
           KNOW BEFORE
@@ -364,6 +386,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
             spellCheck="false"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={anchorSearchUnderNav}
             placeholder="Search any Chicago restaurant or bar, neighborhood, or ZIP code…"
           />
           {query && (
@@ -391,7 +414,10 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
         )}
       </div>
 
-      <div className="wrap section">
+      {/* section-searching collapses the hero/section padding stack so the
+          first result is visible without scrolling on a phone -- see the rule
+          in globals.css. */}
+      <div className={`wrap section${query.trim() ? " section-searching" : ""}`}>
         <AdSlot variant="banner" />
 
         {mapCenter ? (

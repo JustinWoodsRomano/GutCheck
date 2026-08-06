@@ -2458,3 +2458,20 @@ body.swatter-near * { cursor: none; }
   .accordion-trigger { gap: 12px; }
   .hist-right { gap: 10px; }
 }
+
+/* ---------- searching state (phones) ----------
+   With a query active, 90px of vertical space sat between the search field and
+   the first result: the hero's 28px bottom padding, the results section's 40px
+   top padding, and the section heading's 22px margin, stacked. On a 390px-wide
+   phone with the keyboard up, that pushed every result below the fold -- you
+   typed and appeared to get nothing.
+
+   Only the padding collapses. Nothing is hidden, so the layout returns intact
+   the moment the field is cleared. Scoped to phones: on desktop the whole
+   stack is visible at once and the spacing is doing its job. */
+@media (max-width: 640px) {
+  .hero-searching { padding-bottom: 8px; }
+  .section-searching { padding-top: 8px; }
+  .section-searching > .eyebrow:first-of-type,
+  .section-searching .results-head { margin-top: 0; }
+}
