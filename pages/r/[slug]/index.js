@@ -272,13 +272,17 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
           {/* Sits inline with the date it describes. Complaint-driven visits
               fail at 34% against 22% for routine ones, so the trigger belongs
               next to the result, not on its own line below it. */}
+          {/* Its own block rather than inline: at narrow widths the tag wrapped
+              onto a second line and sat hard against the text above it, with
+              no leading of its own because an inline-flex span contributes
+              none. A block with explicit margin is the only way to guarantee
+              the gap survives the wrap. */}
           {inspectionReason(r.it) && (
-            <>
-              {" "}
+            <div className="detail-reason">
               <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
                 {inspectionReason(r.it).label}
               </span>
-            </>
+            </div>
           )}
         </div>
 
@@ -361,11 +365,13 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
                 <RestaurantCard key={x.slug} r={x} source="restaurant-nearby" />
               ))}
             </div>
-            <p className="section-note">
-              <Link href={`/n/${r.nbSlug || ""}`}>
+            {/* Primary CTA, not a footnote link: this is the strongest
+                keep-them-on-the-site action on the page. */}
+            <div className="nearby-cta">
+              <Link href={`/n/${r.nbSlug || ""}`} className="cta-btn">
                 See all {r.nb} restaurants &amp; bars
               </Link>
-            </p>
+            </div>
           </div>
         )}
       </div>

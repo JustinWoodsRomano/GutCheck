@@ -233,7 +233,7 @@ export default function PhysicalFacilities({ total }) {
           restaurant does after being told is a far stronger signal than any single finding.
         </p>
         <Link href="/data" className="cta-btn">
-          See the full inspection data analysis
+          Compare every violation code
         </Link>
       </div>
 
@@ -267,13 +267,30 @@ export default function PhysicalFacilities({ total }) {
               Every inspection record referenced on this page, published as open data.
             </span>
           </li>
-          <li>
-            <Link href="/data">GUTCHECK — analysis of 184,618 Chicago inspections</Link>
-            <span className="source-note">
-              Where the failure-rate and severity figures come from.
-            </span>
-          </li>
         </ul>
+        {/* Deliberately NOT a source. Our own analysis is method, not
+            evidence -- listing it alongside the city's records would be
+            citing ourselves to support our own numbers, which is exactly what
+            a reporter checking this page should not find. It belongs in its
+            own note, stating plainly how the figures were derived and from
+            what, so anyone can reproduce them from the primary data above. */}
+        <h2 className="eyebrow">How these figures were calculated</h2>
+        <div className="prose">
+          <p>
+            The failure rates on this page are not published by the City of Chicago. They were
+            derived from the city&rsquo;s own records: {STATS.sample.toLocaleString()} inspections
+            since {STATS.since} with a graded result of Pass, Pass w/ Conditions or Fail, each
+            one&rsquo;s violation string parsed for the leading code number. For any given
+            violation, the rate shown is the share of inspections citing it that ended in a
+            failure, against a {STATS.baselineFail}% baseline across the whole sample.
+          </p>
+          <p>
+            Anyone can reproduce this from the dataset linked above. The counts describe
+            inspections, not restaurants, and a single inspection commonly cites several
+            violations, so the codes are not mutually exclusive and their shares do not sum
+            to 100%.
+          </p>
+        </div>
       </div>
 
       <Footer />

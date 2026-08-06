@@ -25,42 +25,25 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
       style={{ "--card-accent": gradeAccentVar(r.g) }}
       onClick={handleClick}
     >
-      <div style={{ minWidth: 0 }}>
-        {/* Sits above the name, matching the vertical rhythm of the meta rows
-            below it. Only rendered when asked for, so the standard grid
-            doesn't gain a tag on every card. */}
-        {/* A recently licensed place is flagged everywhere it appears --
-            homepage grid, neighbourhood pages, search results, the "nearby"
-            block -- not only in sections that opted in via showReason. Whether
-            a listing is brand new is context a reader needs wherever they meet
-            it, and it explains a short inspection history on the spot.
-
-            suppressHydrationWarning because the cutoff is relative to now:
-            the server renders at build time and the client at view time, so a
-            listing sitting exactly on the 90-day boundary can legitimately
-            differ between the two. */}
-        {/* The tag shares the name row rather than sitting above it. As its
-            own line it pushed the neighbourhood and last-inspected rows down
-            and made them wrap; names truncate here anyway, so the right end of
-            that row is the cheapest space on the card.
-
-            suppressHydrationWarning because the cutoff is relative to now: the
-            server renders at build time and the client at view time, so a
-            listing sitting exactly on the 90-day boundary can legitimately
-            differ between the two. */}
-        <div className="card-head" suppressHydrationWarning>
-          <div className="card-name">{r.n}</div>
-          {isNewLicense(r.it, r.d) ? (
-            <span className="reason-tag reason-new">New</span>
-          ) : (
-            showReason &&
-            inspectionReason(r.it) && (
-              <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
-                {inspectionReason(r.it).label}
-              </span>
-            )
-          )}
-        </div>
+      {/* Grade and tag share a top row; the name gets the full card width
+          beneath them. Previously the stamp sat in a right-hand column, so the
+          name, neighbourhood and last-inspected rows were all squeezed into
+          whatever was left and truncated early. */}
+      <div className="card-top">
+        <Stamp grade={r.g} size="sm" />
+        {isNewLicense(r.it, r.d) ? (
+          <span className="reason-tag reason-new" suppressHydrationWarning>New</span>
+        ) : (
+          showReason &&
+          inspectionReason(r.it) && (
+            <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
+              {inspectionReason(r.it).label}
+            </span>
+          )
+        )}
+      </div>
+      <div className="card-body">
+        <div className="card-name">{r.n}</div>
         <div className="card-meta">
           {/* Name priority: vernacular neighborhood (Bucktown, Andersonville)
               first, since it's both coordinate-accurate and how people
@@ -72,7 +55,6 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
           <Clock size={12} /> Last inspected {r.d}
         </div>
       </div>
-      <Stamp grade={r.g} size="sm" />
     </Link>
   );
 }

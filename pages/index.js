@@ -552,17 +552,27 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
             {citywideTopViolations.map((v) => (
               <li key={v.code}>
                 {/* Only #55 has a resource page so far; the rest stay plain
-                    text until theirs exist rather than linking nowhere. */}
+                    text until theirs exist rather than linking nowhere. The
+                    whole cell is the target where one exists -- a title-only
+                    link was a thin strip to hit on a card this size. */}
                 {v.code === 55 ? (
-                  <Link href="/violations/physical-facilities" className="viol-title viol-title-link">
-                    {v.title}
+                  <Link href="/violations/physical-facilities" className="viol-cell-link">
+                    <span className="viol-cell-body">
+                      <span className="viol-title">{v.title}</span>
+                      <span className="viol-meta">
+                        cited at {v.count.toLocaleString()} places &middot; {v.share}% of those with violations
+                      </span>
+                    </span>
+                    <span className="viol-cta" aria-hidden="true">Learn more</span>
                   </Link>
                 ) : (
                   <span className="viol-title">{v.title}</span>
                 )}
-                <span className="viol-meta">
-                  cited at {v.count.toLocaleString()} places · {v.share}% of those with violations
-                </span>
+                {v.code !== 55 && (
+                  <span className="viol-meta">
+                    cited at {v.count.toLocaleString()} places · {v.share}% of those with violations
+                  </span>
+                )}
               </li>
             ))}
           </ol>

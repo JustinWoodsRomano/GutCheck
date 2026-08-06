@@ -131,8 +131,11 @@ export default function Reports({ total }) {
           about one restaurant easily and questions about patterns badly. We hold the whole thing in a
           form that can be grouped, ranked, and compared &mdash; and we&rsquo;ll run it for you.
         </p>
-        <p>
-          Free. The only condition is that you cite GUTCHECK Chicago and link to the site in whatever
+        {/* The terms are the offer -- pulled out of the body copy so they read
+            as the deal rather than a footnote to it. */}
+        <p className="terms-callout">
+          <strong>Free for journalists and researchers.</strong> The only condition is that you{" "}
+          <strong>cite GUTCHECK Chicago</strong> and <strong>link to the site</strong> in whatever
           you publish.
         </p>
       </div>

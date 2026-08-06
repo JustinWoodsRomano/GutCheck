@@ -358,9 +358,13 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 .card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  /* Stacked rows, not two columns: the grade and any tag take a row of their
+     own so the name and meta rows get the card's full width instead of
+     competing with a stamp for it. */
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
   padding: 16px;
   background: var(--paper-light);
   border: var(--stamp-border) solid var(--line);
@@ -1417,15 +1421,15 @@ a.chip {
    beneath it so the card keeps one vertical rhythm. */
 /* Superseded by .card-head -- the tag now shares the name row instead of
    occupying one of its own, which was forcing the meta rows to wrap. */
-.card-head {
+.card-top {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 10px;
   min-width: 0;
 }
-.card-head .card-name { flex: 1 1 auto; min-width: 0; }
-.card-head .reason-tag {
+.card-body { min-width: 0; }
+.card-top .reason-tag {
   flex: 0 0 auto;
   font-size: 0.7rem;
   padding: 1px 6px;
@@ -1944,11 +1948,9 @@ a.chip {
 /* Beyond the initial batch: hidden from view, still present in the markup so
    every listing keeps a crawlable link. */
 .reveal-hidden { display: none; }
-/* On desktop a full-width-block CTA left-aligns inside the content column and
-   reads as stray. Centre it once there is room to. */
-@media (min-width: 640px) {
-  .cta-btn { display: block; margin-left: auto; margin-right: auto; }
-}
+/* Full width at every size. A centred auto-width button floats in the column
+   and reads as incidental; edge to edge it reads as the next step. */
+.cta-btn { display: block; width: 100%; text-align: center; }
 
 /* ---------- closures ----------
    Grey rather than red: red already means Fail in this system, and a closure
@@ -2125,4 +2127,56 @@ a.chip {
 }
 @media (prefers-reduced-motion: reduce) {
   .splat-img { animation: none; }
+}
+
+/* Wrapping tag on the restaurant detail page needs leading of its own: an
+   inline-flex span carries none, so on wrap it sat flush against the line
+   above. */
+.detail-reason { margin-top: 10px; }
+
+/* Nearby CTA: separated from the card grid above it so the button does not
+   read as another card. */
+.nearby-cta { margin-top: 26px; }
+
+/* Reports: the terms are the offer. */
+.terms-callout {
+  border-left: 3px solid var(--seal-green);
+  padding: 2px 0 2px 14px;
+  margin-top: 18px;
+}
+.terms-callout strong { color: var(--ink); }
+
+/* Most-cited violations: whole cell is the target. */
+.viol-cell-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: inherit;
+  text-decoration: none;
+  min-width: 0;
+}
+.viol-cell-body { min-width: 0; }
+.viol-cta {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 9px 14px;
+  border-radius: var(--radius-stamp);
+  /* Page background inside, card border colour for the text -- present
+     without competing with the primary CTA. */
+  background: var(--paper);
+  color: var(--line-strong, var(--ink-muted));
+  border: 1px solid var(--line);
+  white-space: nowrap;
+  transition: color 0.12s ease, border-color 0.12s ease;
+}
+.viol-cell-link:hover .viol-cta { color: var(--ink); border-color: var(--ink); }
+.viol-cell-link:focus-visible { outline: 2px solid var(--seal-green); outline-offset: 3px; }
+@media (max-width: 560px) {
+  .viol-cell-link { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .viol-cta { align-self: stretch; text-align: center; }
 }

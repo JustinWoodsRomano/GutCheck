@@ -1,12 +1,41 @@
+import { useState } from "react";
 import { MapPinned, Phone, Globe } from "lucide-react";
 import ShareButton from "./ShareButton";
 
 export function MapEmbed({ address, lat, lon }) {
   const q = lat && lon ? `${lat},${lon}` : encodeURIComponent(address);
   const src = `https://www.google.com/maps?q=${q}&output=embed`;
+  // Google's embed can take a second or two on a slow connection, and until it
+  // paints, the framed area is an empty box that reads as a broken image.
+  const [loaded, setLoaded] = useState(false);
   return (
     <div className="map-embed">
-      <iframe src={src} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Map location" />
+      {!loaded && <MapSpinner />}
+      <iframe
+        src={src}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        title="Map location"
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  );
+}
+
+/** Spinning plate rim with static cutlery. Shared by every embedded map. */
+export function MapSpinner() {
+  return (
+    <div className="map-spinner-wrap" role="status" aria-live="polite">
+      <svg className="map-spinner" viewBox="0 0 48 48" aria-hidden="true">
+        <circle className="map-spinner-plate" cx="24" cy="24" r="20" />
+        <g className="map-spinner-cutlery">
+          <path d="M19 14v8a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-8" />
+          <path d="M21 24v10" />
+          <path d="M29 14c-1.6 0-2.5 2-2.5 5s.9 5 2.5 5" />
+          <path d="M29 24v10" />
+        </g>
+      </svg>
+      <span className="map-spinner-label">Map loading</span>
     </div>
   );
 }
