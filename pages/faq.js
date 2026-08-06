@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
-import { loadRestaurants, loadCounts } from "../lib/data";
+import { loadCounts } from "../lib/data";
 
 const SANITY_QUERY_URL =
   "https://5kywyk09.api.sanity.io/v2024-01-01/data/query/production?query=" +

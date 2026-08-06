@@ -5,7 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import Stamp from "../components/Stamp";
 import AdSlot from "../components/AdSlot";
-import { loadRestaurants, loadCounts } from "../lib/data";
+import { loadCounts } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 

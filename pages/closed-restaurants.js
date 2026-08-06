@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { Nav, Footer } from "../components/Layout";
-import { loadClosures, loadSlugIndex, loadCounts } from "../lib/data";
+import { loadClosures, loadCounts } from "../lib/data";
 import { RECENT_CLOSURE_DAYS } from "../lib/pests.mjs";
 
 const SITE = "https://www.gutcheckchicago.com";

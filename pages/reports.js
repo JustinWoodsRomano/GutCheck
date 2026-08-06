@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronRight, FileText } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
-import { loadRestaurants, loadCounts } from "../lib/data";
+import { loadCounts } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
