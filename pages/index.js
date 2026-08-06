@@ -532,7 +532,9 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
             ))}
           </div>
           <Link href="/new-restaurants" className="cta-btn">
-            View all new Chicago restaurants &amp; bars
+            {/* Same treatment as the section heading above it -- the
+                qualifying word carries the emphasis in both places. */}
+            View all <span className="word-new">NEW</span> Chicago restaurants &amp; bars
           </Link>
         </div>
       )}

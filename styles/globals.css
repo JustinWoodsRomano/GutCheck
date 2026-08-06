@@ -1337,7 +1337,10 @@ a.chip {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   padding: 3px 9px;
-  border-radius: var(--radius-stamp);
+  /* Square, everywhere. Rounded it read as a pill competing with the grade
+     stamp; squared off it reads as a label. Set here rather than per-context
+     so there is exactly one tag design on the site. */
+  border-radius: 0;
   border: 1px solid var(--line);
   color: var(--ink-muted);
   background: transparent;
@@ -1429,15 +1432,10 @@ a.chip {
   min-width: 0;
 }
 .card-body { min-width: 0; }
-.card-top .reason-tag {
-  flex: 0 0 auto;
-  font-size: 0.7rem;
-  padding: 2px 7px;
-  /* Square corners only -- the border stays. Rounded, it read as a pill
-     competing with the grade stamp; squared off it reads as a label. */
-  border-radius: 0;
-  letter-spacing: 0.04em;
-}
+/* Sizing and shape come from .reason-tag; the card only needs it to stop
+   flexing. Overriding font-size here previously dropped it to 11.2px, below
+   the 12px floor the rest of the site holds to. */
+.card-top .reason-tag { flex: 0 0 auto; }
 .card-top-tag { min-width: 0; }
 
 /* ---------- New restaurants & bars ---------- */
@@ -1965,8 +1963,8 @@ a.chip {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: var(--radius-stamp, 6px);
+  padding: 3px 9px;
+  border-radius: 0;
   color: #6b6f76;
   border: 1px solid #b9bcc1;
   background: rgba(120, 124, 130, 0.10);
@@ -2364,4 +2362,5 @@ body.swatter-cursor *:active {
   color: var(--ink-muted);
 }
 /* Closed marker in search results. */
-.card-top .closed-tag { border-radius: 0; font-size: 0.7rem; padding: 2px 7px; }
+/* Shape and size come from .closed-tag itself -- see .reason-tag. */
+.card-top .closed-tag { flex: 0 0 auto; }
