@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Nav, Footer } from "../components/Layout";
 import RestaurantCard from "../components/RestaurantCard";
 import { useState } from "react";
-import { loadRestaurants, loadSlugIndex } from "../lib/data";
+import { loadRestaurants, loadSlugIndex, loadCounts } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
@@ -34,7 +34,7 @@ const INITIAL_VISIBLE = 20;
  */
 export async function getStaticProps() {
   const all = loadRestaurants();
-  const total = Object.keys(loadSlugIndex()).length;
+  const total = loadCounts().active;
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - WINDOW_DAYS);

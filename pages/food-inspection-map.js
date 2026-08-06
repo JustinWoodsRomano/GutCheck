@@ -5,12 +5,12 @@ import { ChevronRight } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import Stamp from "../components/Stamp";
 import AdSlot from "../components/AdSlot";
-import { loadRestaurants } from "../lib/data";
+import { loadRestaurants, loadCounts } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
 export async function getStaticProps() {
-  return { props: { total: loadRestaurants().length } };
+  return { props: { total: loadCounts().active } };
 }
 
 // Straight from the city map's own legend. Worth spelling out because

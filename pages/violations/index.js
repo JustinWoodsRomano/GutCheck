@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Nav, Footer } from "../../components/Layout";
-import { loadSlugIndex } from "../../lib/data";
+import { loadSlugIndex, loadCounts } from "../lib/data";
 import VIOLATION_DATA from "../../data/violations.json";
 import { violationSlug, severityOf } from "../../lib/violations.mjs";
 
@@ -18,7 +18,7 @@ const SITE = "https://www.gutcheckchicago.com";
  * on the page rather than assumed.
  */
 export async function getStaticProps() {
-  const total = Object.keys(loadSlugIndex()).length;
+  const total = loadCounts().active;
   return { props: { total, data: VIOLATION_DATA }, revalidate: 86400 };
 }
 

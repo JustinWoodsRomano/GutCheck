@@ -3,12 +3,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { ChevronRight, FileText } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
-import { loadRestaurants } from "../lib/data";
+import { loadRestaurants, loadCounts } from "../lib/data";
 
 const SITE = "https://www.gutcheckchicago.com";
 
 export async function getStaticProps() {
-  return { props: { total: loadRestaurants().length } };
+  return { props: { total: loadCounts().active } };
 }
 
 const FAQS = [

@@ -6,7 +6,10 @@ import { loadRestaurants } from "../lib/data";
 
 export async function getStaticProps() {
   const restaurants = loadRestaurants();
-  return { props: { total: restaurants.length, lastUpdated: restaurants[0]?.d || null } };
+  // Archived closures live in the same file now, so the headline figure and
+  // the "last updated" date both have to come from active records only.
+  const active = restaurants.filter((r) => !r.closed);
+  return { props: { total: active.length, lastUpdated: active[0]?.d || null } };
 }
 
 export default function About({ total, lastUpdated }) {

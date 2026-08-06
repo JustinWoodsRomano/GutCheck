@@ -3,13 +3,13 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
 import AdSlot from "../components/AdSlot";
-import { loadRestaurants } from "../lib/data";
+import { loadRestaurants, loadCounts } from "../lib/data";
 import analysis from "../data/inspection-analysis.json";
 
 const SITE = "https://www.gutcheckchicago.com";
 
 export async function getStaticProps() {
-  return { props: { total: loadRestaurants().length } };
+  return { props: { total: loadCounts().active } };
 }
 
 function titleCase(s) {

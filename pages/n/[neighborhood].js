@@ -27,7 +27,10 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
-  const all = loadRestaurants();
+  // Archived closures share this file now. A neighbourhood page is a list of
+  // places to eat, so they are excluded here; they stay reachable by search
+  // and from /closed-restaurants.
+  const all = loadRestaurants().filter((r) => !r.closed);
   const meta = loadNeighborhoodMeta()[params.neighborhood] || null;
 
   // A restaurant belongs to this page if EITHER its vernacular neighborhood

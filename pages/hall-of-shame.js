@@ -22,7 +22,7 @@ import ShameCritters from "../components/ShameCritters";
 // violation, whether it's revealed) lives in that file.
 export async function getStaticProps() {
   const restaurants = loadRestaurants();
-  const total = restaurants.length;
+  const total = restaurants.filter((r) => !r.closed).length;
 
   // Entries are addressed by a distinctive fragment of the violation text,
   // searched across the current inspection AND the full history.

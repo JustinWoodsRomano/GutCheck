@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
 import { Nav, Footer } from "../components/Layout";
-import { loadClosures, loadSlugIndex } from "../lib/data";
+import { loadClosures, loadSlugIndex, loadCounts } from "../lib/data";
 import { RECENT_CLOSURE_DAYS } from "../lib/pests.mjs";
 
 const SITE = "https://www.gutcheckchicago.com";
@@ -29,7 +29,7 @@ const INITIAL_VISIBLE = 20;
  */
 export async function getStaticProps() {
   const all = loadClosures();
-  const total = Object.keys(loadSlugIndex()).length;
+  const total = loadCounts().active;
 
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - WINDOW_DAYS);

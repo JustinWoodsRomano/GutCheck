@@ -2343,3 +2343,25 @@ body.swatter-cursor *:active {
   /* Touch devices have no cursor to change. */
   body.swatter-cursor, body.swatter-cursor * { cursor: auto; }
 }
+
+/* Closure notice on a restaurant detail page. */
+.closed-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #b9bcc1;
+  border-radius: var(--radius-card);
+  background: rgba(120, 124, 130, 0.07);
+}
+.closed-notice .closed-tag { flex: 0 0 auto; margin-top: 2px; }
+.closed-notice p {
+  margin: 0;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+/* Closed marker in search results. */
+.card-top .closed-tag { border-radius: 0; font-size: 0.7rem; padding: 2px 7px; }

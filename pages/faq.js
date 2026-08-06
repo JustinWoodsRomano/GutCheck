@@ -2,14 +2,14 @@ import Head from "next/head";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Nav, Footer } from "../components/Layout";
-import { loadRestaurants } from "../lib/data";
+import { loadRestaurants, loadCounts } from "../lib/data";
 
 const SANITY_QUERY_URL =
   "https://5kywyk09.api.sanity.io/v2024-01-01/data/query/production?query=" +
   encodeURIComponent('*[_type=="faqItem"]|order(category,order){question,answer,category,order}');
 
 export async function getStaticProps() {
-  const total = loadRestaurants().length;
+  const total = loadCounts().active;
   let faqs = [];
   try {
     const res = await fetch(SANITY_QUERY_URL);

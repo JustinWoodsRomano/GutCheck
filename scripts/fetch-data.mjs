@@ -453,6 +453,12 @@ function buildClosures(rows, processed) {
     const dates = priorGraded.map((x) => (x.inspection_date || "").slice(0, 10)).sort();
 
     out.push({
+      // Full record, so a closed restaurant keeps every violation and every
+      // inspection it ever had. This is the archive: once the city marks a
+      // licence out of business it stops appearing in the active set, and
+      // without keeping the record here its entire history would vanish from
+      // the site the day it closed.
+      record: { ...known, closed: true, closedOn: d },
       slug: known.slug,
       n: known.n,
       a: known.a,
@@ -565,7 +571,20 @@ try {
       `(${vnSlugs.size} vernacular + ${caSlugs.size} community areas + ` +
       `${aliasSlugs.size} legacy aliases, deduped).`
   );
+  // Stats are deliberately computed on ACTIVE restaurants only -- a closed
+  // establishment's last grade should not move a neighbourhood's pass rate.
   const neighborhoodStats = buildNeighborhoodStats(restaurants);
+
+  // Closed restaurants, rebuilt from their pre-closure history. They are kept
+  // searchable and keep their own pages: the inspection record is the whole
+  // point of the site, and it does not stop being true because the business
+  // shut. They are NOT counted in the headline total and NOT included in
+  // neighbourhood statistics -- both describe places you can currently eat.
+  const closures = buildClosures(rows, restaurants);
+  const archived = closures.map((c) => c.record).filter(Boolean);
+  const activeSlugs = new Set(restaurants.map((r) => r.slug));
+  const archiveOnly = archived.filter((a) => a.slug && !activeSlugs.has(a.slug));
+  console.log(`Closure archive: ${archiveOnly.length} closed restaurants retained and searchable.`);
 
   // Lean slug -> {n: raw dba_name, a: raw address} index. pages/r/[slug]
   // uses this at ISR revalidate time to resolve a slug into the exact
@@ -574,13 +593,17 @@ try {
   // Uses the RAW (not title-cased) values since that's what has to match
   // Socrata's own stored casing for an exact upper() comparison.
   const slugIndex = {};
-  for (const r of restaurants) slugIndex[r.slug] = { n: r.rawName, a: r.rawAddress, l: r.license };
+  for (const r of [...restaurants, ...archiveOnly]) {
+    slugIndex[r.slug] = { n: r.rawName, a: r.rawAddress, l: r.license };
+  }
   fs.writeFileSync(path.join(outBuildDir, "slug-index.json"), JSON.stringify(slugIndex));
 
   // rawName/rawAddress only exist to seed slugIndex above -- strip them
   // before writing the public-facing dataset so it stays lean and doesn't
   // carry two redundant near-duplicates of every restaurant's name/address.
-  const publicRestaurants = restaurants.map(({ rawName, rawAddress, license, ...rest }) => rest);
+  const publicRestaurants = [...restaurants, ...archiveOnly].map(
+    ({ rawName, rawAddress, license, ...rest }) => rest
+  );
 
   // The homepage's client-side browse/search UI (pages/index.js) only ever
   // reads id, slug, n, nb, nbSlug, z, g, d from each restaurant -- it never
@@ -602,7 +625,7 @@ try {
   // what loadRestaurants() reads server-side for pages that do need those
   // fields (e.g. pages/hall-of-shame.js reading a specific violation) --
   // only the client-fetched public copy is trimmed.
-  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, it, lat, lon, ca, caSlug, vn, vnSlug }) => ({
+  const browseRestaurants = publicRestaurants.map(({ id, slug, n, nb, nbSlug, z, g, d, it, lat, lon, ca, caSlug, vn, vnSlug, closed, closedOn }) => ({
     id,
     slug,
     n,
@@ -621,6 +644,9 @@ try {
     vn,
     vnSlug,
     it,
+    // Present only on archived closures, so a search result can be labelled
+    // without the browse UI having to fetch anything extra.
+    ...(closed ? { closed: true, closedOn } : {}),
     // Rounded to 5 decimals (~1.1m precision) -- plenty for map pins,
     // saves bytes across 8,000+ records vs full float precision.
     lat: lat != null ? Math.round(lat * 100000) / 100000 : null,
@@ -631,10 +657,10 @@ try {
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-meta.json"), JSON.stringify(neighborhoodMeta));
-  const closures = buildClosures(rows, restaurants);
   fs.writeFileSync(path.join(outBuildDir, "closures.json"), JSON.stringify(closures));
   console.log(`closures: ${closures.length} licences marked out of business with no later graded inspection`);
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(publicRestaurants, neighborhoods));
+  fs.writeFileSync(path.join(outBuildDir, "active-count.json"), JSON.stringify({ active: restaurants.length, archived: archiveOnly.length }));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(publicRestaurants.length, neighborhoods));
 
   console.log("Generating Open Graph images...");

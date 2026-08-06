@@ -95,7 +95,9 @@ export async function getStaticProps() {
 // possible so the block reads as a spread across the city rather than
 // whichever neighbourhood happened to be inspected that week.
 function buildRecentlyInspected(limit) {
-  const all = loadRestaurants();
+  // Archived closures share this file now; the recently-inspected strip is a
+  // list of operating places, so they are filtered out here.
+  const all = loadRestaurants().filter((r) => !r.closed);
   const sorted = all
     .filter((r) => r.d && r.n)
     .sort((a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0));

@@ -33,7 +33,11 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
         {/* Tag left, grade right. The tag sits above the name; the grade keeps
             the right-hand position it has everywhere else on the site. */}
         <span className="card-top-tag" suppressHydrationWarning>
-          {isNewLicense(r.it, r.d) ? (
+          {r.closed ? (
+            // Archived closure: the record is still searchable, so a result
+            // has to say plainly that the place is no longer operating.
+            <span className="closed-tag">Closed</span>
+          ) : isNewLicense(r.it, r.d) ? (
             <span className="reason-tag reason-new">New license</span>
           ) : (
             showReason &&

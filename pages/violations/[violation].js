@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Nav, Footer } from "../../components/Layout";
-import { loadSlugIndex } from "../../lib/data";
+import { loadSlugIndex, loadCounts } from "../lib/data";
 import VIOLATION_DATA from "../../data/violations.json";
 import { violationSlug, severityOf, severityBlurb } from "../../lib/violations.mjs";
 
@@ -26,7 +26,7 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   const v = VIOLATION_DATA.violations.find((x) => violationSlug(x) === params.violation);
   if (!v) return { notFound: true };
-  const total = Object.keys(loadSlugIndex()).length;
+  const total = loadCounts().active;
 
   const sorted = [...VIOLATION_DATA.violations].sort((a, b) => b.cited - a.cited);
   const rankByCitation = sorted.findIndex((x) => x.code === v.code) + 1;

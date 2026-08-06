@@ -251,6 +251,23 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
           <ArrowLeft size={13} /> Back to results
         </Link>
 
+        {/* Deliberately worded differently from the summary on
+            /closed-restaurants: the same facts phrased the same way across
+            ~100 pages would be near-duplicate content. That page reports the
+            closure as an event; this one frames the record that survives it. */}
+        {r.closed && (
+          <div className="closed-notice" role="note">
+            <span className="closed-tag">Closed</span>
+            <p>
+              City inspectors recorded this establishment as out of business on{" "}
+              <strong>{r.closedOn}</strong>. Its inspection history is kept below in full &mdash;
+              the record does not stop being true because the business shut. The city publishes no
+              reason for a closure, and none is inferred here. A licence can be reinstated; if this
+              one is inspected and graded again, the notice clears on the next rebuild.
+            </p>
+          </div>
+        )}
+
         <p style={{ fontFamily: "var(--font-serif)", fontSize: "1rem", color: "var(--ink)", marginBottom: 20 }}>
           As of <strong>{r.d}</strong>, <strong>{r.n}</strong> {gradeLabel === "Fail" ? "failed" : gradeLabel === "Pass" ? "passed" : "received a Pass w/ Conditions on"} its most recent City of Chicago health inspection.
         </p>
