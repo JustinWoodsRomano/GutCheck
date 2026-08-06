@@ -44,6 +44,8 @@ export default function ShameCritters() {
   const [drops, setDrops] = useState([]);
   const [flyVisible, setFlyVisible] = useState(false);
   const [splat, setSplat] = useState(null);
+  const [swatter, setSwatter] = useState(null);
+  const [swinging, setSwinging] = useState(false);
   const [mounted, setMounted] = useState(false);
   const flyRef = useRef(null);
   // Live viewport position, kept in a ref so the click handler can read it
@@ -112,16 +114,65 @@ export default function ShameCritters() {
     return () => document.removeEventListener("pointerdown", onDown, true);
   }, [flyVisible, smash]);
 
-  // Swatter cursor while there is something to swat. Set on <body> rather than
-  // a wrapper because the fly roams the whole viewport, and removed the moment
-  // it is squashed so the rest of the page behaves normally again. Scoped to
-  // this component, which only mounts on Hall of Shame.
+  // Swatter, shown only when the pointer is actually near the fly.
+  //
+  // Previously this was `cursor: url(...)` applied to <body> for as long as the
+  // fly was alive, which meant the whole page had a swatter cursor whether or
+  // not you were anywhere near it. It also could not animate: a CSS cursor
+  // swaps between two static images with no motion in between.
+  //
+  // So the swatter is a real element that follows the pointer inside the
+  // proximity band and hides again outside it, which both matches the intent
+  // and gives the swat something to animate.
   useEffect(() => {
-    // splat, not smashedRef: a ref mutation does not re-run an effect, so the
-    // cursor would have stayed a swatter after the fly was already dead.
+    if (!flyVisible || splat) {
+      setSwatter(null);
+      document.body.classList.remove("swatter-near");
+      return;
+    }
+    // Comfortably wider than HIT_RADIUS so the swatter appears before you are
+    // close enough to connect -- it should read as an invitation, not as a
+    // hit indicator.
+    const SHOW_RANGE = 150;
+    let frame = 0;
+
+    const onMove = (e) => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        const { x, y } = posRef.current;
+        const dx = e.clientX - x;
+        const dy = e.clientY - y;
+        const near = Math.sqrt(dx * dx + dy * dy) <= SHOW_RANGE;
+        setSwatter(near ? { x: e.clientX, y: e.clientY } : null);
+        document.body.classList.toggle("swatter-near", near);
+      });
+    };
+    const onLeave = () => {
+      setSwatter(null);
+      document.body.classList.remove("swatter-near");
+    };
+
+    window.addEventListener("pointermove", onMove, { passive: true });
+    document.addEventListener("pointerleave", onLeave);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerleave", onLeave);
+      document.body.classList.remove("swatter-near");
+    };
+  }, [flyVisible, splat]);
+
+  // Swing on every press, whether or not it connects -- a swing that only
+  // animated on a hit would feel unresponsive on the misses.
+  useEffect(() => {
     if (!flyVisible || splat) return;
-    document.body.classList.add("swatter-cursor");
-    return () => document.body.classList.remove("swatter-cursor");
+    const onDown = () => {
+      setSwinging(true);
+      window.setTimeout(() => setSwinging(false), 320);
+    };
+    window.addEventListener("pointerdown", onDown);
+    return () => window.removeEventListener("pointerdown", onDown);
   }, [flyVisible, splat]);
 
   useEffect(() => {
@@ -241,6 +292,23 @@ export default function ShameCritters() {
           </span>
         )}
       </div>
+
+      {/* Follows the pointer only inside the proximity band. Viewport-fixed,
+          unlike the splat, because it tracks the cursor rather than the page. */}
+      {mounted &&
+        swatter &&
+        createPortal(
+          <img
+            className={`swatter${swinging ? " swatter-swing" : ""}`}
+            src="/swatter.png"
+            alt=""
+            aria-hidden="true"
+            width="48"
+            height="48"
+            style={{ transform: `translate3d(${swatter.x}px, ${swatter.y}px, 0)` }}
+          />,
+          document.body
+        )}
 
       {/* Portalled to <body> so it anchors to the document rather than the
           viewport -- see the note at the top of this file. */}

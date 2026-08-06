@@ -1337,24 +1337,24 @@ a.chip {
   letter-spacing: 0.05em;
   text-transform: uppercase;
   padding: 3px 9px;
-  /* Square, everywhere. Rounded it read as a pill competing with the grade
-     stamp; squared off it reads as a label. Set here rather than per-context
-     so there is exactly one tag design on the site. */
-  border-radius: 0;
-  border: 1px solid var(--line);
+  /* Rounded, no stroke. Defined once here so every instance -- card, section
+     header, detail page, search result -- is identical by default. The tonal
+     background carries the shape now that the outline is gone, so the base
+     needs a fill of its own; transparent + no border would have left an
+     untoned tag as floating text. */
+  border-radius: var(--radius-stamp);
+  border: none;
   color: var(--ink-muted);
-  background: transparent;
+  background: rgba(120, 124, 130, 0.10);
   white-space: nowrap;
 }
 /* Triggered by a member of the public. */
 .reason-flag {
-  border-color: var(--amber);
   color: var(--amber-deep, #8a6100);
   background: var(--amber-tint);
 }
 /* Someone reported getting sick. */
 .reason-alarm {
-  border-color: var(--stamp-red);
   color: var(--stamp-red);
   background: var(--stamp-red-tint);
 }
@@ -1909,7 +1909,6 @@ a.chip {
 }
 .reason-tag.reason-new {
   color: var(--seal-green);
-  border-color: var(--seal-green);
   background: var(--seal-green-tint);
 }
 
@@ -1964,10 +1963,10 @@ a.chip {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 3px 9px;
-  border-radius: 0;
+  border-radius: var(--radius-stamp);
   color: #6b6f76;
-  border: 1px solid #b9bcc1;
-  background: rgba(120, 124, 130, 0.10);
+  border: none;
+  background: rgba(120, 124, 130, 0.14);
 }
 .closure-list { display: grid; gap: 14px; margin-top: 18px; }
 .closure-card {
@@ -2325,21 +2324,56 @@ a.chip {
   color: var(--ink);
 }
 
-/* ---------- fly swatter cursor (Hall of Shame only) ----------
-   Applied to <body> by ShameCritters while the fly is alive, and removed on
-   the smash so the page reverts to a normal cursor. The * selector is needed
-   because links and buttons set their own cursor and would otherwise win. */
-body.swatter-cursor,
-body.swatter-cursor * {
-  cursor: url("/swatter.png") 10 10, crosshair;
+/* ---------- fly swatter (Hall of Shame only) ----------
+   A real element following the pointer, not `cursor: url(...)`. A CSS cursor
+   cannot animate -- it can only swap between two static images -- and it
+   applied to the whole page rather than just the area around the fly.
+
+   The system cursor is hidden only while the swatter is on screen, i.e. only
+   inside the proximity band, so the pointer behaves normally everywhere else. */
+body.swatter-near,
+body.swatter-near * { cursor: none; }
+
+.swatter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 48px;
+  z-index: 60;
+  pointer-events: none;
+  /* Pivot at the handle so the swing arcs from the wrist rather than spinning
+     about the pad. */
+  transform-origin: 78% 88%;
+  will-change: transform;
+  filter: drop-shadow(0 2px 3px rgba(28, 35, 51, 0.28));
+  /* Offset so the pad -- not the handle -- sits under the pointer. */
+  margin: -34px 0 0 -12px;
+  rotate: -22deg;
+  transition: rotate 0.13s ease-out;
 }
-body.swatter-cursor:active,
-body.swatter-cursor *:active {
-  cursor: url("/swatter-down.png") 10 10, crosshair;
+
+/* Wind up, snap through, overshoot, settle. The rotate property animates
+   independently of the translate applied inline, so the swatter can swing
+   while still tracking the pointer. */
+.swatter-swing { animation: swat 0.32s cubic-bezier(0.3, 0.9, 0.3, 1.4) both; }
+@keyframes swat {
+  0%   { rotate: -22deg; }
+  18%  { rotate: -46deg; }   /* wind up */
+  46%  { rotate: 34deg; }    /* strike */
+  62%  { rotate: 26deg; }    /* impact recoil */
+  80%  { rotate: -30deg; }   /* bounce back past rest */
+  100% { rotate: -22deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swatter { transition: none; }
+  .swatter-swing { animation: none; }
 }
 @media (hover: none) {
-  /* Touch devices have no cursor to change. */
-  body.swatter-cursor, body.swatter-cursor * { cursor: auto; }
+  /* Touch has no hover state to track; leave the cursor alone. */
+  body.swatter-near, body.swatter-near * { cursor: auto; }
+  .swatter { display: none; }
 }
 
 /* Closure notice on a restaurant detail page. */
