@@ -671,9 +671,11 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 .accordion-trigger {
   width: 100%;
   display: flex;
-  align-items: center;
+  /* Top, not centre: the left column is two stacked rows and the grade should
+     line up with the date, not float against the middle of the pair. */
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   padding: 14px 16px;
   background: var(--paper-light);
   border: none;
@@ -2398,3 +2400,45 @@ body.swatter-near * { cursor: none; }
 /* Closed marker in search results. */
 /* Shape and size come from .closed-tag itself -- see .reason-tag. */
 .card-top .closed-tag { flex: 0 0 auto; }
+
+/* ---------- inspection history rows ----------
+   The old single-line layout put date, grade and reason tag in one flex row.
+   With no flex-shrink guard the date lost the fight to a long reason like
+   "Complaint re-inspection" and wrapped to one character per line. Splitting
+   into two columns removes the competition entirely: the tag gets a full row
+   of its own and the date can never be squeezed. */
+.hist-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  text-align: left;
+}
+.hist-date {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--ink);
+  /* Never wrap. This is the specific failure in the old layout. */
+  white-space: nowrap;
+}
+.accordion-trigger[aria-expanded="true"] .hist-date { color: var(--ink); }
+/* The tag may wrap its own text on a narrow screen; it must not force the
+   date to. */
+.hist-left .reason-tag { white-space: normal; text-align: left; }
+
+.hist-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  /* Keeps the grade aligned with the date's cap height rather than the
+     column's centre. */
+  padding-top: 1px;
+}
+
+@media (max-width: 420px) {
+  .accordion-trigger { gap: 12px; }
+  .hist-right { gap: 10px; }
+}

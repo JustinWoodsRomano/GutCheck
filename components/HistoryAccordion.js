@@ -3,6 +3,28 @@ import { detectPests, inspectionReason, sortViolations } from "../lib/pests.mjs"
 import { ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
 import Stamp from "./Stamp";
 
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+/**
+ * "2019-05-30" -> "May 30".
+ *
+ * The year is dropped because every row already sits under a year heading.
+ * Parsed off the string rather than via `new Date()`: an ISO date-only string
+ * is treated as UTC midnight, so in any timezone behind UTC the Date object
+ * reports the previous day, and inspections would silently show one day early.
+ * Falls back to the raw value if the shape is not what we expect.
+ */
+function formatDay(d) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || "");
+  if (!m) return d || "";
+  const month = MONTHS[Number(m[2]) - 1];
+  if (!month) return d;
+  return `${month} ${Number(m[3])}`;
+}
+
 export default function HistoryAccordion({ history }) {
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -42,16 +64,24 @@ export default function HistoryAccordion({ history }) {
               aria-expanded={open}
               onClick={() => setOpenIndex(open ? null : i)}
             >
-              <span style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0, maxWidth: "100%" }}>
-                {h.d}
-                <Stamp grade={h.g} size="sm" />
+              {/* Two columns. Everything used to sit on one flex line, so a
+                  long reason like "Complaint re-inspection" squeezed the date
+                  until it wrapped a character per line. The date and its tag
+                  now stack on the left and the grade sits on the right, which
+                  gives the tag a whole row to use and stops it competing with
+                  anything. */}
+              <span className="hist-left">
+                <span className="hist-date">{formatDay(h.d)}</span>
                 {inspectionReason(h.it) && (
                   <span className={`reason-tag reason-${inspectionReason(h.it).tone}`}>
                     {inspectionReason(h.it).label}
                   </span>
                 )}
               </span>
-              <ChevronDown size={16} className="accordion-chevron" />
+              <span className="hist-right">
+                <Stamp grade={h.g} size="sm" />
+                <ChevronDown size={16} className="accordion-chevron" />
+              </span>
             </button>
             {open && (
               <div className="accordion-panel">
