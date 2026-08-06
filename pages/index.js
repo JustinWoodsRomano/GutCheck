@@ -105,14 +105,14 @@ function buildRecentlyInspected(limit) {
     const hood = r.vnSlug || r.caSlug || r.nbSlug || "";
     if (seen.has(hood)) continue;
     seen.add(hood);
-    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, nb: r.vn || r.ca || r.nb });
+    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, it: r.it, nb: r.nb, vn: r.vn, ca: r.ca });
     if (out.length >= limit) break;
   }
   // Top up from the plain recency list if there weren't enough neighbourhoods.
   for (const r of sorted) {
     if (out.length >= limit) break;
     if (out.some((x) => x.slug === r.slug)) continue;
-    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, nb: r.vn || r.ca || r.nb });
+    out.push({ slug: r.slug, n: r.n, g: r.g, d: r.d, it: r.it, nb: r.nb, vn: r.vn, ca: r.ca });
   }
   return out;
 }

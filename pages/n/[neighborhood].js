@@ -71,7 +71,10 @@ export async function getStaticProps({ params }) {
     // coordinate-derived names, and without them every card silently fell
     // back to the stale ZIP-derived neighborhood (Bucktown listings were
     // labelled "Logan Square").
-    .map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, vn: r.vn, ca: r.ca, g: r.g, d: r.d }))
+    // `it` carries the inspection reason, which RestaurantCard needs to flag
+    // recently licensed places. Dropping it here silently suppressed the
+    // "New license" badge on every neighbourhood page.
+    .map((r) => ({ id: r.id, slug: r.slug, n: r.n, nb: r.nb, vn: r.vn, ca: r.ca, g: r.g, d: r.d, it: r.it }))
     .sort((a, b) => (a.d < b.d ? 1 : -1));
 
   return {
