@@ -111,6 +111,7 @@ function buildSitemap(restaurants, neighborhoods) {
     { loc: `${SITE_URL}/faq`, priority: "0.6" },
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
     { loc: `${SITE_URL}/new-restaurants`, priority: "0.8" },
+    { loc: `${SITE_URL}/closed-restaurants`, priority: "0.7" },
     { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/food-inspection-map`, priority: "0.7" },
     { loc: `${SITE_URL}/reports`, priority: "0.7" },
@@ -143,6 +144,9 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Neighborhood directories are at /n/{neighborhood-slug}.
 - New and newly-licensed restaurants and bars (the closest public signal to a
   new opening, since the city publishes no opening-date field): /new-restaurants
+- Recently closed restaurants and bars, i.e. licences the city has marked "Out
+  of Business" with no later graded inspection: /closed-restaurants. The city
+  records no REASON for a closure, and neither does this site.
 - FAQ (methodology, grading system explanation): /faq
 - Free custom inspection reports for journalists and researchers, with a
   sample PDF and a request form: /reports
@@ -353,6 +357,117 @@ const outBuildDir = path.resolve("scripts/.data");
 fs.mkdirSync(outDataDir, { recursive: true });
 fs.mkdirSync(outBuildDir, { recursive: true });
 
+// ---------------------------------------------------------------------------
+// Closures
+//
+// The city records "Out of Business" as an inspection result: an inspector
+// went to the address and the establishment was gone. It is the only closure
+// signal in the public record -- there is no closure date, and crucially no
+// REASON. Nothing in this dataset says why anything closed.
+//
+// It is also not perfectly reliable. Checked against 40 out-of-business
+// records from before Oct 2025, 38 stayed closed and 2 were later graded
+// again -- Russian Tea Time, a Loop institution that is very much open, was
+// one of them. So a licence is only treated as closed when NO later graded
+// inspection exists for it. That catches every correction the city has
+// actually filed, and the page wording ("marked out of business by city
+// inspectors") reports the record rather than asserting the business is gone.
+// ---------------------------------------------------------------------------
+function buildClosures(rows, processed) {
+  const GRADED = new Set(["Pass", "Fail", "Pass w/ Conditions"]);
+
+  // Latest graded inspection per licence, so a later Pass can veto a closure.
+  const lastGraded = new Map();
+  for (const r of rows) {
+    if (!GRADED.has(r.results)) continue;
+    const lic = r.license_;
+    const d = (r.inspection_date || "").slice(0, 10);
+    if (!lic || !d) continue;
+    if (!lastGraded.has(lic) || d > lastGraded.get(lic)) lastGraded.set(lic, d);
+  }
+
+  // Most recent out-of-business record per licence.
+  const oob = new Map();
+  for (const r of rows) {
+    if (r.results !== "Out of Business") continue;
+    const lic = r.license_;
+    const d = (r.inspection_date || "").slice(0, 10);
+    if (!lic || !d) continue;
+    const prev = oob.get(lic);
+    if (!prev || d > prev.d) oob.set(lic, { d, row: r });
+  }
+
+  // Geography and history come from the processed active-restaurant records
+  // where the licence is known to us; otherwise fall back to the raw row.
+  const byLicense = new Map();
+  for (const p of processed) if (p.license) byLicense.set(String(p.license), p);
+
+  const out = [];
+  for (const [lic, { d, row }] of oob) {
+    const graded = lastGraded.get(lic);
+    // Reopened, or the closure record is stale -- not a closure.
+    if (graded && graded >= d) continue;
+
+    let known = byLicense.get(String(lic));
+    if (!known) {
+      // Licence is closed, so it never appears in the active set. Build the
+      // same shape from its own rows via the shared builder so the slug,
+      // display name and address match how every other record is formatted.
+      const own = rows.filter((x) => x.license_ === lic);
+      const built = own.length ? buildRestaurantFromRows(own, { neighborhoodFor }) : null;
+      if (built) {
+        const ca = communityAreaFor(built.lat, built.lon);
+        const vn = vernacularNeighborhoodFor(built.lat, built.lon);
+        known = {
+          ...built,
+          ca: ca ? ca.name : null,
+          caSlug: ca ? ca.slug : null,
+          vn: vn ? vn.name : null,
+          vnSlug: vn ? vn.slug : null,
+        };
+      }
+    }
+    if (!known) continue;
+    const priorGraded = rows.filter(
+      (x) => x.license_ === lic && GRADED.has(x.results) && (x.inspection_date || "").slice(0, 10) < d
+    );
+    const fails = priorGraded.filter((x) => x.results === "Fail").length;
+    const dates = priorGraded.map((x) => (x.inspection_date || "").slice(0, 10)).sort();
+
+    out.push({
+      slug: known.slug,
+      n: known.n,
+      a: known.a,
+      z: known.z || null,
+      nb: known.nb || null,
+      nbSlug: known.nbSlug || null,
+      ca: known.ca || null,
+      caSlug: known.caSlug || null,
+      vn: known.vn || null,
+      vnSlug: known.vnSlug || null,
+      lat: known.lat ?? null,
+      lon: known.lon ?? null,
+      // Date the city recorded the establishment as out of business.
+      d,
+      // Inspection record before it closed. Facts only -- these are what the
+      // page describes, and they are the only thing the data supports.
+      inspections: priorGraded.length,
+      fails,
+      firstSeen: dates[0] || null,
+      lastGraded: dates.length ? dates[dates.length - 1] : null,
+      lastResult: priorGraded.length
+        ? priorGraded.sort((x, y) => (x.inspection_date < y.inspection_date ? 1 : -1))[0].results
+        : null,
+      // Whether this licence is one we also list as an active restaurant.
+      // Is this licence also in the active-restaurant set (i.e. does /r/{slug} exist)?
+      hasPage: byLicense.has(String(lic)),
+    });
+  }
+
+  out.sort((a, b) => (a.d < b.d ? 1 : a.d > b.d ? -1 : 0));
+  return out;
+}
+
 try {
   console.log("Fetching live Chicago restaurant inspection data...");
   const rows = await fetchAllRows();
@@ -498,6 +613,9 @@ try {
   fs.writeFileSync(path.join(outBuildDir, "restaurants.json"), JSON.stringify(publicRestaurants));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-stats.json"), JSON.stringify(neighborhoodStats));
   fs.writeFileSync(path.join(outBuildDir, "neighborhood-meta.json"), JSON.stringify(neighborhoodMeta));
+  const closures = buildClosures(rows, restaurants);
+  fs.writeFileSync(path.join(outBuildDir, "closures.json"), JSON.stringify(closures));
+  console.log(`closures: ${closures.length} licences marked out of business with no later graded inspection`);
   fs.writeFileSync(path.resolve("public/sitemap.xml"), buildSitemap(publicRestaurants, neighborhoods));
   fs.writeFileSync(path.resolve("public/llms.txt"), buildLlmsTxt(publicRestaurants.length, neighborhoods));
 

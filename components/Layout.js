@@ -55,6 +55,8 @@ export function Footer() {
           <Link href="/food-inspection-map">Inspection map</Link>
           <Link href="/reports">Custom reports</Link>
           <Link href="/about">About the data</Link>
+          <Link href="/new-restaurants">New restaurants</Link>
+          <Link href="/closed-restaurants">Recently closed</Link>
           <Link href="/hall-of-shame">Hall of Shame</Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>

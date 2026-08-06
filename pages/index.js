@@ -558,6 +558,9 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
               </li>
             ))}
           </ol>
+          <Link href="/data" className="cta-btn">
+            See the full inspection data analysis
+          </Link>
         </div>
       )}
 

@@ -1922,3 +1922,59 @@ a.chip {
 /* Beyond the initial batch: hidden from view, still present in the markup so
    every listing keeps a crawlable link. */
 .reveal-hidden { display: none; }
+
+/* ---------- closures ----------
+   Grey rather than red: red already means Fail in this system, and a closure
+   is not a health judgment. Grey reads as inactive, which is what it is. */
+.closed-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--radius-stamp, 6px);
+  color: #6b6f76;
+  border: 1px solid #b9bcc1;
+  background: rgba(120, 124, 130, 0.10);
+}
+.closure-list { display: grid; gap: 14px; margin-top: 18px; }
+.closure-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 16px 18px;
+  /* Deliberately flatter than a live restaurant card -- these are records of
+     something that is no longer there. */
+  background: transparent;
+}
+.closure-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.closure-name {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  min-width: 0;
+}
+.closure-name a { color: inherit; text-decoration: none; }
+.closure-name a:hover { text-decoration: underline; }
+.closure-meta {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  margin-top: 6px;
+}
+.closure-summary {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+  margin: 10px 0 0;
+}
