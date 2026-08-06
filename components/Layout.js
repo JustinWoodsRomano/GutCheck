@@ -63,7 +63,7 @@ export function Footer() {
                 carries no meaning the link text does not already carry.
                 Neutral for SEO either way; Google does not treat emoji as a
                 ranking signal, and the anchor text is unchanged. */}
-            <span aria-hidden="true">&#129454;</span> Hall of Shame
+            <span aria-hidden="true">&#129712;</span> Hall of Shame
           </Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
