@@ -57,7 +57,14 @@ export function Footer() {
           <Link href="/about">About the data</Link>
           <Link href="/new-restaurants">New restaurants</Link>
           <Link href="/closed-restaurants">Recently closed</Link>
-          <Link href="/hall-of-shame">Hall of Shame</Link>
+          <Link href="/hall-of-shame">
+            {/* Decorative only. aria-hidden so a screen reader announces
+                "Hall of Shame" rather than "fly, Hall of Shame" -- the emoji
+                carries no meaning the link text does not already carry.
+                Neutral for SEO either way; Google does not treat emoji as a
+                ranking signal, and the anchor text is unchanged. */}
+            <span aria-hidden="true">&#129454;</span> Hall of Shame
+          </Link>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>
           <Link href="/cookies">Cookies</Link>
