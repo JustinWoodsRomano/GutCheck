@@ -215,11 +215,41 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 /* ---------- Hero ---------- */
 .hero { padding-top: 44px; padding-bottom: 28px; }
-/* A section starting immediately under the nav's bottom border sat tight
-   against the rule. */
+
+/* ---------- vertical rhythm ----------
+   Sections need room to breathe: content that butts up against a rule or the
+   section above it reads as one undifferentiated block. These are the
+   defaults so spacing is a property of the layout rather than something
+   re-applied per page with inline styles. */
+
+/* A section opening directly beneath the nav's bottom border. */
 .nav + .wrap > .eyebrow:first-child,
-.nav + .wrap .eyebrow:first-child { margin-top: 30px; }
-.wrap.section { padding-top: 8px; }
+.nav + .wrap .eyebrow:first-child { margin-top: 40px; }
+
+.wrap.section {
+  padding-top: 40px;
+  padding-bottom: 56px;
+}
+/* Consecutive sections shouldn't double up their gap. */
+.wrap.section + .wrap.section { padding-top: 16px; }
+
+/* Every section header gets air above it and a beat below before its copy. */
+.wrap > .eyebrow,
+.wrap.section > .eyebrow {
+  margin-top: 34px;
+  margin-bottom: 14px;
+}
+.hero > .eyebrow { margin-top: 0; }
+.wrap.section > .eyebrow:first-child { margin-top: 0; }
+
+/* Intro copy sits close to its header, then leaves a clear gap before the
+   content it introduces. */
+.wrap > .eyebrow + .section-note,
+.wrap > .eyebrow + .prose,
+.wrap > .eyebrow + .new-intro { margin-top: 0; }
+.wrap > .section-note + .grid,
+.wrap > .new-intro + .grid,
+.wrap > .prose + .grid { margin-top: 22px; }
 .hero h1 {
   font-family: var(--font-display);
   color: var(--ink);
@@ -1659,61 +1689,11 @@ a.chip {
   100% { transform: rotate(var(--splat-rot)) scale(1); opacity: 1; }
 }
 
-/* ---------- nearby / recently-inspected lists ----------
-   Used on restaurant pages ("other places in this neighbourhood") and on the
-   homepage ("recently inspected"). Both exist primarily so that every page
-   has an internal link pointing at it -- ~47% of restaurant pages previously
-   had none and were reachable only via the sitemap. Rows are 44px minimum so
-   they're a legitimate tap target on mobile. */
-.nearby-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--line);
-}
-.nearby-item { border-bottom: 1px solid var(--line); }
-.nearby-link {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 9px 2px;
-  text-decoration: none;
-  color: inherit;
-}
-.nearby-link:hover .nearby-name { text-decoration: underline; }
-.nearby-name {
-  flex: 1 1 auto;
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 15px;
-  line-height: 1.3;
-  min-width: 0;
-}
-.nearby-meta {
-  flex: 0 0 auto;
-  font-family: var(--font-mono), monospace;
-  font-size: 12px;
-  color: var(--ink-muted);
-  white-space: nowrap;
-}
-.nearby-grade {
-  flex: 0 0 auto;
-  font-family: var(--font-mono), monospace;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border-radius: var(--radius-stamp, 6px);
-  border: 1px solid var(--line);
-}
-.nearby-pass { color: var(--seal-green); border-color: var(--seal-green); background: var(--seal-green-tint); }
-.nearby-cond, .nearby-conditional { color: var(--amber-ink, #8a6100); border-color: var(--amber); background: var(--amber-tint); }
-.nearby-fail { color: var(--stamp-red); border-color: var(--stamp-red); background: var(--stamp-red-tint); }
-@media (max-width: 520px) {
-  /* The date is the first thing to go when space is tight -- the grade and
-     the name are what the row is actually for. */
-  .nearby-meta { display: none; }
-}
+/* The compact one-line "nearby list" row style was removed deliberately.
+   Restaurant listings use .card via components/RestaurantCard everywhere --
+   homepage, neighbourhood pages, /new-restaurants, and the "other places
+   nearby" block on a restaurant page. One listing style, one component. If
+   you find yourself hand-rolling a denser row, use RestaurantCard instead. */
 
 /* ---------- accessibility utilities ---------- */
 /* Visually hidden but read by screen readers. Used for the search input's
@@ -1873,4 +1853,33 @@ a.chip {
   width: auto;
   height: 26px;
   flex: 0 0 auto;
+}
+
+/* ---------- neighbourhood tally (new-restaurants page) ---------- */
+.hood-tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.hood-tally-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill, 999px);
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.hood-tally-item:hover { border-color: var(--seal-green); color: var(--seal-green); }
+.hood-tally-count {
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--seal-green-tint);
+  border-radius: var(--radius-pill, 999px);
+  padding: 1px 8px;
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Nav, Footer } from "../../../components/Layout";
 import Stamp from "../../../components/Stamp";
+import RestaurantCard from "../../../components/RestaurantCard";
 import HistoryAccordion from "../../../components/HistoryAccordion";
 import { MapEmbed, ContactRow, RestaurantLogo } from "../../../components/Contact";
 import AdSlot from "../../../components/AdSlot";
@@ -132,12 +133,13 @@ function buildNearby(slug, limit = 8) {
   for (let i = 0; i < Math.min(limit, ordered.length); i++) {
     out.push(ordered[(selfIdx + i) % ordered.length]);
   }
-  return out.map((x) => ({ slug: x.slug, n: x.n, g: x.g, d: x.d, nb: x.vn || x.ca || x.nb }));
+  // Shape matches what RestaurantCard reads, including the vn/ca/nb
+  // priority it applies for the location line.
+  return out.map((x) => ({
+    slug: x.slug, n: x.n, g: x.g, d: x.d, it: x.it,
+    nb: x.nb, vn: x.vn, ca: x.ca,
+  }));
 }
-
-// Same faces the Stamp component uses, so a grade reads identically
-// wherever it appears.
-const GRADE_EMOJI = { PASS: "\u{1F642}", CONDITIONAL: "\u{1F62C}", FAIL: "\u{1F922}" };
 
 export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
   const gradeLabel = GRADE_LABEL[r.g];
@@ -354,19 +356,11 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
             <h2 className="eyebrow">
               Other restaurants &amp; bars in {r.nb}
             </h2>
-            <ul className="nearby-list">
+            <div className="grid">
               {nearby.map((x) => (
-                <li key={x.slug} className="nearby-item">
-                  <Link href={`/r/${x.slug}`} className="nearby-link">
-                    <span className="nearby-name">{x.n}</span>
-                    <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
-                      <span aria-hidden="true">{GRADE_EMOJI[x.g] || ""}</span>{" "}
-                      {x.g === "CONDITIONAL" ? "COND" : x.g}
-                    </span>
-                  </Link>
-                </li>
+                <RestaurantCard key={x.slug} r={x} source="restaurant-nearby" />
               ))}
-            </ul>
+            </div>
             <p className="section-note">
               <Link href={`/n/${r.nbSlug || ""}`}>
                 See all {r.nb} restaurants &amp; bars

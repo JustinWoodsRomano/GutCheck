@@ -57,9 +57,6 @@ function distanceMiles(lat1, lon1, lat2, lon2) {
 // widths. Mobile ignores this entirely and renders the full list.
 const COLLAPSED_CHIP_COUNT = 40;
 
-// Matches the Stamp component, so a grade reads the same everywhere.
-const GRADE_EMOJI = { PASS: "\u{1F642}", CONDITIONAL: "\u{1F62C}", FAIL: "\u{1F922}" };
-
 export async function getStaticProps() {
   const neighborhoods = loadNeighborhoods();
   const stats = loadNeighborhoodStats();
@@ -522,26 +519,17 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           `data` load -- this is the block that gives a non-JS crawler
           something to read. It stays out of the way during an active search. */}
       {!query.trim() && recentlyInspected.length > 0 && (
-        <div className="wrap" style={{ marginTop: 34 }}>
+        <div className="wrap section">
           <h2 className="eyebrow">Recently inspected across Chicago</h2>
           <p className="section-note section-note-left">
             The latest health inspection results filed by the Chicago Department of
             Public Health, one per neighborhood.
           </p>
-          <ul className="nearby-list" style={{ marginTop: 12 }}>
+          <div className="grid">
             {recentlyInspected.map((x) => (
-              <li key={x.slug} className="nearby-item">
-                <Link href={`/r/${x.slug}`} className="nearby-link">
-                  <span className="nearby-name">{x.n}</span>
-                  <span className="nearby-meta">{x.nb} · {x.d}</span>
-                  <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
-                    <span aria-hidden="true">{GRADE_EMOJI[x.g] || ""}</span>{" "}
-                    {x.g === "CONDITIONAL" ? "COND" : x.g}
-                  </span>
-                </Link>
-              </li>
+              <RestaurantCard key={x.slug} r={x} source="homepage-recent" />
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
