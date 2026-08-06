@@ -2470,8 +2470,11 @@ body.swatter-near * { cursor: none; }
    the moment the field is cleared. Scoped to phones: on desktop the whole
    stack is visible at once and the spacing is doing its job. */
 @media (max-width: 640px) {
-  .hero-searching { padding-bottom: 8px; }
-  .section-searching { padding-top: 8px; }
-  .section-searching > .eyebrow:first-of-type,
-  .section-searching .results-head { margin-top: 0; }
+  /* .wrap.hero and .wrap.section are two-class selectors, so single-class
+     modifiers lose to them. Matched at equal-or-higher specificity here --
+     the first attempt collapsed the hero (whose rule happens to be weaker)
+     but silently left the section's 40px intact. */
+  .wrap.hero.hero-searching { padding-bottom: 8px; }
+  .wrap.section.section-searching { padding-top: 8px; }
+  .wrap.section.section-searching > .eyebrow:first-child { margin-top: 0; }
 }
