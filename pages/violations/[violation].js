@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { Nav, Footer } from "../../components/Layout";
-import { loadSlugIndex, loadCounts } from "../lib/data";
+import { loadCounts } from "../../lib/data";
 import VIOLATION_DATA from "../../data/violations.json";
 import { violationSlug, severityOf, severityBlurb } from "../../lib/violations.mjs";
 
