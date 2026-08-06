@@ -1,4 +1,9 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
+
+// Client-only: it lazy-loads lottie-web from an IntersectionObserver, and
+// there is nothing to server-render for a decorative badge.
+const BackspaceBadge = dynamic(() => import("./BackspaceBadge"), { ssr: false });
 
 export function Nav({ total }) {
   return (
@@ -67,6 +72,7 @@ export function Footer() {
             Website Design Chicago
           </a>
         </div>
+        <BackspaceBadge />
       </div>
     </div>
   );

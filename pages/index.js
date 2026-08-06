@@ -57,6 +57,9 @@ function distanceMiles(lat1, lon1, lat2, lon2) {
 // widths. Mobile ignores this entirely and renders the full list.
 const COLLAPSED_CHIP_COUNT = 40;
 
+// Matches the Stamp component, so a grade reads the same everywhere.
+const GRADE_EMOJI = { PASS: "\u{1F642}", CONDITIONAL: "\u{1F62C}", FAIL: "\u{1F922}" };
+
 export async function getStaticProps() {
   const neighborhoods = loadNeighborhoods();
   const stats = loadNeighborhoodStats();
@@ -245,7 +248,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
     return data
       .filter((r) => inspectionReason(r.it)?.label === "New license")
       .sort((a, b) => (a.d < b.d ? 1 : -1))
-      .slice(0, 12);
+      .slice(0, 8);
   }, [data]);
 
   const title = "Chicago Restaurant & Bar Health Inspections — GutCheck";
@@ -509,6 +512,9 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
               <RestaurantCard key={r.id} r={r} source="homepage-new" showReason />
             ))}
           </div>
+          <Link href="/new-restaurants" className="view-all-btn">
+            View all new Chicago restaurants &amp; bars
+          </Link>
         </div>
       )}
 
@@ -518,7 +524,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
       {!query.trim() && recentlyInspected.length > 0 && (
         <div className="wrap" style={{ marginTop: 34 }}>
           <h2 className="eyebrow">Recently inspected across Chicago</h2>
-          <p className="section-note" style={{ marginTop: 4 }}>
+          <p className="section-note section-note-left">
             The latest health inspection results filed by the Chicago Department of
             Public Health, one per neighborhood.
           </p>
@@ -529,6 +535,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                   <span className="nearby-name">{x.n}</span>
                   <span className="nearby-meta">{x.nb} · {x.d}</span>
                   <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
+                    <span aria-hidden="true">{GRADE_EMOJI[x.g] || ""}</span>{" "}
                     {x.g === "CONDITIONAL" ? "COND" : x.g}
                   </span>
                 </Link>

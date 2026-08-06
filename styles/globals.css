@@ -80,13 +80,27 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 }
 
 .eyebrow {
+  /* Same display face as the H1 so section headers read as part of the same
+     type system, but a third of the size and tightened tracking -- clearly
+     subordinate, never mistaken for another H1. */
+  font-family: var(--font-display);
+  color: var(--ink);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-size: 1.05rem;
+  line-height: 1.2;
+  font-weight: 400;
+  margin: 0 0 10px;
+}
+/* The eyebrow above an H1 is a kicker, not a section header -- it keeps the
+   original mono treatment so it doesn't compete with the headline below it. */
+.hero > .eyebrow {
   font-family: var(--font-mono);
   color: var(--ink-muted);
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.75rem;
   font-weight: 500;
-  margin: 0 0 10px;
 }
 
 /* ---------- Nav (sticky) ---------- */
@@ -201,6 +215,11 @@ button:focus-visible, input:focus-visible, a:focus-visible {
 
 /* ---------- Hero ---------- */
 .hero { padding-top: 44px; padding-bottom: 28px; }
+/* A section starting immediately under the nav's bottom border sat tight
+   against the rule. */
+.nav + .wrap > .eyebrow:first-child,
+.nav + .wrap .eyebrow:first-child { margin-top: 30px; }
+.wrap.section { padding-top: 8px; }
 .hero h1 {
   font-family: var(--font-display);
   color: var(--ink);
@@ -1369,6 +1388,13 @@ a.chip {
   text-align: center;
   margin-top: 12px;
 }
+/* Explanatory copy under a section header reads as prose, not as a caption,
+   so it ranges left like every other paragraph on the page. */
+.section-note-left {
+  text-align: left;
+  margin-top: 4px;
+  line-height: 1.55;
+}
 .new-intro {
   font-family: var(--font-serif);
   font-size: 0.95rem;
@@ -1782,4 +1808,69 @@ a.chip {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+}
+
+/* ---------- view-all button ---------- */
+.view-all-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  margin-top: 18px;
+  padding: 10px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  background: transparent;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-stamp, 8px);
+  text-decoration: none;
+}
+.view-all-btn:hover {
+  border-style: solid;
+  border-color: var(--seal-green);
+  color: var(--seal-green);
+}
+
+/* ---------- Built with 💪 by Backspace ----------
+   Ported from vidarlaw.com. The arm is a Lottie loaded lazily on scroll --
+   see components/BackspaceBadge.js. */
+.bbs-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 18px;
+  text-decoration: none;
+  color: var(--ink);
+  min-height: 44px;
+}
+.bbs-badge:hover { opacity: 0.75; }
+.bbs-built,
+.bbs-by {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.bbs-flex,
+.bbs-flex-static {
+  display: inline-block;
+  width: 30px;
+  height: 33px;
+  line-height: 33px;
+  font-size: 20px;
+  text-align: center;
+  /* Reserved before the Lottie loads so the footer doesn't reflow. */
+  flex: 0 0 auto;
+}
+.bbs-flex svg { display: block; width: 100%; height: 100%; }
+.bbs-logo {
+  display: block;
+  width: auto;
+  height: 26px;
+  flex: 0 0 auto;
 }

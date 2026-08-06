@@ -110,6 +110,7 @@ function buildSitemap(restaurants, neighborhoods) {
     { loc: `${SITE_URL}/`, priority: "1.0" },
     { loc: `${SITE_URL}/faq`, priority: "0.6" },
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
+    { loc: `${SITE_URL}/new-restaurants`, priority: "0.8" },
     { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/food-inspection-map`, priority: "0.7" },
     { loc: `${SITE_URL}/reports`, priority: "0.7" },
@@ -140,6 +141,8 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
 - Currently indexes ${restaurantCount.toLocaleString()} active Chicago restaurants and bars across ${neighborhoods.length} neighborhoods.
 - Each restaurant has its own page at /r/{slug} with current grade (Pass / Pass w/ Conditions / Fail), listed violations, and up to 5 most recent inspections.
 - Neighborhood directories are at /n/{neighborhood-slug}.
+- New and newly-licensed restaurants and bars (the closest public signal to a
+  new opening, since the city publishes no opening-date field): /new-restaurants
 - FAQ (methodology, grading system explanation): /faq
 - Free custom inspection reports for journalists and researchers, with a
   sample PDF and a request form: /reports

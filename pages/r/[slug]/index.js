@@ -72,6 +72,23 @@ export async function getStaticProps({ params }) {
   // ever point somewhere other than the URL actually being viewed.
   restaurant.slug = params.slug;
 
+  // Neighbourhood shown here must match what the list views show. The live
+  // Socrata fetch only yields the ZIP-derived neighbourhood, while every
+  // list uses vernacular-first (vn -> ca -> nb). That mismatch was visible:
+  // Roma's Kitchen reads "Bucktown" in a list and "Logan Square" here, off
+  // the same record. The browse index holds the coordinate-derived
+  // vernacular name, so adopt it -- it is both the more accurate label and
+  // the one whose /n/ page actually lists this restaurant.
+  const indexed = loadRestaurants().find((x) => x.slug === params.slug);
+  if (indexed) {
+    const label = indexed.vn || indexed.ca || indexed.nb;
+    const labelSlug = indexed.vnSlug || indexed.caSlug || indexed.nbSlug;
+    if (label && labelSlug) {
+      restaurant.nb = label;
+      restaurant.nbSlug = labelSlug;
+    }
+  }
+
   // Revalidate hourly: individual restaurant grade/violation changes go
   // live within an hour of appearing in the city's feed, without needing a
   // full site rebuild/redeploy.
@@ -117,6 +134,10 @@ function buildNearby(slug, limit = 8) {
   }
   return out.map((x) => ({ slug: x.slug, n: x.n, g: x.g, d: x.d, nb: x.vn || x.ca || x.nb }));
 }
+
+// Same faces the Stamp component uses, so a grade reads identically
+// wherever it appears.
+const GRADE_EMOJI = { PASS: "\u{1F642}", CONDITIONAL: "\u{1F62C}", FAIL: "\u{1F922}" };
 
 export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
   const gradeLabel = GRADE_LABEL[r.g];
@@ -339,6 +360,7 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
                   <Link href={`/r/${x.slug}`} className="nearby-link">
                     <span className="nearby-name">{x.n}</span>
                     <span className={`nearby-grade nearby-${(x.g || "").toLowerCase()}`}>
+                      <span aria-hidden="true">{GRADE_EMOJI[x.g] || ""}</span>{" "}
                       {x.g === "CONDITIONAL" ? "COND" : x.g}
                     </span>
                   </Link>
