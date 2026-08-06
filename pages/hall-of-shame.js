@@ -146,7 +146,7 @@ export default function HallOfShame({ entries, total }) {
         <Link href="/" className="back-link">
           <ArrowLeft size={14} /> Back home
         </Link>
-        <div className="eyebrow">Notable findings \u00b7 official public data</div>
+        <div className="eyebrow">Notable findings &middot; official public data</div>
         <h1>HALL OF SHAME.</h1>
         <p>
           Some of the more notable violations turned up in recent Chicago health inspections, straight from
@@ -165,7 +165,7 @@ export default function HallOfShame({ entries, total }) {
               <Stamp grade={entry.g} size="sm" />
             </h2>
             <div className="shame-card-meta">
-              {entry.nb}, Chicago \u00b7 {entry.d}
+              {entry.nb}, Chicago &middot; {entry.d}
               {entry.historical && (
                 <span className="shame-historical">
                   {" \u00b7 "}since re-inspected

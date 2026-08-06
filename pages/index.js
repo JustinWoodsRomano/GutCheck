@@ -551,7 +551,15 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           <ol className="viol-list">
             {citywideTopViolations.map((v) => (
               <li key={v.code}>
-                <span className="viol-title">{v.title}</span>
+                {/* Only #55 has a resource page so far; the rest stay plain
+                    text until theirs exist rather than linking nowhere. */}
+                {v.code === 55 ? (
+                  <Link href="/violations/physical-facilities" className="viol-title viol-title-link">
+                    {v.title}
+                  </Link>
+                ) : (
+                  <span className="viol-title">{v.title}</span>
+                )}
                 <span className="viol-meta">
                   cited at {v.count.toLocaleString()} places · {v.share}% of those with violations
                 </span>

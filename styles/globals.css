@@ -1978,3 +1978,45 @@ a.chip {
   color: var(--ink-muted);
   margin: 10px 0 0;
 }
+
+/* ---------- violation comparison ---------- */
+.viol-compare { display: grid; gap: 16px; margin-top: 18px; }
+.viol-compare-row {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+}
+.viol-compare-focus { border-color: var(--seal-green); background: var(--seal-green-tint); }
+.viol-compare-head { display: flex; gap: 10px; align-items: baseline; }
+.viol-compare-code {
+  font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--ink-muted); flex: 0 0 auto;
+}
+.viol-compare-name {
+  font-family: var(--font-mono); font-size: 0.85rem; font-weight: 600;
+  color: var(--ink); line-height: 1.35;
+}
+.viol-compare-bar-wrap {
+  height: 8px; margin-top: 10px; border-radius: 999px;
+  background: rgba(120,124,130,0.16); overflow: hidden;
+}
+.viol-compare-bar { height: 100%; background: var(--stamp-red); border-radius: 999px; }
+.viol-compare-focus .viol-compare-bar { background: var(--seal-green); }
+.viol-compare-meta {
+  font-family: var(--font-mono); font-size: 0.75rem;
+  color: var(--ink-muted); margin-top: 8px;
+}
+.viol-title-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.viol-title-link:hover { color: var(--seal-green); }
+
+/* ---------- sources ---------- */
+.source-list { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 16px; }
+.source-list li { border-left: 3px solid var(--seal-green); padding-left: 14px; }
+.source-list a {
+  display: block; font-family: var(--font-mono); font-size: 0.85rem;
+  min-height: 32px;
+}
+.source-note {
+  display: block; font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.9rem; color: var(--ink-muted); margin-top: 4px; line-height: 1.5;
+}

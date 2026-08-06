@@ -112,6 +112,7 @@ function buildSitemap(restaurants, neighborhoods) {
     { loc: `${SITE_URL}/hall-of-shame`, priority: "0.6" },
     { loc: `${SITE_URL}/new-restaurants`, priority: "0.8" },
     { loc: `${SITE_URL}/closed-restaurants`, priority: "0.7" },
+    { loc: `${SITE_URL}/violations/physical-facilities`, priority: "0.7" },
     { loc: `${SITE_URL}/data`, priority: "0.8" },
     { loc: `${SITE_URL}/food-inspection-map`, priority: "0.7" },
     { loc: `${SITE_URL}/reports`, priority: "0.7" },
@@ -152,6 +153,8 @@ function buildLlmsTxt(restaurantCount, neighborhoods) {
   sample PDF and a request form: /reports
 - Chicago food inspection map, inspection types explained, and what Pass /
   Pass w Conditions / Fail actually mean: /food-inspection-map
+- Explainers for individual violation codes, including how often each one is
+  cited and how strongly it predicts a failure: /violations/{slug}
 - Original analysis of 16 years of Chicago inspection data -- which violations
   are cited most, which actually predict a failure, seasonality, and repeat
   offenders: /data

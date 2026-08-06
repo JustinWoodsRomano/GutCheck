@@ -124,6 +124,30 @@ export default function ShameCritters() {
     setFlyVisible(false);
   }, []);
 
+  // Proximity hit test. The fly is repositioned on every animation frame, so a
+  // plain onPointerDown on the element almost never lands -- by the time the
+  // event resolves it has darted somewhere else. Verified on desktop: the fly
+  // WAS the element returned by elementFromPoint at the click coordinates and
+  // the handler still did not fire. So the document decides instead -- if a
+  // pointer goes down within HIT_RADIUS of wherever the fly is at that
+  // instant, that counts. Nothing is preventDefault-ed unless it connects, so
+  // ordinary clicks on the page are unaffected.
+  useEffect(() => {
+    if (!flyVisible) return;
+    const HIT_RADIUS = 34;
+
+    const onDown = (e) => {
+      if (smashedRef.current) return;
+      const { x, y } = posRef.current;
+      const dx = e.clientX - x;
+      const dy = e.clientY - y;
+      if (Math.sqrt(dx * dx + dy * dy) <= HIT_RADIUS) smash(e);
+    };
+
+    document.addEventListener("pointerdown", onDown, true);
+    return () => document.removeEventListener("pointerdown", onDown, true);
+  }, [flyVisible, smash]);
+
   useEffect(() => {
     if (!flyVisible) return;
     const el = flyRef.current;
