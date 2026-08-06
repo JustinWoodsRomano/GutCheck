@@ -144,7 +144,7 @@ function buildNearby(slug, limit = 8) {
 export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
   const gradeLabel = GRADE_LABEL[r.g];
   // Kept under ~60 chars so Google doesn't truncate it. The old format
-  // ("... | GutCheck") averaged 72 and ran to 94, so the brand -- the part
+  // ("... | GUTCHECK") averaged 72 and ran to 94, so the brand -- the part
   // most worth showing -- was the first thing cut. Long restaurant names
   // drop the neighbourhood rather than overflow.
   const baseTitle = `${r.n} Health Inspection`;
@@ -207,7 +207,7 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: "https://www.gutcheckchicago.com/" },
+      { "@type": "ListItem", position: 1, name: "GUTCHECK Chicago", item: "https://www.gutcheckchicago.com/" },
       { "@type": "ListItem", position: 2, name: r.nb, item: `https://www.gutcheckchicago.com/n/${r.nbSlug}` },
       { "@type": "ListItem", position: 3, name: r.n, item: url },
     ],
@@ -305,7 +305,7 @@ export default function RestaurantPage({ restaurant: r, total, nearby = [] }) {
               <span>
                 The City of Chicago&rsquo;s public record for this inspection lists a result of{" "}
                 <strong>{r.g === "FAIL" ? "Fail" : "Pass w/ Conditions"}</strong> but doesn&rsquo;t include itemized
-                violation text. GutCheck displays exactly what the city publishes and doesn&rsquo;t infer or add
+                violation text. GUTCHECK displays exactly what the city publishes and doesn&rsquo;t infer or add
                 violation details that aren&rsquo;t in the official record.
               </span>
             </div>

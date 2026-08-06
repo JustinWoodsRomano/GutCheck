@@ -129,7 +129,7 @@ export default function NeighborhoodPage({
   // Title/description lead with how people actually search -- "<name>
   // restaurants" -- rather than the inspection framing, which has
   // effectively no search volume of its own.
-  const title = `${name} Restaurants & Bars — Health Inspection Records | GutCheck Chicago`;
+  const title = `${name} Restaurants & Bars — Health Inspection Records | GUTCHECK Chicago`;
   const description = `${restaurants.length} restaurants and bars in ${name}, Chicago. See which passed their latest health inspection — ${passCount} passing, ${conditionalCount} passed with conditions, ${failCount} failing. Official city data, updated daily.`;
   const url = `${SITE}/n/${slug}`;
   const intro = buildNeighborhoodIntro({ name, stats });
@@ -152,7 +152,7 @@ export default function NeighborhoodPage({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: `${SITE}/` },
+      { "@type": "ListItem", position: 1, name: "GUTCHECK Chicago", item: `${SITE}/` },
       { "@type": "ListItem", position: 2, name: "Chicago neighborhoods", item: `${SITE}/#neighborhoods` },
       { "@type": "ListItem", position: 3, name, item: url },
     ],
@@ -190,7 +190,7 @@ export default function NeighborhoodPage({
       <Nav total={total} />
 
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">GutCheck Chicago</Link>
+        <Link href="/">GUTCHECK Chicago</Link>
         <ChevronRight size={13} aria-hidden="true" />
         <span aria-current="page">{name}</span>
       </nav>

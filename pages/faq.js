@@ -21,12 +21,12 @@ export async function getStaticProps() {
   return { props: { faqs, total }, revalidate: false };
 }
 
-const CATEGORY_LABEL = { grading: "Grading System", data: "Data & Sourcing", usage: "Using GutCheck" };
+const CATEGORY_LABEL = { grading: "Grading System", data: "Data & Sourcing", usage: "Using GUTCHECK" };
 
 export default function FAQPage({ faqs, total }) {
-  const title = "FAQ — How Chicago Restaurant Health Inspections Work | GutCheck";
+  const title = "FAQ — How Chicago Restaurant Health Inspections Work | GUTCHECK";
   const description =
-    "Answers to common questions about Chicago's restaurant health inspection grading system, GutCheck's data source, and how to use the site.";
+    "Answers to common questions about Chicago's restaurant health inspection grading system, GUTCHECK's data source, and how to use the site.";
 
   const jsonLd = {
     "@context": "https://schema.org",

@@ -10,8 +10,8 @@ export async function getStaticProps() {
 }
 
 export default function Terms({ total }) {
-  const title = "Terms of Service — GutCheck Chicago";
-  const description = "The terms governing your use of GutCheck Chicago.";
+  const title = "Terms of Service — GUTCHECK Chicago";
+  const description = "The terms governing your use of GUTCHECK Chicago.";
 
   return (
     <div>
@@ -42,15 +42,15 @@ export default function Terms({ total }) {
         <p><em>Last updated: July 17, 2026</em></p>
 
         <p>
-          These Terms of Service (&ldquo;Terms&rdquo;) govern your use of GutCheck Chicago,
-          available at www.gutcheckchicago.com. GutCheck Chicago is operated by Built By Backspace,
+          These Terms of Service (&ldquo;Terms&rdquo;) govern your use of GUTCHECK Chicago,
+          available at www.gutcheckchicago.com. GUTCHECK Chicago is operated by Built By Backspace,
           LLC (&ldquo;Built By Backspace,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;our&rdquo;). By using
           this site, you agree to these Terms. If you don&rsquo;t agree, please don&rsquo;t use the site.
         </p>
 
-        <h2>1. What GutCheck is</h2>
+        <h2>1. What GUTCHECK is</h2>
         <p>
-          GutCheck is an independent, informational tool that reorganizes publicly available City
+          GUTCHECK is an independent, informational tool that reorganizes publicly available City
           of Chicago health inspection records into a searchable format. We are not affiliated
           with, endorsed by, or operated on behalf of the City of Chicago, Cook County, the
           Chicago Department of Public Health, or any restaurant listed on this site.
@@ -63,7 +63,7 @@ export default function Terms({ total }) {
           not independently verify, conduct, or influence inspections. Data may be incomplete,
           delayed, outdated, or contain errors introduced by the source or by our processing.
           Violations reflect conditions observed at a single point in time and are not a guarantee
-          of a restaurant&rsquo;s current or future condition. <strong>GutCheck is provided
+          of a restaurant&rsquo;s current or future condition. <strong>GUTCHECK is provided
           &ldquo;as is&rdquo; and &ldquo;as available,&rdquo; without warranties of any kind, express or
           implied</strong>, including accuracy, completeness, or fitness for a particular purpose.
         </p>
@@ -71,7 +71,7 @@ export default function Terms({ total }) {
         <h2>3. Not a substitute for official records</h2>
         <p>
           For legal, business, or official purposes, always consult the City of Chicago&rsquo;s
-          official records directly. Do not rely on GutCheck as the sole basis for decisions
+          official records directly. Do not rely on GUTCHECK as the sole basis for decisions
           where accuracy is critical.
         </p>
 
@@ -89,7 +89,7 @@ export default function Terms({ total }) {
 
         <h2>5. Advertising</h2>
         <p>
-          GutCheck is supported by advertising, including ads served through Google AdSense.
+          GUTCHECK is supported by advertising, including ads served through Google AdSense.
           Third-party advertisers and ad networks may use cookies and similar technologies as
           described in our <Link href="/privacy" style={{ textDecoration: "underline" }}>Privacy
           Policy</Link>. We don&rsquo;t control the content of individual ads and aren&rsquo;t
@@ -105,7 +105,7 @@ export default function Terms({ total }) {
 
         <h2>7. Limitation of liability</h2>
         <p>
-          To the fullest extent permitted by law, GutCheck and its operators aren&rsquo;t liable
+          To the fullest extent permitted by law, GUTCHECK and its operators aren&rsquo;t liable
           for any indirect, incidental, or consequential damages arising from your use of, or
           inability to use, the site, including decisions made in reliance on data displayed here.
         </p>

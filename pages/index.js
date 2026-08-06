@@ -249,7 +249,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
       .slice(0, 8);
   }, [data]);
 
-  const title = "Chicago Restaurant & Bar Health Inspections — GutCheck";
+  const title = "Chicago Restaurant & Bar Health Inspections — GUTCHECK";
   const description =
     "Look up any Chicago restaurant or bar's official health inspection status — pass, fail, or violations — sourced live from the City of Chicago. Free, updated daily.";
 
@@ -276,7 +276,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                 {
                   "@type": "WebSite",
                   "@id": "https://www.gutcheckchicago.com/#website",
-                  name: "GutCheck Chicago",
+                  name: "GUTCHECK Chicago",
                   url: "https://www.gutcheckchicago.com/",
                   publisher: { "@id": "https://www.gutcheckchicago.com/#org" },
                   potentialAction: {
@@ -291,7 +291,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
                   // says nothing about who is making the claim.
                   "@type": "Organization",
                   "@id": "https://www.gutcheckchicago.com/#org",
-                  name: "GutCheck Chicago",
+                  name: "GUTCHECK Chicago",
                   url: "https://www.gutcheckchicago.com/",
                   email: "GutCheckChicago@builtbybackspace.com",
                   logo: {

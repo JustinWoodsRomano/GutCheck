@@ -10,7 +10,7 @@
  * someone and hasn't.
  */
 const TO = "GutCheckChicago@builtbybackspace.com";
-const SUBJECT = "GutCheck Report Request";
+const SUBJECT = "GUTCHECK Report Request";
 
 function esc(s) {
   return String(s || "")
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
   }
 
   const html = `
-    <h2>GutCheck report request</h2>
+    <h2>GUTCHECK report request</h2>
     <table cellpadding="6" style="border-collapse:collapse;font-family:sans-serif">
       <tr><td><b>Name</b></td><td>${esc(name)}</td></tr>
       <tr><td><b>Email</b></td><td>${esc(email)}</td></tr>
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "GutCheck Chicago <reports@gutcheckchicago.com>",
+        from: "GUTCHECK Chicago <reports@gutcheckchicago.com>",
         to: [TO],
         reply_to: email,
         subject: SUBJECT,

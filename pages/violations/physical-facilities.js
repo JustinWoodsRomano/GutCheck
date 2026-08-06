@@ -9,7 +9,7 @@ const SITE = "https://www.gutcheckchicago.com";
  * Resource page for violation #55, Physical Facilities.
  *
  * The point of difference: the City of Chicago publishes what the rule says.
- * Nobody publishes whether it matters. These figures come from GutCheck's own
+ * Nobody publishes whether it matters. These figures come from GUTCHECK's own
  * analysis of 50,000 graded inspections since 2022 and are the reason this
  * page can rank against chicago.gov rather than duplicating it.
  *
@@ -70,11 +70,11 @@ export default function PhysicalFacilities({ total }) {
     },
     {
       q: "What is the difference between a core, priority foundation, and priority violation?",
-      a: "Chicago classifies violations into three tiers. Priority violations pose the most direct risk of foodborne illness — improper temperatures, contamination, pest activity. Priority foundation violations support those controls, such as missing procedures or equipment. Core violations, including #55, relate to general maintenance, sanitation and facility condition. GutCheck lists priority violations before core ones on every restaurant page for this reason.",
+      a: "Chicago classifies violations into three tiers. Priority violations pose the most direct risk of foodborne illness — improper temperatures, contamination, pest activity. Priority foundation violations support those controls, such as missing procedures or equipment. Core violations, including #55, relate to general maintenance, sanitation and facility condition. GUTCHECK lists priority violations before core ones on every restaurant page for this reason.",
     },
     {
       q: "Where does this data come from?",
-      a: `The violation records come from the City of Chicago's Food Inspections dataset, published as open data (4ijn-s7e5). The failure-rate figures are GutCheck's own analysis of ${STATS.sample.toLocaleString()} graded inspections since ${STATS.since}; the city does not publish them.`,
+      a: `The violation records come from the City of Chicago's Food Inspections dataset, published as open data (4ijn-s7e5). The failure-rate figures are GUTCHECK's own analysis of ${STATS.sample.toLocaleString()} graded inspections since ${STATS.since}; the city does not publish them.`,
     },
   ];
 
@@ -203,7 +203,7 @@ export default function PhysicalFacilities({ total }) {
         <p className="section-note section-note-left">
           Failure rate of inspections citing each violation, against a{" "}
           {STATS.baselineFail}% baseline across {STATS.sample.toLocaleString()} graded Chicago
-          inspections since {STATS.since}. This analysis is GutCheck&rsquo;s own; the city
+          inspections since {STATS.since}. This analysis is GUTCHECK&rsquo;s own; the city
           publishes the records but not these rates.
         </p>
         <div className="viol-compare">
@@ -268,7 +268,7 @@ export default function PhysicalFacilities({ total }) {
             </span>
           </li>
           <li>
-            <Link href="/data">GutCheck — analysis of 184,618 Chicago inspections</Link>
+            <Link href="/data">GUTCHECK — analysis of 184,618 Chicago inspections</Link>
             <span className="source-note">
               Where the failure-rate and severity figures come from.
             </span>

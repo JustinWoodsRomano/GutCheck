@@ -14,7 +14,7 @@ export async function getStaticProps() {
 const FAQS = [
   {
     q: "What does a custom report cost?",
-    a: "Nothing. The only condition is attribution: cite GutCheck Chicago and include a link to gutcheckchicago.com in whatever you publish.",
+    a: "Nothing. The only condition is attribution: cite GUTCHECK Chicago and include a link to gutcheckchicago.com in whatever you publish.",
   },
   {
     q: "What can you pull that the city's portal can't?",
@@ -76,7 +76,7 @@ export default function Reports({ total }) {
     }
   }
 
-  const title = "Custom Chicago Restaurant Inspection Reports for Journalists | GutCheck";
+  const title = "Custom Chicago Restaurant Inspection Reports for Journalists | GUTCHECK";
   const description =
     "Free custom reports from Chicago's full food inspection record — repeat offenders, neighbourhood comparisons, violation patterns. Every figure cited to the city's own data. For journalists and researchers.";
   const url = `${SITE}/reports`;
@@ -94,7 +94,7 @@ export default function Reports({ total }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: `${SITE}/` },
+      { "@type": "ListItem", position: 1, name: "GUTCHECK Chicago", item: `${SITE}/` },
       { "@type": "ListItem", position: 2, name: "Custom reports", item: url },
     ],
   };
@@ -118,7 +118,7 @@ export default function Reports({ total }) {
       <Nav total={total} />
 
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">GutCheck Chicago</Link>
+        <Link href="/">GUTCHECK Chicago</Link>
         <ChevronRight size={13} aria-hidden="true" />
         <span aria-current="page">Custom reports</span>
       </nav>
@@ -132,7 +132,7 @@ export default function Reports({ total }) {
           form that can be grouped, ranked, and compared &mdash; and we&rsquo;ll run it for you.
         </p>
         <p>
-          Free. The only condition is that you cite GutCheck Chicago and link to the site in whatever
+          Free. The only condition is that you cite GUTCHECK Chicago and link to the site in whatever
           you publish.
         </p>
       </div>

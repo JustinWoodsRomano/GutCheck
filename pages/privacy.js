@@ -10,8 +10,8 @@ export async function getStaticProps() {
 }
 
 export default function Privacy({ total }) {
-  const title = "Privacy Policy — GutCheck Chicago";
-  const description = "How GutCheck Chicago handles data, cookies, and advertising.";
+  const title = "Privacy Policy — GUTCHECK Chicago";
+  const description = "How GUTCHECK Chicago handles data, cookies, and advertising.";
 
   return (
     <div>
@@ -42,8 +42,8 @@ export default function Privacy({ total }) {
         <p><em>Last updated: July 17, 2026</em></p>
 
         <p>
-          GutCheck Chicago (&ldquo;GutCheck&rdquo;) is operated by Built By Backspace, LLC
-          (&ldquo;Built By Backspace,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;our&rdquo;). GutCheck
+          GUTCHECK Chicago (&ldquo;GUTCHECK&rdquo;) is operated by Built By Backspace, LLC
+          (&ldquo;Built By Backspace,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;our&rdquo;). GUTCHECK
           doesn&rsquo;t require an
           account, and we don&rsquo;t ask you for personal information to use the site. This
           policy explains what limited data is collected, mainly through hosting infrastructure
@@ -67,7 +67,7 @@ export default function Privacy({ total }) {
 
         <h2>3. Cookies and advertising (Google AdSense)</h2>
         <p>
-          GutCheck displays ads served through Google AdSense. As required by Google&rsquo;s
+          GUTCHECK displays ads served through Google AdSense. As required by Google&rsquo;s
           publisher policies, we disclose the following:
         </p>
         <ul>
@@ -99,7 +99,7 @@ export default function Privacy({ total }) {
 
         <h2>4. Data about restaurants shown on this site</h2>
         <p>
-          Restaurant names, addresses, and inspection results displayed on GutCheck are public
+          Restaurant names, addresses, and inspection results displayed on GUTCHECK are public
           records sourced from the City of Chicago&rsquo;s Food Inspections open-data feed
           (data.cityofchicago.org, dataset 4ijn-s7e5). This is government-published public data,
           not personal data we&rsquo;ve collected, and is governed by the City of Chicago&rsquo;s
@@ -108,7 +108,7 @@ export default function Privacy({ total }) {
 
         <h2>5. Children&rsquo;s privacy</h2>
         <p>
-          GutCheck isn&rsquo;t directed at children under 13, and we don&rsquo;t knowingly collect
+          GUTCHECK isn&rsquo;t directed at children under 13, and we don&rsquo;t knowingly collect
           personal information from children.
         </p>
 

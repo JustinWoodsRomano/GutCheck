@@ -10,8 +10,8 @@ export async function getStaticProps() {
 }
 
 export default function Cookies({ total }) {
-  const title = "Cookie Policy — GutCheck Chicago";
-  const description = "What cookies GutCheck Chicago uses and why.";
+  const title = "Cookie Policy — GUTCHECK Chicago";
+  const description = "What cookies GUTCHECK Chicago uses and why.";
 
   return (
     <div>
@@ -42,14 +42,14 @@ export default function Cookies({ total }) {
         <p><em>Last updated: July 17, 2026</em></p>
 
         <p>
-          A cookie is a small text file placed on your device when you visit a website. GutCheck
+          A cookie is a small text file placed on your device when you visit a website. GUTCHECK
           Chicago is operated by Built By Backspace, LLC. This page
-          explains which cookies GutCheck Chicago uses.
+          explains which cookies GUTCHECK Chicago uses.
         </p>
 
         <h2>Cookies we don&rsquo;t set</h2>
         <p>
-          GutCheck itself doesn&rsquo;t use cookies for accounts, logins, tracking your searches,
+          GUTCHECK itself doesn&rsquo;t use cookies for accounts, logins, tracking your searches,
           or building a profile of you. There&rsquo;s no login system on this site to begin with.
         </p>
 
@@ -70,7 +70,7 @@ export default function Cookies({ total }) {
           </li>
         </ul>
         <p>
-          These cookies are set by Google, not by GutCheck directly, and are governed by{" "}
+          These cookies are set by Google, not by GUTCHECK directly, and are governed by{" "}
           <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" style={{ textDecoration: "underline" }}>
             Google&rsquo;s own cookie and data use policies
           </a>

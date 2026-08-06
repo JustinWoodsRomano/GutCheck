@@ -23,7 +23,7 @@ function titleCase(s) {
 export default function DataPage({ total }) {
   const { meta, seasonality, yearly, mostCited, mostPredictive, byInspectionType, repeat } = analysis;
 
-  const title = "What 16 Years of Chicago Restaurant Inspections Actually Show | GutCheck";
+  const title = "What 16 Years of Chicago Restaurant Inspections Actually Show | GUTCHECK";
   const description = `An analysis of ${meta.gradedInspections.toLocaleString()} Chicago restaurant and bar health inspections: which violations inspectors cite most, which ones actually predict a failure, and why the two lists are almost opposites.`;
   const url = `${SITE}/data`;
 
@@ -39,7 +39,7 @@ export default function DataPage({ total }) {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "GutCheck Chicago", item: `${SITE}/` },
+      { "@type": "ListItem", position: 1, name: "GUTCHECK Chicago", item: `${SITE}/` },
       { "@type": "ListItem", position: 2, name: "Inspection data analysis", item: url },
     ],
   };
@@ -54,7 +54,7 @@ export default function DataPage({ total }) {
     name: "Chicago restaurant health inspection outcomes, 2010–present",
     description,
     url,
-    creator: { "@type": "Organization", name: "GutCheck Chicago", url: SITE },
+    creator: { "@type": "Organization", name: "GUTCHECK Chicago", url: SITE },
     isBasedOn: "https://data.cityofchicago.org/Health-Human-Services/Food-Inspections/4ijn-s7e5",
     license: "https://www.cityofchicago.org/city/en/narr/foia/data_disclaimer.html",
     temporalCoverage: `${meta.earliest}/${meta.latest}`,
@@ -107,7 +107,7 @@ export default function DataPage({ total }) {
       <Nav total={total} />
 
       <nav className="crumbs" aria-label="Breadcrumb">
-        <Link href="/">GutCheck Chicago</Link>
+        <Link href="/">GUTCHECK Chicago</Link>
         <ChevronRight size={13} aria-hidden="true" />
         <span aria-current="page">Inspection data analysis</span>
       </nav>
@@ -382,7 +382,7 @@ export default function DataPage({ total }) {
             </li>
           </ul>
           <p className="hint">
-            Analysis last regenerated {meta.generated}. GutCheck is an independent service and is not
+            Analysis last regenerated {meta.generated}. GUTCHECK is an independent service and is not
             affiliated with the City of Chicago. The underlying data is published by the Chicago
             Department of Public Health; the city notes it may contain duplicate records and should be
             verified against official sources for any consequential use.
