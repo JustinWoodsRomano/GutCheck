@@ -554,7 +554,7 @@ export default function Home({ neighborhoods, popularSlugs, citywideTopViolation
           </p>
           <div className="grid">
             {newlyLicensed.map((r) => (
-              <RestaurantCard key={r.id} r={r} source="homepage-new" showReason />
+              <RestaurantCard key={r.id} r={r} source="homepage-new" />
             ))}
           </div>
           <Link href="/new-restaurants" className="cta-btn">

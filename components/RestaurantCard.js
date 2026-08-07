@@ -3,7 +3,7 @@ import { MapPin, Clock } from "lucide-react";
 import Stamp, { gradeAccentVar } from "./Stamp";
 import { inspectionReason, isNewLicense } from "../lib/pests.mjs";
 
-export default function RestaurantCard({ r, source = "unknown", showReason = false }) {
+export default function RestaurantCard({ r, source = "unknown" }) {
   function handleClick() {
     // GA4 select_content event -- item_name + source lets us see both
     // which restaurants get clicked most and which entry point (homepage
@@ -40,7 +40,12 @@ export default function RestaurantCard({ r, source = "unknown", showReason = fal
           ) : isNewLicense(r.it, r.d) ? (
             <span className="reason-tag reason-new">New license</span>
           ) : (
-            showReason &&
+            // Always shown. This used to sit behind a showReason prop that only
+            // the new-restaurants strip passed, so every other feed rendered an
+            // empty slot where the tag should be -- the card reserved the row
+            // for it either way, which read as a gap rather than an absence.
+            // Why an inspection happened is signal in its own right: complaint-
+            // driven visits fail at 34% against 22% for routine ones.
             inspectionReason(r.it) && (
               <span className={`reason-tag reason-${inspectionReason(r.it).tone}`}>
                 {inspectionReason(r.it).label}
